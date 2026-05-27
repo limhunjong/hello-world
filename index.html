@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐯 호랑이 다마고치</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --or1:#FF9500;--or2:#FF7700;--or3:#CC5500;
+  --sc:#A8D878;--scb:#3A6B00;
+  --txt:#1A3A00;
+}
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Noto Sans KR',sans-serif;
+  overflow-x:hidden;
+}
+
+/* floating stars */
+.star{position:fixed;color:rgba(255,255,255,0.6);animation:starFloat 8s ease-in-out infinite;pointer-events:none;font-size:20px}
+@keyframes starFloat{0%,100%{transform:translateY(0) scale(1);opacity:0.4}50%{transform:translateY(-15px) scale(1.2);opacity:0.8}}
+
+.game-title{
+  font-family:'Jua',cursive;font-size:28px;color:#FFD700;
+  text-shadow:0 0 20px rgba(255,215,0,0.6),0 3px 6px rgba(0,0,0,0.5);
+  margin-bottom:16px;letter-spacing:3px;
+  animation:titlePulse 3s ease-in-out infinite;
+}
+@keyframes titlePulse{0%,100%{text-shadow:0 0 20px rgba(255,215,0,0.6),0 3px 6px rgba(0,0,0,0.5)}50%{text-shadow:0 0 35px rgba(255,215,0,0.9),0 3px 6px rgba(0,0,0,0.5)}}
+
+/* ── DEVICE SHELL ── */
+.device{
+  width:340px;
+  background:linear-gradient(160deg,#FFB347 0%,#FF8C00 55%,#E07000 100%);
+  border-radius:48% 48% 44% 44% / 22% 22% 78% 78%;
+  padding:22px 22px 44px;
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.5),
+    inset 0 3px 0 rgba(255,255,255,0.35),
+    inset 0 -4px 8px rgba(0,0,0,0.25),
+    0 0 0 5px #CC5500,
+    0 0 0 9px #FFB347,
+    0 0 0 13px #CC5500;
+  position:relative;
+}
+.device-label{
+  text-align:center;color:#CC5500;font-size:11px;font-weight:900;
+  letter-spacing:3px;margin-bottom:10px;
+  text-shadow:0 1px 0 rgba(255,255,255,0.4);
+  font-family:'Jua',cursive;
+}
+
+/* keychain hole */
+.device::before{
+  content:'';position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  width:16px;height:18px;background:#CC5500;border-radius:50% 50% 0 0;
+  box-shadow:inset 0 3px 4px rgba(0,0,0,0.3),0 0 0 3px #FFB347;
+}
+
+/* ── SCREEN ── */
+.screen{
+  background:var(--sc);border-radius:14px;
+  border:4px solid var(--scb);
+  box-shadow:inset 0 3px 12px rgba(0,0,0,0.35),inset 0 0 0 1px rgba(0,0,0,0.1);
+  padding:10px;position:relative;overflow:hidden;min-height:310px;
+}
+/* scanline */
+.screen::after{
+  content:'';position:absolute;inset:0;border-radius:10px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.025) 3px,rgba(0,0,0,0.025) 4px);
+}
+
+/* info bar */
+.info-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(0,0,0,0.12);border-radius:8px;padding:4px 8px;margin-bottom:8px;
+  font-size:11px;font-weight:700;color:var(--txt);font-family:'Jua',cursive;
+}
+
+/* ── TIGER DISPLAY ── */
+.tiger-stage{
+  height:160px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;position:relative;
+}
+.tiger-wrap{position:relative;display:inline-block}
+.tiger-wrap.idle{animation:idle 2.5s ease-in-out infinite}
+.tiger-wrap.happy{animation:happyBounce 0.5s ease-in-out infinite}
+.tiger-wrap.shaking{animation:shake 0.4s ease-in-out}
+.tiger-wrap.sleeping{animation:sleepBreath 4s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes happyBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.06)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes sleepBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+
+/* floating effect items */
+.fx{position:absolute;font-size:22px;pointer-events:none;animation:fxFloat 1s ease-out forwards}
+@keyframes fxFloat{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-70px) scale(1.4);opacity:0}}
+
+/* ── MESSAGE BUBBLE ── */
+.msg-bubble{
+  background:rgba(255,255,255,0.75);border:2px solid rgba(255,255,255,0.95);
+  border-radius:12px;padding:5px 12px;text-align:center;
+  font-size:12px;font-weight:700;color:var(--txt);min-height:26px;
+  margin-top:6px;position:relative;font-family:'Jua',cursive;
+}
+.msg-bubble::before{
+  content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-bottom-color:rgba(255,255,255,0.95);
+}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px}
+.stat{display:flex;align-items:center;gap:4px}
+.stat.full{grid-column:span 2}
+.stat-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.bar-bg{flex:1;height:10px;background:rgba(0,0,0,0.15);border-radius:5px;overflow:hidden;border:1px solid rgba(0,0,0,0.08)}
+.bar-fill{height:100%;border-radius:5px;transition:width 0.6s ease,background 0.6s ease}
+.bar-fill.low{animation:barPulse 0.8s ease-in-out infinite}
+@keyframes barPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.b-hunger .bar-fill{background:linear-gradient(90deg,#FF6B35,#FFAA55)}
+.b-happy  .bar-fill{background:linear-gradient(90deg,#FF6BAA,#FF99CC)}
+.b-health .bar-fill{background:linear-gradient(90deg,#2EC4B6,#7EEAE4)}
+.b-energy .bar-fill{background:linear-gradient(90deg,#9B5DE5,#CC99FF)}
+.b-clean  .bar-fill{background:linear-gradient(90deg,#0ABDE3,#66DDFF)}
+
+/* ── DEAD OVERLAY ── */
+.dead-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,0.72);border-radius:10px;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  color:white;gap:8px;z-index:10;
+}
+.dead-overlay .restart-btn{
+  margin-top:5px;background:#FF6BAA;border:none;border-radius:20px;
+  padding:8px 22px;color:white;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Jua',cursive;
+  box-shadow:0 4px 0 #CC3377;transition:transform 0.1s;
+}
+.dead-overlay .restart-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #CC3377}
+
+/* ── BUTTONS ── */
+.btns{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  padding:4px 10px 0;margin-top:18px;
+}
+.btn-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.btn-wrap:active .btn-c{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.25)!important}
+.btn-c{
+  width:56px;height:56px;border-radius:50%;border:none;font-size:22px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 5px 0 rgba(0,0,0,0.22),inset 0 2px 0 rgba(255,255,255,0.3);
+  transition:transform 0.1s,box-shadow 0.1s;
+}
+.btn-lbl{font-size:10px;font-weight:700;color:#7A3A00;font-family:'Jua',cursive}
+.b1{background:linear-gradient(145deg,#FF8C69,#FF5533)}
+.b2{background:linear-gradient(145deg,#88EE88,#44CC44)}
+.b3{background:linear-gradient(145deg,#88CCFF,#4499DD)}
+.b4{background:linear-gradient(145deg,#CCAAFF,#9966EE)}
+.b5{background:linear-gradient(145deg,#FFB6C1,#FF77AA)}
+.b6{background:linear-gradient(145deg,#FFE066,#FFBB00)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:rgba(255,255,255,0.95);border-radius:20px;padding:10px 20px;
+  font-size:13px;font-weight:700;color:#333;
+  box-shadow:0 8px 25px rgba(0,0,0,0.2);
+  transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);z-index:100;
+  white-space:nowrap;font-family:'Jua',cursive;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* evolution flash */
+.evo-flash{
+  position:fixed;inset:0;background:white;opacity:0;pointer-events:none;
+  z-index:99;transition:opacity 0.6s ease;
+}
+</style>
+</head>
+<body>
+
+<div class="star" style="top:8%;left:5%;animation-delay:0s">✦</div>
+<div class="star" style="top:15%;right:7%;animation-delay:1.2s">✧</div>
+<div class="star" style="top:60%;left:3%;animation-delay:2.4s">✦</div>
+<div class="star" style="top:75%;right:4%;animation-delay:0.6s">✧</div>
+<div class="star" style="top:40%;left:1%;animation-delay:1.8s">✦</div>
+<div class="star" style="top:50%;right:2%;animation-delay:3s">✧</div>
+
+<div class="toast" id="toast"></div>
+<div class="evo-flash" id="evoFlash"></div>
+
+<div class="game-title">🐯 호랑이 다마고치</div>
+
+<div class="device">
+  <div class="device-label">✦ TIGER TAMAGOTCHI ✦</div>
+
+  <div class="screen">
+    <div class="info-bar">
+      <span id="stage-name">🥚 알</span>
+      <span id="age-disp">0일차</span>
+      <span id="time-icon">☀️</span>
+    </div>
+
+    <div class="tiger-stage" id="tiger-stage"></div>
+
+    <div class="msg-bubble" id="msg-bubble">어서 와! 나 여기 있어~ 🐾</div>
+
+    <div class="stats">
+      <div class="stat b-hunger"><span class="stat-icon">🍖</span><div class="bar-bg"><div class="bar-fill" id="b-hunger" style="width:80%"></div></div></div>
+      <div class="stat b-happy"> <span class="stat-icon">😊</span><div class="bar-bg"><div class="bar-fill" id="b-happy"  style="width:80%"></div></div></div>
+      <div class="stat b-health"><span class="stat-icon">💖</span><div class="bar-bg"><div class="bar-fill" id="b-health" style="width:100%"></div></div></div>
+      <div class="stat b-energy"><span class="stat-icon">⚡</span><div class="bar-bg"><div class="bar-fill" id="b-energy" style="width:100%"></div></div></div>
+      <div class="stat b-clean full"><span class="stat-icon">🛁</span><div class="bar-bg"><div class="bar-fill" id="b-clean"  style="width:100%"></div></div></div>
+    </div>
+
+    <div class="dead-overlay" id="dead-overlay">
+      <div style="font-size:44px">😢</div>
+      <div style="font-family:'Jua',cursive;font-size:16px">호랑이가 하늘나라로...</div>
+      <div style="font-size:12px;opacity:0.8">더 잘 돌봐줄걸 ㅠㅠ</div>
+      <button class="restart-btn" onclick="restartGame()">다시 시작하기 🐯</button>
+    </div>
+  </div><!-- /screen -->
+
+  <div class="btns">
+    <div class="btn-wrap" onclick="doAction('feed')">
+      <div class="btn-c b1">🍖</div><span class="btn-lbl">밥주기</span>
+    </div>
+    <div class="btn-wrap" onclick="doAction('play')">
+      <div class="btn-c b2">🎮</div><span class="btn-lbl">놀아주기</span>
+    </div>
+    <div class="btn-wrap" onclick="doAction('sleep')">
+      <div class="btn-c b3">💤</div><span class="btn-lbl">재우기</span>
+    </div>
+    <div class="btn-wrap" onclick="doAction('clean')">
+      <div class="btn-c b4">🛁</div><span class="btn-lbl">씻기기</span>
+    </div>
+    <div class="btn-wrap" onclick="doAction('heal')">
+      <div class="btn-c b5">💊</div><span class="btn-lbl">약주기</span>
+    </div>
+    <div class="btn-wrap" onclick="doAction('pet')">
+      <div class="btn-c b6">❤️</div><span class="btn-lbl">쓰다듬기</span>
+    </div>
+  </div>
+</div><!-- /device -->
+
+<script>
+// ── SVG TIGER GENERATOR ──────────────────────────────────────────────────────
+function tigerSVG(mood, size) {
+  const s = size || 1;
+  const w = Math.round(110 * s), h = Math.round(140 * s);
+  const c = '#FFA520', cd = '#FF8200', stripe = '#6B3500', nose = '#CC2255';
+
+  // Eye variants
+  const eyes = {
+    normal:   `<circle cx="37" cy="52" r="9" fill="#111"/><circle cx="63" cy="52" r="9" fill="#111"/>
+               <circle cx="40" cy="49" r="3.5" fill="white"/><circle cx="66" cy="49" r="3.5" fill="white"/>`,
+    happy:    `<path d="M29,54 Q37,44 45,54" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>
+               <path d="M55,54 Q63,44 71,54" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+    sad:      `<circle cx="37" cy="52" r="9" fill="#111"/><circle cx="63" cy="52" r="9" fill="#111"/>
+               <circle cx="40" cy="49" r="3.5" fill="white"/><circle cx="66" cy="49" r="3.5" fill="white"/>
+               <path d="M27,42 Q37,48 43,43" stroke="${stripe}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+               <path d="M57,43 Q63,48 73,42" stroke="${stripe}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>`,
+    sleeping: `<path d="M29,52 Q37,57 45,52" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/>
+               <path d="M55,52 Q63,57 71,52" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+    sick:     `<line x1="30" y1="44" x2="44" y2="58" stroke="#888" stroke-width="4" stroke-linecap="round"/>
+               <line x1="44" y1="44" x2="30" y2="58" stroke="#888" stroke-width="4" stroke-linecap="round"/>
+               <line x1="56" y1="44" x2="70" y2="58" stroke="#888" stroke-width="4" stroke-linecap="round"/>
+               <line x1="70" y1="44" x2="56" y2="58" stroke="#888" stroke-width="4" stroke-linecap="round"/>`,
+    hungry:   `<circle cx="37" cy="52" r="9" fill="#111"/><circle cx="63" cy="52" r="9" fill="#111"/>
+               <circle cx="40" cy="49" r="3.5" fill="white"/><circle cx="66" cy="49" r="3.5" fill="white"/>
+               <path d="M27,40 Q37,47 43,41" stroke="${stripe}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.55"/>
+               <path d="M57,41 Q63,47 73,40" stroke="${stripe}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.55"/>`,
+  };
+
+  // Mouth variants
+  const mouths = {
+    normal:   `<path d="M42,70 Q50,77 58,70" stroke="${nose}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    happy:    `<path d="M40,69 Q50,80 60,69" stroke="${nose}" stroke-width="3" fill="none" stroke-linecap="round"/>
+               <path d="M40,69 Q50,80 60,69" stroke="${nose}" stroke-width="1" fill="${nose}" fill-opacity="0.15"/>`,
+    sad:      `<path d="M40,76 Q50,68 60,76" stroke="${nose}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    sleeping: `<path d="M43,70 Q50,73 57,70" stroke="${nose}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+    sick:     `<path d="M42,74 Q50,68 58,74" stroke="${nose}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+    hungry:   `<ellipse cx="50" cy="74" rx="10" ry="8" fill="#FF9999" opacity="0.8"/>
+               <path d="M50,66 L50,78" stroke="#FF6666" stroke-width="2.5" stroke-linecap="round"/>
+               <path d="M45,82 Q50,86 55,82" stroke="${nose}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+  };
+
+  // Extra details per mood
+  const extras = {
+    normal:   `<circle cx="28" cy="65" r="8" fill="#FF9999" opacity="0.4"/>
+               <circle cx="72" cy="65" r="8" fill="#FF9999" opacity="0.4"/>`,
+    happy:    `<circle cx="26" cy="65" r="10" fill="#FF7799" opacity="0.5"/>
+               <circle cx="74" cy="65" r="10" fill="#FF7799" opacity="0.5"/>`,
+    sad:      `<circle cx="28" cy="65" r="8" fill="#FF9999" opacity="0.2"/>
+               <circle cx="72" cy="65" r="8" fill="#FF9999" opacity="0.2"/>
+               <ellipse cx="34" cy="62" rx="3" ry="5" fill="#88BBFF" opacity="0.6" transform="rotate(-15 34 62)"/>
+               <ellipse cx="66" cy="62" rx="3" ry="5" fill="#88BBFF" opacity="0.6" transform="rotate(15 66 62)"/>`,
+    sleeping: `<circle cx="28" cy="65" r="8" fill="#FF9999" opacity="0.3"/>
+               <circle cx="72" cy="65" r="8" fill="#FF9999" opacity="0.3"/>
+               <text x="74" y="32" font-size="14" fill="#6699CC" opacity="0.9">z</text>
+               <text x="80" y="20" font-size="11" fill="#6699CC" opacity="0.7">z</text>
+               <text x="84" y="11" font-size="8"  fill="#6699CC" opacity="0.5">z</text>`,
+    sick:     `<circle cx="28" cy="65" r="8" fill="#AAAAAA" opacity="0.3"/>
+               <circle cx="72" cy="65" r="8" fill="#AAAAAA" opacity="0.3"/>
+               <text x="70" y="20" font-size="18">😷</text>`,
+    hungry:   `<circle cx="28" cy="65" r="8" fill="#FF9999" opacity="0.25"/>
+               <circle cx="72" cy="65" r="8" fill="#FF9999" opacity="0.25"/>`,
+  };
+
+  const eKey = (mood === 'happy') ? 'happy'
+    : (mood === 'sad') ? 'sad'
+    : (mood === 'sleeping') ? 'sleeping'
+    : (mood === 'sick') ? 'sick'
+    : (mood === 'hungry') ? 'hungry' : 'normal';
+
+  const bodyColor = (mood === 'sick') ? '#DDA020' : c;
+  const headColor = (mood === 'sick') ? '#E8A020' : c;
+
+  return `<svg viewBox="0 0 100 135" width="${w}" height="${h}" style="filter:drop-shadow(0 5px 8px rgba(0,0,0,0.25));overflow:visible">
+  <!-- tail -->
+  <path d="M72,100 Q92,88 88,72 Q84,60 76,65" stroke="${cd}" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <circle cx="80" cy="67" r="7" fill="${bodyColor}"/>
+  <!-- body -->
+  <ellipse cx="50" cy="110" rx="27" ry="24" fill="${bodyColor}"/>
+  <ellipse cx="50" cy="114" rx="16" ry="13" fill="#FFF0D0"/>
+  <!-- body stripes -->
+  <path d="M33,92 Q35,103 32,114" stroke="${stripe}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.38"/>
+  <path d="M50,89 Q50,102 50,114" stroke="${stripe}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.38"/>
+  <path d="M67,92 Q65,103 68,114" stroke="${stripe}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.38"/>
+  <!-- paws -->
+  <ellipse cx="28" cy="130" rx="12" ry="7" fill="${cd}"/>
+  <ellipse cx="72" cy="130" rx="12" ry="7" fill="${cd}"/>
+  <circle cx="22" cy="134" r="3.5" fill="${bodyColor}"/>
+  <circle cx="29" cy="135" r="3.5" fill="${bodyColor}"/>
+  <circle cx="65" cy="135" r="3.5" fill="${bodyColor}"/>
+  <circle cx="72" cy="134" r="3.5" fill="${bodyColor}"/>
+  <!-- head -->
+  <circle cx="50" cy="53" r="40" fill="${headColor}"/>
+  <!-- ears -->
+  <ellipse cx="18" cy="19" rx="14" ry="17" fill="${headColor}" transform="rotate(-18 18 19)"/>
+  <ellipse cx="82" cy="19" rx="14" ry="17" fill="${headColor}" transform="rotate(18 82 19)"/>
+  <ellipse cx="18" cy="21" rx="7.5" ry="10" fill="#FFB6C1" transform="rotate(-18 18 21)"/>
+  <ellipse cx="82" cy="21" rx="7.5" ry="10" fill="#FFB6C1" transform="rotate(18 82 21)"/>
+  <!-- head stripes -->
+  <path d="M32,14 Q35,27 33,37" stroke="${stripe}" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.38"/>
+  <path d="M50,8  Q50,22 50,34"  stroke="${stripe}" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.38"/>
+  <path d="M68,14 Q65,27 67,37" stroke="${stripe}" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.38"/>
+  <!-- eye whites -->
+  <ellipse cx="37" cy="52" rx="11" ry="12" fill="#FFFAF0" opacity="0.92"/>
+  <ellipse cx="63" cy="52" rx="11" ry="12" fill="#FFFAF0" opacity="0.92"/>
+  <!-- eyes -->
+  ${eyes[eKey]}
+  <!-- nose -->
+  <ellipse cx="50" cy="64" rx="5.5" ry="3.5" fill="${nose}"/>
+  <ellipse cx="50" cy="62.5" rx="2.5" ry="1.5" fill="white" opacity="0.45"/>
+  <!-- mouth -->
+  ${mouths[eKey]}
+  <!-- whiskers -->
+  <line x1="3"  y1="62" x2="34" y2="64" stroke="${stripe}" stroke-width="1.5" opacity="0.38"/>
+  <line x1="3"  y1="70" x2="34" y2="69" stroke="${stripe}" stroke-width="1.5" opacity="0.38"/>
+  <line x1="66" y1="64" x2="97" y2="62" stroke="${stripe}" stroke-width="1.5" opacity="0.38"/>
+  <line x1="66" y1="69" x2="97" y2="70" stroke="${stripe}" stroke-width="1.5" opacity="0.38"/>
+  <!-- cheeks / extras -->
+  ${extras[eKey] || extras.normal}
+</svg>`;
+}
+
+function eggSVG(ticks) {
+  const crack1 = ticks > 8;
+  const crack2 = ticks > 16;
+  return `<svg viewBox="0 0 80 100" width="90" height="112" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,0.2))">
+  <defs><radialGradient id="eg" cx="35%" cy="30%"><stop offset="0%" stop-color="#FFFEF0"/><stop offset="100%" stop-color="#FFE066"/></radialGradient></defs>
+  <ellipse cx="40" cy="56" rx="32" ry="42" fill="url(#eg)" stroke="#D4B800" stroke-width="1.5"/>
+  <ellipse cx="28" cy="36" rx="8" ry="13" fill="white" opacity="0.28" transform="rotate(-12 28 36)"/>
+  ${crack1 ? `<path d="M25,38 L31,48 L24,56" stroke="#AA8800" stroke-width="2.5" fill="none" stroke-linecap="round"/>` : ''}
+  ${crack2 ? `<path d="M50,42 L55,54 L48,62" stroke="#AA8800" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M34,60 L39,70 L32,78" stroke="#AA8800" stroke-width="2" fill="none" stroke-linecap="round"/>` : ''}
+  ${ticks > 12 ? `<text x="18" y="64" font-size="26" opacity="0.12">🐯</text>` : ''}
+</svg>`;
+}
+
+// ── GAME STATE ────────────────────────────────────────────────────────────────
+const STAGES     = ['알', '아기 호랑이', '어린 호랑이', '청소년 호랑이', '어른 호랑이'];
+const STAGE_EMJS = ['🥚', '🐯', '🐯', '🐯', '🐯'];
+const STAGE_SIZE = [0, 0.68, 0.80, 0.91, 1.0];
+const EVO_SECS   = [0, 25, 180, 420, 840]; // seconds after hatch to evolve
+
+const MSGS = {
+  idle:     ['잘 놀고 있어~ 😊', '오늘도 최고야! 🐾', '같이 있으니 좋아~', '호랑이가 여기 있어! 🐯'],
+  hungry:   ['배고파... 밥 줘요 🍖', '꼬르륵~ 배가 고파!', '밥 주세요~ ꒰꒡﹃꒡꒱', '배고파 죽겠어요...'],
+  sad:      ['외롭다... 놀아줘 😢', '같이 놀아줘~ 🎮', '심심해... ㅠㅠ', '나 좀 봐줘요...'],
+  sick:     ['으으 아파요 💊', '머리가 아파...', '약 주세요 ㅠㅠ', '눕고 싶어...'],
+  sleeping: ['쿨쿨... 💤', 'Zzz... Zzz...', '꿈꾸는 중~ 🌙', '자는 거 방해하지 마~'],
+  happy:    ['야호~ 너무 좋아! ✨', '오늘 최고야! 🌟', '행복해~ 💕', '같이 있어서 행복해!'],
+};
+
+let G = newGame();
+let animCls = 'idle';
+let ticker = null;
+
+function newGame() {
+  return {
+    stage: 0, age: 0, ticks: 0,
+    hunger: 80, happy: 80, health: 100, energy: 100, clean: 100,
+    alive: true, sleeping: false,
+    saved: Date.now()
+  };
+}
+
+// Load saved
+(function loadSave() {
+  try {
+    const d = localStorage.getItem('hrtama_v3');
+    if (!d) return;
+    const sv = JSON.parse(d);
+    G = { ...newGame(), ...sv };
+    // Apply offline decay
+    const elapsed = Math.floor((Date.now() - (sv.saved || Date.now())) / 1000);
+    if (elapsed > 0 && G.alive && !G.sleeping) applyDecay(Math.min(elapsed, 600));
+  } catch(e) {}
+})();
+
+function applyDecay(secs) {
+  G.hunger = Math.max(0, G.hunger - secs * 0.083);
+  G.happy  = Math.max(0, G.happy  - secs * 0.056);
+  G.energy = Math.max(0, G.energy - secs * 0.042);
+  G.clean  = Math.max(0, G.clean  - secs * 0.037);
+  if (G.hunger <= 0)    G.health = Math.max(0, G.health - secs * 0.12);
+  if (G.clean  < 20)   G.health = Math.max(0, G.health - secs * 0.04);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function getMood() {
+  if (!G.alive)      return 'sick';
+  if (G.sleeping)    return 'sleeping';
+  if (G.health < 30) return 'sick';
+  if (G.hunger < 20) return 'hungry';
+  if (G.happy  < 20) return 'sad';
+  if (G.happy  > 75 && G.hunger > 55) return 'happy';
+  return 'idle';
+}
+
+function render() {
+  const stage = document.getElementById('tiger-stage');
+  const mood  = getMood();
+  const ac    = G.sleeping ? 'sleeping' : animCls;
+
+  if (G.stage === 0) {
+    stage.innerHTML = `<div class="tiger-wrap idle">${eggSVG(G.ticks)}</div>`;
+  } else {
+    stage.innerHTML = `<div class="tiger-wrap ${ac}">${tigerSVG(mood, STAGE_SIZE[G.stage])}</div>`;
+  }
+
+  // stats bars
+  const bars = {hunger:G.hunger, happy:G.happy, health:G.health, energy:G.energy, clean:G.clean};
+  for (const [k, v] of Object.entries(bars)) {
+    const el = document.getElementById(`b-${k}`);
+    if (!el) continue;
+    el.style.width = Math.max(0, Math.min(100, v)) + '%';
+    el.classList.toggle('low', v < 22);
+  }
+
+  // info bar
+  const stageN = STAGE_EMJS[G.stage] + ' ' + STAGES[G.stage];
+  document.getElementById('stage-name').textContent = stageN;
+  document.getElementById('age-disp').textContent = G.age + '일차';
+  const hr = new Date().getHours();
+  document.getElementById('time-icon').textContent = (hr >= 7 && hr < 20) ? '☀️' : '🌙';
+}
+
+function setMsg(mood, custom) {
+  const el = document.getElementById('msg-bubble');
+  if (custom) { el.textContent = custom; return; }
+  const arr = MSGS[mood] || MSGS.idle;
+  el.textContent = arr[Math.floor(Math.random() * arr.length)];
+}
+
+function showFX(emojis) {
+  const stage = document.getElementById('tiger-stage');
+  emojis.forEach((em, i) => {
+    setTimeout(() => {
+      const d = document.createElement('div');
+      d.className = 'fx';
+      d.textContent = em;
+      d.style.cssText = `left:${15 + Math.random()*65}%;top:${30 + Math.random()*35}%;position:absolute`;
+      stage.appendChild(d);
+      setTimeout(() => d.remove(), 1050);
+    }, i * 160);
+  });
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+function setAnim(cls, dur) {
+  animCls = cls;
+  setTimeout(() => { animCls = 'idle'; render(); }, dur || 900);
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+function doAction(a) {
+  if (!G.alive) return;
+  let msg = '';
+  switch (a) {
+    case 'feed':
+      if (G.sleeping) { toast('자고 있어서 밥을 못 먹어요 💤'); return; }
+      if (G.hunger >= 100) { toast('배가 불러요! 🍖'); return; }
+      G.hunger = Math.min(100, G.hunger + 30);
+      G.happy  = Math.min(100, G.happy  + 5);
+      msg = '냠냠~ 맛있어! 😋'; showFX(['🍖','✨','💕']); setAnim('happy');
+      break;
+    case 'play':
+      if (G.sleeping) { toast('자고 있어요 💤'); return; }
+      if (G.energy < 10) { toast('너무 피곤해서 못 놀아요 ⚡'); return; }
+      G.happy  = Math.min(100, G.happy  + 25);
+      G.energy = Math.max(0,   G.energy - 15);
+      G.hunger = Math.max(0,   G.hunger - 10);
+      msg = '야호~ 신나게 놀자! 🎮'; showFX(['🎮','⭐','💫','✨']); setAnim('happy');
+      break;
+    case 'sleep':
+      G.sleeping = !G.sleeping;
+      msg = G.sleeping ? '쿨쿨... 잘 자야지~ 💤' : '잘 잤어! 이제 일어났어~ ☀️';
+      toast(G.sleeping ? '호랑이가 잠들었어요 💤' : '호랑이가 일어났어요!');
+      break;
+    case 'clean':
+      if (G.clean >= 100) { toast('이미 깨끗해요! 🛁'); return; }
+      G.clean = Math.min(100, G.clean + 40);
+      G.happy = Math.min(100, G.happy + 8);
+      msg = '깨끗해졌다! 상쾌해~ 🛁'; showFX(['🛁','💧','✨','🌟']); setAnim('happy');
+      break;
+    case 'heal':
+      if (G.health >= 100) { toast('건강해요! 💊'); return; }
+      G.health = Math.min(100, G.health + 30);
+      G.happy  = Math.max(0,   G.happy  - 5);
+      msg = '약 먹었어... 쓰지만 나을 거야 💊'; showFX(['💊','💚','✨']); setAnim('shaking', 500);
+      break;
+    case 'pet':
+      if (G.sleeping) { toast('자는 거 방해하지 마세요~ 💤'); return; }
+      G.happy = Math.min(100, G.happy + 15);
+      msg = '그루~ 기분 좋아! ❤️'; showFX(['❤️','💕','💗','✨']); setAnim('happy');
+      break;
+  }
+  if (msg) setMsg(null, msg);
+  save(); render();
+}
+
+// ── GAME LOOP ─────────────────────────────────────────────────────────────────
+function tick() {
+  if (!G.alive) return;
+  G.ticks++;
+
+  if (G.sleeping) {
+    G.energy = Math.min(100, G.energy + 0.7);
+    G.hunger = Math.max(0,   G.hunger - 0.06);
+    if (G.energy >= 100) {
+      G.sleeping = false;
+      setMsg(null, '잘 잤어! 좋은 아침~ ☀️');
+      toast('호랑이가 자연스럽게 일어났어요!');
+    }
+  } else {
+    // Per-second decay
+    G.hunger = Math.max(0, G.hunger - 0.083);
+    G.happy  = Math.max(0, G.happy  - 0.056);
+    G.energy = Math.max(0, G.energy - 0.042);
+    G.clean  = Math.max(0, G.clean  - 0.037);
+
+    // Health damage from low stats
+    if (G.hunger <= 0)   G.health = Math.max(0, G.health - 0.17);
+    if (G.clean  < 15)   G.health = Math.max(0, G.health - 0.05);
+    if (G.happy  < 15)   G.health = Math.max(0, G.health - 0.03);
+
+    // Slow health recovery when well cared for
+    if (G.hunger > 55 && G.clean > 50 && G.happy > 45 && G.health < 100)
+      G.health = Math.min(100, G.health + 0.06);
+
+    // Random illness
+    if (G.ticks % 90 === 0 && Math.random() < 0.18) {
+      G.health = Math.max(0, G.health - 12);
+      toast('앗! 갑자기 아파요! 💊');
+      setMsg(null, '으으... 갑자기 아파졌어 💊');
+    }
+  }
+
+  // Age in game-days (1 game-day = 60 real seconds)
+  if (G.ticks % 60 === 0) G.age++;
+
+  // Egg hatch
+  if (G.stage === 0 && G.ticks >= 22) {
+    evolve(1);
+  }
+
+  // Evolution checks (age in seconds since hatch)
+  const secsSinceHatch = G.ticks - 22;
+  if (G.stage === 1 && secsSinceHatch >= EVO_SECS[2]) evolve(2);
+  if (G.stage === 2 && secsSinceHatch >= EVO_SECS[3]) evolve(3);
+  if (G.stage === 3 && secsSinceHatch >= EVO_SECS[4]) evolve(4);
+
+  // Death
+  if (G.health <= 0 && G.alive) {
+    G.alive = false;
+    document.getElementById('dead-overlay').style.display = 'flex';
+    setMsg(null, '안녕... 잘 있어... 😢');
+    clearInterval(ticker);
+  }
+
+  // Update UI every 2 ticks
+  if (G.ticks % 2 === 0) {
+    render();
+    if (G.ticks % 25 === 0) setMsg(getMood());
+  }
+
+  save();
+}
+
+// ── EVOLUTION ─────────────────────────────────────────────────────────────────
+function evolve(n) {
+  if (G.stage >= n) return;
+  G.stage = n;
+  const fl = document.getElementById('evoFlash');
+  fl.style.opacity = '1';
+  setTimeout(() => { fl.style.opacity = '0'; }, 120);
+  toast('✨ ' + STAGES[n] + '로 성장했어요! ✨');
+  setMsg(null, '우와~ ' + STAGES[n] + '가 됐어! ✨🐯');
+}
+
+// ── PERSIST ───────────────────────────────────────────────────────────────────
+function save() {
+  try { localStorage.setItem('hrtama_v3', JSON.stringify({ ...G, saved: Date.now() })); } catch(e) {}
+}
+
+function restartGame() {
+  G = newGame();
+  document.getElementById('dead-overlay').style.display = 'none';
+  animCls = 'idle';
+  save(); render(); setMsg('idle');
+  clearInterval(ticker);
+  ticker = setInterval(tick, 1000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+render();
+setMsg(G.sleeping ? 'sleeping' : getMood());
+if (!G.alive) document.getElementById('dead-overlay').style.display = 'flex';
+ticker = setInterval(tick, 1000);
+</script>
+</body>
+</html>
