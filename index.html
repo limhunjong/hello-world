@@ -7,38 +7,72 @@
 <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
 body{
   min-height:100vh;
-  background:linear-gradient(160deg,#FFF5E4 0%,#FFE0A0 50%,#FFCC66 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:10px 0 30px;
   font-family:'Jua',cursive;
+  transition:background 2s ease;
   overflow-x:hidden;
-  padding:12px 0 24px;
+  position:relative;
 }
+body.day  {background:linear-gradient(180deg,#87CEEB 0%,#CCF0FF 55%,#E8FFC8 100%)}
+body.night{background:linear-gradient(180deg,#0A0A2E 0%,#1A1A5E 50%,#2A3A4E 100%)}
 
-/* bg paws */
-.bg-paw{position:fixed;font-size:40px;opacity:0.07;pointer-events:none;animation:pawFloat 9s ease-in-out infinite}
-@keyframes pawFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(15deg)}}
+/* ── BG ELEMENTS ── */
+.bg-el{position:fixed;pointer-events:none;z-index:0;font-size:36px;transition:opacity 1.5s}
+@keyframes cloudDrift{0%{transform:translateX(0)}100%{transform:translateX(-120vw)}}
+@keyframes starTwinkle{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes sunPulse{0%,100%{text-shadow:0 0 20px #FFD700,0 0 40px rgba(255,215,0,0.4)}50%{text-shadow:0 0 30px #FFD700,0 0 60px rgba(255,215,0,0.6)}}
+.cloud-el{animation:cloudDrift linear infinite}
+.star-el {animation:starTwinkle ease-in-out infinite}
+.sun-el  {animation:sunPulse 4s ease-in-out infinite;font-size:46px}
 
+/* ── NAME MODAL ── */
+.name-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,0.55);
+  display:flex;align-items:center;justify-content:center;z-index:200;
+}
+.name-box{
+  background:linear-gradient(145deg,#FFF8E8,#FFE8C0);
+  border-radius:24px;padding:28px 24px;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,0.3);width:280px;
+  border:3px solid #FFCC66;
+}
+.name-box h2{font-size:22px;color:#CC4400;margin-bottom:6px}
+.name-box p {font-size:13px;color:#774400;margin-bottom:16px}
+.name-input{
+  width:100%;padding:10px 14px;border:3px solid #FFAA33;border-radius:14px;
+  font-family:'Jua',cursive;font-size:18px;text-align:center;
+  background:#FFFBF0;outline:none;color:#333;margin-bottom:14px;
+}
+.name-input:focus{border-color:#FF7700}
+.name-confirm-btn{
+  background:#FF7700;border:none;border-radius:20px;padding:10px 28px;
+  color:white;font-size:16px;font-family:'Jua',cursive;cursor:pointer;
+  box-shadow:0 4px 0 #CC4400;transition:transform 0.1s;
+}
+.name-confirm-btn:active{transform:translateY(4px);box-shadow:0 0 0 #CC4400}
+
+/* ── TITLE ── */
 .game-title{
-  font-size:26px;color:#CC4400;letter-spacing:2px;margin-bottom:14px;
-  text-shadow:0 3px 0 #FF8833,0 5px 10px rgba(200,80,0,0.25);
+  font-size:24px;color:#CC4400;letter-spacing:2px;
+  margin:8px 0 12px;z-index:10;position:relative;
+  text-shadow:0 3px 0 #FF9944,0 5px 12px rgba(200,80,0,0.2);
 }
 
 /* ── DEVICE ── */
 .device{
-  width:340px;
+  width:340px;z-index:10;position:relative;
   background:linear-gradient(165deg,#FF9500 0%,#FF7700 60%,#E05500 100%);
   border-radius:46% 46% 42% 42% / 20% 20% 80% 80%;
   padding:20px 20px 42px;
   box-shadow:
-    0 28px 55px rgba(180,80,0,0.4),
+    0 28px 55px rgba(180,80,0,0.35),
     inset 0 3px 0 rgba(255,255,255,0.4),
     inset 0 -4px 10px rgba(0,0,0,0.2),
-    0 0 0 5px #BB4400,
-    0 0 0 9px #FFA033,
-    0 0 0 13px #BB4400;
-  position:relative;
+    0 0 0 5px #BB4400,0 0 0 9px #FFA033,0 0 0 13px #BB4400;
 }
 .device::before{
   content:'';position:absolute;top:-18px;left:50%;transform:translateX(-50%);
@@ -46,7 +80,7 @@ body{
   box-shadow:inset 0 3px 5px rgba(0,0,0,0.3),0 0 0 3px #FFA033;
 }
 .device-label{
-  text-align:center;color:#AA3300;font-size:11px;letter-spacing:3px;
+  text-align:center;color:#AA3300;font-size:10px;letter-spacing:3px;
   margin-bottom:10px;text-shadow:0 1px 0 rgba(255,255,255,0.4);
 }
 
@@ -54,27 +88,32 @@ body{
 .screen{
   background:#C8EE88;border-radius:14px;
   border:4px solid #3A7200;
-  box-shadow:inset 0 3px 14px rgba(0,0,0,0.3),inset 0 0 0 1px rgba(0,0,0,0.08);
-  padding:10px;position:relative;overflow:hidden;min-height:305px;
+  box-shadow:inset 0 3px 14px rgba(0,0,0,0.3);
+  padding:10px;position:relative;overflow:hidden;min-height:310px;
 }
 .screen::after{
   content:'';position:absolute;inset:0;border-radius:10px;pointer-events:none;
   background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.02) 3px,rgba(0,0,0,0.02) 4px);
+  z-index:1;
 }
 
 /* info bar */
 .info-bar{
   display:flex;justify-content:space-between;align-items:center;
   background:rgba(0,0,0,0.1);border-radius:8px;padding:4px 8px;margin-bottom:8px;
-  font-size:12px;color:#1A4400;
+  font-size:11px;color:#1A4400;position:relative;z-index:2;
+}
+.sound-btn{
+  background:none;border:none;cursor:pointer;font-size:14px;
+  padding:0 2px;line-height:1;
 }
 
 /* ── TIGER DISPLAY ── */
 .tiger-stage{
   height:165px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;position:relative;
+  align-items:center;justify-content:center;position:relative;z-index:2;
 }
-.tiger-wrap{position:relative;display:inline-block;transition:transform 0.3s}
+.tiger-wrap{position:relative;display:inline-block}
 .tiger-wrap.idle    {animation:idleBob 2.8s ease-in-out infinite}
 .tiger-wrap.happy   {animation:happyJump 0.5s ease-in-out infinite}
 .tiger-wrap.shaking {animation:shake 0.45s ease-in-out}
@@ -84,16 +123,15 @@ body{
 @keyframes shake      {0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 @keyframes sleepBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
 
-/* floating effects */
-.fx{position:absolute;font-size:24px;pointer-events:none;animation:fxUp 1s ease-out forwards}
+.fx{position:absolute;font-size:24px;pointer-events:none;animation:fxUp 1s ease-out forwards;z-index:5}
 @keyframes fxUp{0%{transform:translateY(0) scale(0.6);opacity:1}100%{transform:translateY(-75px) scale(1.5);opacity:0}}
 
-/* ── MESSAGE BUBBLE ── */
+/* ── MSG BUBBLE ── */
 .msg-bubble{
   background:rgba(255,255,255,0.78);border:2px solid rgba(255,255,255,0.95);
   border-radius:12px;padding:5px 12px;text-align:center;
-  font-size:13px;color:#1A4400;min-height:28px;
-  margin-top:6px;position:relative;
+  font-size:12px;color:#1A4400;min-height:28px;
+  margin-top:6px;position:relative;z-index:2;
 }
 .msg-bubble::before{
   content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
@@ -101,7 +139,7 @@ body{
 }
 
 /* ── STATS ── */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px;position:relative;z-index:2}
 .stat{display:flex;align-items:center;gap:4px}
 .stat.full{grid-column:span 2}
 .stat-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center}
@@ -109,7 +147,6 @@ body{
 .bar-fill{height:100%;border-radius:6px;transition:width 0.6s ease}
 .bar-fill.low{animation:barBlink 0.75s ease-in-out infinite}
 @keyframes barBlink{0%,100%{opacity:1}50%{opacity:0.25}}
-
 .b-hunger .bar-fill{background:linear-gradient(90deg,#FF5500,#FF9944)}
 .b-happy  .bar-fill{background:linear-gradient(90deg,#FF3388,#FF88BB)}
 .b-health .bar-fill{background:linear-gradient(90deg,#00AA77,#55DDAA)}
@@ -120,19 +157,74 @@ body{
 .dead-overlay{
   position:absolute;inset:0;background:rgba(0,0,0,0.75);border-radius:10px;
   display:none;flex-direction:column;align-items:center;justify-content:center;
-  color:white;gap:8px;z-index:10;
+  color:white;gap:8px;z-index:20;
 }
 .restart-btn{
   margin-top:4px;background:#FF5500;border:none;border-radius:22px;
   padding:9px 24px;color:white;font-size:15px;font-family:'Jua',cursive;
   cursor:pointer;box-shadow:0 4px 0 #AA2200;transition:transform 0.1s;
 }
-.restart-btn:active{transform:translateY(4px);box-shadow:0 0px 0 #AA2200}
+.restart-btn:active{transform:translateY(4px);box-shadow:0 0 0 #AA2200}
 
-/* ── ACTION BUTTONS ── */
+/* ── MINI-GAME OVERLAY ── */
+.mg-overlay{
+  position:absolute;inset:0;background:#7BD44A;border-radius:10px;
+  display:none;flex-direction:column;z-index:15;overflow:hidden;
+}
+.mg-header{
+  background:rgba(0,0,0,0.18);padding:7px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:#0A3A00;flex-shrink:0;
+}
+.mg-header b{font-size:15px;color:#003300}
+.mg-close{
+  background:rgba(255,80,0,0.85);border:none;border-radius:50%;
+  width:24px;height:24px;color:white;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.mg-field{
+  flex:1;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#A8E870 0%,#88CC44 100%);
+}
+.mg-item{
+  position:absolute;font-size:34px;cursor:pointer;
+  animation:itemPop 0.25s ease-out, itemFade 0.4s ease-in 2.1s forwards;
+  user-select:none;-webkit-user-select:none;
+  transition:transform 0.1s;
+}
+.mg-item:active{transform:scale(1.3)}
+@keyframes itemPop {from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes itemFade{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(0.5)}}
+.mg-item.caught{animation:itemCatch 0.25s ease-out forwards!important}
+@keyframes itemCatch{0%{transform:scale(1.6)}100%{transform:scale(3);opacity:0}}
+.mg-score-pop{
+  position:absolute;font-size:20px;font-weight:bold;color:#FF5500;
+  animation:scorePop 0.5s ease-out forwards;pointer-events:none;z-index:5;
+}
+@keyframes scorePop{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-35px) scale(1.4);opacity:0}}
+.mg-tiger-base{
+  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  pointer-events:none;
+}
+.mg-result{
+  position:absolute;inset:0;background:rgba(255,240,200,0.97);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;border-radius:10px;
+}
+.mg-result h2{font-size:24px;color:#CC4400}
+.mg-result p {font-size:15px;color:#553300}
+.mg-result p b{color:#FF5500;font-size:20px}
+.mg-result-btn{
+  background:#FF7700;border:none;border-radius:20px;
+  padding:10px 28px;color:white;font-size:16px;font-family:'Jua',cursive;
+  cursor:pointer;box-shadow:0 4px 0 #CC4400;
+}
+.mg-result-btn:active{transform:translateY(4px);box-shadow:0 0 0 #CC4400}
+
+/* ── BUTTONS ── */
 .btns{
   display:grid;grid-template-columns:repeat(3,1fr);gap:11px;
-  padding:2px 8px 0;margin-top:18px;
+  padding:2px 8px 0;margin-top:18px;position:relative;z-index:10;
 }
 .btn-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
 .btn-wrap:active .btn-c{transform:translateY(5px)!important;box-shadow:0 1px 0 rgba(0,0,0,0.25)!important}
@@ -152,37 +244,64 @@ body{
 /* ── TOAST ── */
 .toast{
   position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-90px);
-  background:rgba(255,255,255,0.95);border-radius:22px;padding:10px 22px;
+  background:rgba(255,255,255,0.96);border-radius:22px;padding:10px 22px;
   font-size:13px;color:#333;box-shadow:0 8px 24px rgba(0,0,0,0.18);
-  transition:transform 0.36s cubic-bezier(0.34,1.56,0.64,1);z-index:100;
+  transition:transform 0.36s cubic-bezier(0.34,1.56,0.64,1);z-index:300;
   white-space:nowrap;
 }
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-/* evolution flash */
-.evo-flash{position:fixed;inset:0;background:white;opacity:0;pointer-events:none;z-index:99;transition:opacity 0.7s ease}
+/* evo flash */
+.evo-flash{position:fixed;inset:0;background:white;opacity:0;pointer-events:none;z-index:250;transition:opacity 0.7s ease}
 </style>
 </head>
-<body>
+<body class="day">
 
-<div class="bg-paw" style="top:5%;left:3%;animation-delay:0s">🐾</div>
-<div class="bg-paw" style="top:12%;right:4%;animation-delay:1.5s">🐾</div>
-<div class="bg-paw" style="bottom:12%;left:4%;animation-delay:3s">🐾</div>
-<div class="bg-paw" style="bottom:6%;right:3%;animation-delay:0.8s">🐾</div>
-<div class="bg-paw" style="top:50%;left:1%;animation-delay:2.2s;font-size:28px">🐾</div>
+<!-- BG elements injected by JS -->
+<div id="bg-wrap" style="position:fixed;inset:0;pointer-events:none;z-index:0"></div>
+
+<!-- NAME MODAL -->
+<div class="name-modal" id="name-modal" style="display:none">
+  <div class="name-box">
+    <h2>🐣 알이 깨졌어!</h2>
+    <p>새로운 호랑이가 태어났어요~<br>이름을 지어줘! 🐯</p>
+    <input class="name-input" id="name-input" maxlength="8" placeholder="이름 입력..." autocomplete="off">
+    <button class="name-confirm-btn" onclick="confirmName()">확인 ✓</button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 <div class="evo-flash" id="evoFlash"></div>
 
-<div class="game-title">🐯 호랑이 다마고치</div>
+<div class="game-title" id="game-title">🐯 호랑이 다마고치</div>
 
 <div class="device">
   <div class="device-label">✦ TIGER TAMAGOTCHI ✦</div>
 
   <div class="screen">
+    <!-- MINI-GAME (absolute overlay) -->
+    <div class="mg-overlay" id="minigame">
+      <div class="mg-header">
+        <span>🐟 음식을 빨리 잡아라!</span>
+        <span>점수 <b id="mg-score">0</b> &nbsp;⏱<b id="mg-timer">15</b></span>
+        <button class="mg-close" onclick="forceCloseMG()">✕</button>
+      </div>
+      <div class="mg-field" id="mg-field">
+        <div class="mg-tiger-base" id="mg-tiger-base"></div>
+      </div>
+      <div class="mg-result" id="mg-result">
+        <h2>🎉 게임 끝!</h2>
+        <p>음식 <b id="mg-final">0</b>개 잡음!</p>
+        <p>행복도 <b id="mg-hp">+0</b> ✨</p>
+        <button class="mg-result-btn" onclick="closeMG()">닫기</button>
+      </div>
+    </div>
+
     <div class="info-bar">
       <span id="stage-name">🥚 알</span>
+      <span id="tiger-name-disp" style="color:#2A6000;font-size:13px"></span>
       <span id="age-disp">0일차</span>
+      <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="소리 켜기/끄기">🔊</button>
       <span id="time-icon">☀️</span>
     </div>
 
@@ -200,18 +319,18 @@ body{
 
     <div class="dead-overlay" id="dead-overlay">
       <div style="font-size:46px">😢</div>
-      <div style="font-size:16px">호랑이가 하늘나라로...</div>
+      <div style="font-size:16px" id="dead-name-msg">호랑이가 하늘나라로...</div>
       <div style="font-size:12px;opacity:0.75">더 잘 돌봐줄걸 ㅠㅠ</div>
       <button class="restart-btn" onclick="restartGame()">다시 시작하기 🐯</button>
     </div>
-  </div>
+  </div><!-- /screen -->
 
   <div class="btns">
     <div class="btn-wrap" onclick="doAction('feed')">
       <div class="btn-c b1">🍖</div><span class="btn-lbl">밥주기</span>
     </div>
     <div class="btn-wrap" onclick="doAction('play')">
-      <div class="btn-c b2">🎮</div><span class="btn-lbl">놀아주기</span>
+      <div class="btn-c b2">🎮</div><span class="btn-lbl">미니게임</span>
     </div>
     <div class="btn-wrap" onclick="doAction('sleep')">
       <div class="btn-c b3">💤</div><span class="btn-lbl">재우기</span>
@@ -226,230 +345,270 @@ body{
       <div class="btn-c b6">❤️</div><span class="btn-lbl">쓰다듬기</span>
     </div>
   </div>
-</div>
+</div><!-- /device -->
 
 <script>
-// ── SVG: STICKER-STYLE TIGER ─────────────────────────────────────────────────
-// Design reference: chubby, round, thick black outline, bold stripes
-// matching the 주환이 sticker character style
+// ═══════════════════════════════════════════════════════════
+//  SOUND SYSTEM  (Web Audio API, no files needed)
+// ═══════════════════════════════════════════════════════════
+const Sound = {
+  _ctx: null,
+  ctx() {
+    if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this._ctx.state === 'suspended') this._ctx.resume();
+    return this._ctx;
+  },
+  tone(freq, vol, dur, type='sine', t=0) {
+    const ctx=this.ctx(), o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type=type;
+    o.frequency.setValueAtTime(freq, ctx.currentTime+t);
+    g.gain.setValueAtTime(vol, ctx.currentTime+t);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+t+dur);
+    o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+dur+0.05);
+  },
+  sweep(f1,f2,vol,dur,t=0) {
+    const ctx=this.ctx(), o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(f1, ctx.currentTime+t);
+    o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime+t+dur);
+    g.gain.setValueAtTime(vol, ctx.currentTime+t);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+t+dur);
+    o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+dur+0.05);
+  },
+  play(name) {
+    if (!G.soundOn) return;
+    try {
+      switch(name) {
+        case 'btn':     this.tone(880,0.05,0.07); break;
+        case 'feed':    this.sweep(350,700,0.2,0.1); this.sweep(700,500,0.15,0.08,0.12); break;
+        case 'sleep':   this.sweep(600,180,0.13,0.9); break;
+        case 'clean':   this.sweep(900,1300,0.1,0.06); this.tone(1100,0.1,0.18,'sine',0.07); break;
+        case 'heal':    this.tone(1047,0.18,0.45,'sine'); this.tone(1319,0.1,0.3,'sine',0.15); break;
+        case 'pet':     this.tone(330,0.12,0.35,'sine'); this.tone(440,0.1,0.3,'sine',0.1); this.tone(550,0.08,0.25,'sine',0.2); break;
+        case 'play':    [400,600,800].forEach((f,i)=>this.tone(f,0.15,0.13,'square',i*0.1)); break;
+        case 'evolve':  [523,659,784,1047,1319].forEach((f,i)=>this.tone(f,0.22,0.32,'sine',i*0.14)); break;
+        case 'catch':   this.sweep(500,1100,0.2,0.09); break;
+        case 'mgend':   [500,450,400,350,300].forEach((f,i)=>this.tone(f,0.18,0.28,'square',i*0.12)); break;
+        case 'die':     [440,370,300,240,180].forEach((f,i)=>this.tone(f,0.15,0.45,'sine',i*0.32)); break;
+        case 'hatch':   [440,550,660,880].forEach((f,i)=>this.tone(f,0.2,0.2,'sine',i*0.1)); break;
+      }
+    } catch(e) {}
+  }
+};
 
-function tigerSVG(mood, s) {
-  s = s || 1;
-  const W  = Math.round(108 * s), H = Math.round(130 * s);
-  const OG = '#FF9200';  // tiger orange (warm)
-  const ER = '#E07500';  // ear inner / darker
-  const BL = '#FFEEDD';  // belly light
-  const BK = '#151005';  // outline / stripes
+// ═══════════════════════════════════════════════════════════
+//  SVG  TIGER  GENERATOR  (sticker style + stage poses)
+// ═══════════════════════════════════════════════════════════
+function tigerSVG(mood, sizeScale, stage) {
+  const s  = sizeScale || 1;
+  const W  = Math.round(108*s), H = Math.round(130*s);
+  const OG = '#FF9200';
+  const ER = '#E07500';
+  const BL = '#FFEEDD';
+  const BK = '#151005';
   const ol = `stroke="${BK}" stroke-width="5.5" stroke-linejoin="round"`;
 
-  // ── Per-mood: eyes, mouth, extras ──────────────────────────────────────────
-  let eyeL, eyeR, mouth, extra = '';
-
-  if (mood === 'happy') {
-    // ^^ eyes (upward arc)
-    eyeL  = `<path d="M27,48 Q37,38 47,48" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-    eyeR  = `<path d="M53,48 Q63,38 73,48" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-    mouth = `<path d="M36,61 Q50,73 64,61" stroke="${BK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-    extra = `<ellipse cx="23" cy="58" rx="10" ry="7" fill="#FF3366" opacity="0.28"/>
-             <ellipse cx="77" cy="58" rx="10" ry="7" fill="#FF3366" opacity="0.28"/>`;
-
-  } else if (mood === 'sleeping') {
-    // closed eyes (downward arc like eyelids)
-    eyeL  = `<path d="M27,46 Q37,53 47,46" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-    eyeR  = `<path d="M53,46 Q63,53 73,46" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-    mouth = `<path d="M41,60 Q50,63 59,60" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
-    extra = `<ellipse cx="23" cy="58" rx="9" ry="6" fill="#FF3366" opacity="0.18"/>
-             <ellipse cx="77" cy="58" rx="9" ry="6" fill="#FF3366" opacity="0.18"/>
-             <text x="70" y="33" font-size="14" fill="${BK}" opacity="0.62" font-family="serif" font-weight="bold">z</text>
-             <text x="76" y="21" font-size="10" fill="${BK}" opacity="0.44" font-family="serif" font-weight="bold">z</text>
-             <text x="80" y="12" font-size="7"  fill="${BK}" opacity="0.28" font-family="serif" font-weight="bold">z</text>`;
-
-  } else if (mood === 'sad') {
-    // inner-corner-raised worried eyes
-    eyeL  = `<rect x="28" y="40" width="18" height="9" rx="4.5" fill="${BK}" transform="rotate(14,37,44.5)"/>`;
-    eyeR  = `<rect x="54" y="40" width="18" height="9" rx="4.5" fill="${BK}" transform="rotate(-14,63,44.5)"/>`;
-    mouth = `<path d="M37,63 Q50,55 63,63" stroke="${BK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-    extra = `<!-- tear left -->
-             <path d="M33,52 Q32,60 34,66" stroke="#66AAFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.82"/>
-             <ellipse cx="34" cy="69" rx="4.5" ry="6" fill="#66AAFF" opacity="0.78"/>
-             <ellipse cx="22" cy="58" rx="9" ry="6" fill="#AACCFF" opacity="0.2"/>
-             <ellipse cx="78" cy="58" rx="9" ry="6" fill="#AACCFF" opacity="0.2"/>`;
-
-  } else if (mood === 'sick') {
-    // × × eyes
-    eyeL  = `<line x1="28" y1="39" x2="46" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>
-             <line x1="46" y1="39" x2="28" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>`;
-    eyeR  = `<line x1="54" y1="39" x2="72" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>
-             <line x1="72" y1="39" x2="54" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>`;
-    mouth = `<path d="M38,63 Q50,57 62,63" stroke="${BK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
-    extra = `<!-- sweat drop -->
-             <path d="M20,43 Q18,52 20,59" stroke="#55BBFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.8"/>
-             <ellipse cx="20" cy="63" rx="5" ry="7" fill="#55BBFF" opacity="0.75"/>`;
-
-  } else if (mood === 'hungry') {
-    // normal eyes + drool + swirl marks
-    eyeL  = `<rect x="28" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
-    eyeR  = `<rect x="54" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
-    mouth = `<path d="M37,60 Q50,69 63,60" stroke="${BK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-    extra = `<!-- drool -->
-             <path d="M48,70 Q47,78 49,85" stroke="#77CCFF" stroke-width="4.5" fill="none" stroke-linecap="round" opacity="0.85"/>
-             <ellipse cx="49" cy="89" rx="6" ry="8" fill="#77CCFF" opacity="0.8"/>
-             <!-- hunger marks -->
-             <path d="M15,38 Q18,31 22,36" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>
-             <path d="M85,38 Q82,31 78,36" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>`;
-
+  // ── EYES ──
+  let eyeL, eyeR;
+  if (mood==='happy') {
+    eyeL=`<path d="M27,48 Q37,38 47,48" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+    eyeR=`<path d="M53,48 Q63,38 73,48" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+  } else if (mood==='sleeping') {
+    eyeL=`<path d="M27,46 Q37,53 47,46" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+    eyeR=`<path d="M53,46 Q63,53 73,46" stroke="${BK}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+  } else if (mood==='sad') {
+    eyeL=`<rect x="28" y="40" width="18" height="9" rx="4.5" fill="${BK}" transform="rotate(14,37,44.5)"/>`;
+    eyeR=`<rect x="54" y="40" width="18" height="9" rx="4.5" fill="${BK}" transform="rotate(-14,63,44.5)"/>`;
+  } else if (mood==='sick') {
+    eyeL=`<line x1="28" y1="39" x2="46" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>
+          <line x1="46" y1="39" x2="28" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>`;
+    eyeR=`<line x1="54" y1="39" x2="72" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>
+          <line x1="72" y1="39" x2="54" y2="52" stroke="${BK}" stroke-width="6.5" stroke-linecap="round"/>`;
+  } else if (mood==='hungry') {
+    eyeL=`<rect x="28" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
+    eyeR=`<rect x="54" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
   } else {
-    // idle / neutral — rectangular eyes, light smile
-    eyeL  = `<rect x="28" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
-    eyeR  = `<rect x="54" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
-    mouth = `<path d="M39,60 Q50,67 61,60" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
-    extra = `<ellipse cx="22" cy="58" rx="9" ry="6" fill="#FF3366" opacity="0.22"/>
-             <ellipse cx="78" cy="58" rx="9" ry="6" fill="#FF3366" opacity="0.22"/>`;
+    eyeL=`<rect x="28" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
+    eyeR=`<rect x="54" y="40" width="18" height="9" rx="4.5" fill="${BK}"/>`;
+  }
+
+  // ── MOUTH & EXTRAS ──
+  let mouth, extra='';
+  if (mood==='happy') {
+    mouth=`<path d="M36,61 Q50,73 64,61" stroke="${BK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+    extra=`<ellipse cx="23" cy="58" rx="10" ry="7" fill="#FF3366" opacity="0.28"/>
+           <ellipse cx="77" cy="58" rx="10" ry="7" fill="#FF3366" opacity="0.28"/>`;
+  } else if (mood==='sleeping') {
+    mouth=`<path d="M41,60 Q50,63 59,60" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    extra=`<ellipse cx="23" cy="58" rx="8" ry="6" fill="#FF3366" opacity="0.16"/>
+           <text x="70" y="33" font-size="14" fill="${BK}" opacity="0.62">z</text>
+           <text x="77" y="21" font-size="10" fill="${BK}" opacity="0.44">z</text>
+           <text x="81" y="12" font-size="7"  fill="${BK}" opacity="0.28">z</text>`;
+  } else if (mood==='sad') {
+    mouth=`<path d="M37,63 Q50,55 63,63" stroke="${BK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+    extra=`<path d="M33,52 Q32,60 34,66" stroke="#66AAFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.82"/>
+           <ellipse cx="34" cy="69" rx="4.5" ry="6" fill="#66AAFF" opacity="0.78"/>`;
+  } else if (mood==='sick') {
+    mouth=`<path d="M38,63 Q50,57 62,63" stroke="${BK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    extra=`<path d="M20,43 Q18,52 20,59" stroke="#55BBFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.8"/>
+           <ellipse cx="20" cy="63" rx="5" ry="7" fill="#55BBFF" opacity="0.75"/>`;
+  } else if (mood==='hungry') {
+    mouth=`<path d="M37,60 Q50,69 63,60" stroke="${BK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+    extra=`<path d="M48,70 Q47,78 49,85" stroke="#77CCFF" stroke-width="4.5" fill="none" stroke-linecap="round" opacity="0.85"/>
+           <ellipse cx="49" cy="89" rx="6" ry="8" fill="#77CCFF" opacity="0.8"/>
+           <path d="M15,38 Q18,31 22,36" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>
+           <path d="M85,38 Q82,31 78,36" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>`;
+  } else {
+    mouth=`<path d="M39,60 Q50,67 61,60" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    extra=`<ellipse cx="22" cy="58" rx="9" ry="6" fill="#FF3366" opacity="0.22"/>
+           <ellipse cx="78" cy="58" rx="9" ry="6" fill="#FF3366" opacity="0.22"/>`;
+  }
+
+  // ── STAGE-BASED ARMS ──
+  let armL, armR;
+  switch(stage) {
+    case 1: // baby: both arms raised up (pick me up!)
+      armL=`<ellipse cx="10" cy="62" rx="10" ry="15" fill="${OG}" ${ol} transform="rotate(-75 10 62)"/>`;
+      armR=`<ellipse cx="90" cy="62" rx="10" ry="15" fill="${OG}" ${ol} transform="rotate(75 90 62)"/>`;
+      break;
+    case 2: // child: right arm waving
+      armL=`<ellipse cx="12" cy="86" rx="11" ry="16" fill="${OG}" ${ol} transform="rotate(-24 12 86)"/>`;
+      armR=`<ellipse cx="88" cy="63" rx="11" ry="16" fill="${OG}" ${ol} transform="rotate(68 88 63)"/>`;
+      break;
+    case 3: // teen: arms slightly out, casual
+      armL=`<ellipse cx="11" cy="85" rx="11" ry="16" fill="${OG}" ${ol} transform="rotate(-32 11 85)"/>`;
+      armR=`<ellipse cx="89" cy="85" rx="11" ry="16" fill="${OG}" ${ol} transform="rotate(32 89 85)"/>`;
+      break;
+    default: // adult: natural stance
+      armL=`<ellipse cx="13" cy="86" rx="12" ry="17" fill="${OG}" ${ol} transform="rotate(-22 13 86)"/>`;
+      armR=`<ellipse cx="87" cy="86" rx="12" ry="17" fill="${OG}" ${ol} transform="rotate(22 87 86)"/>`;
+  }
+
+  // ── STAGE ACCESSORIES ──
+  let accessory = '';
+  if (stage === 3) {
+    // teen: small stars
+    accessory = `<text x="8"  y="10" font-size="11" opacity="0.7">✦</text>
+                 <text x="80" y="9"  font-size="9"  opacity="0.6">✦</text>`;
+  } else if (stage === 4) {
+    // adult: crown!
+    accessory = `<text x="50" y="7" text-anchor="middle" font-size="19">👑</text>`;
   }
 
   return `<svg viewBox="0 0 100 127" width="${W}" height="${H}"
           style="overflow:visible;filter:drop-shadow(0 4px 8px rgba(120,60,0,0.28))">
-
-    <!-- TAIL (behind body) -->
-    <path d="M76,98 Q93,82 89,64 Q85,50 76,58"
-          fill="${ER}" ${ol} stroke-linecap="round"/>
-
-    <!-- LEFT ARM -->
-    <ellipse cx="13" cy="85" rx="11" ry="16" fill="${OG}" ${ol}
-             transform="rotate(-24 13 85)"/>
-
-    <!-- RIGHT ARM -->
-    <ellipse cx="87" cy="85" rx="11" ry="16" fill="${OG}" ${ol}
-             transform="rotate(24 87 85)"/>
-
-    <!-- BODY -->
+    ${accessory}
+    <path d="M76,98 Q93,82 89,64 Q85,50 76,58" fill="${ER}" ${ol} stroke-linecap="round"/>
+    ${armL}
+    ${armR}
     <ellipse cx="50" cy="96" rx="33" ry="28" fill="${OG}" ${ol}/>
-
-    <!-- BELLY (soft cream circle) -->
     <ellipse cx="50" cy="100" rx="19" ry="17" fill="${BL}" opacity="0.55"/>
-
-    <!-- BODY STRIPES (bold 3 lines) -->
     <path d="M25,78 Q27,91 25,105" stroke="${BK}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
     <path d="M50,76 Q50,91 50,105"  stroke="${BK}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
     <path d="M75,78 Q73,91 75,105" stroke="${BK}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-
-    <!-- LEFT FOOT -->
     <ellipse cx="33" cy="120" rx="15" ry="9" fill="${OG}" ${ol}/>
-    <!-- RIGHT FOOT -->
     <ellipse cx="67" cy="120" rx="15" ry="9" fill="${OG}" ${ol}/>
-
-    <!-- EARS (behind head layer) -->
     <circle cx="20" cy="15" r="15" fill="${OG}" ${ol}/>
     <circle cx="80" cy="15" r="15" fill="${OG}" ${ol}/>
-    <!-- ear inner -->
     <circle cx="20" cy="17" r="9"  fill="${ER}"/>
     <circle cx="80" cy="17" r="9"  fill="${ER}"/>
-
-    <!-- HEAD (large, round, slightly off-center down) -->
     <circle cx="50" cy="48" r="40" fill="${OG}" ${ol}/>
-
-    <!-- HEAD STRIPES (3 bold lines) -->
     <path d="M29,11 Q32,25 30,40" stroke="${BK}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
     <path d="M50,6  Q50,21 50,38"  stroke="${BK}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
     <path d="M71,11 Q68,25 70,40" stroke="${BK}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-
-    <!-- EYE WHITES (subtle) -->
     <ellipse cx="37" cy="45" rx="12" ry="12" fill="#FFFCF5" opacity="0.85"/>
     <ellipse cx="63" cy="45" rx="12" ry="12" fill="#FFFCF5" opacity="0.85"/>
-
-    <!-- EYES -->
     ${eyeL}
     ${eyeR}
-
-    <!-- NOSE: two small dots like W shape -->
     <circle cx="44" cy="57" r="3.5" fill="${BK}"/>
     <circle cx="56" cy="57" r="3.5" fill="${BK}"/>
-
-    <!-- MOUTH + MOOD EXTRAS -->
     ${mouth}
     ${extra}
   </svg>`;
 }
 
-// ── EGG SVG ──────────────────────────────────────────────────────────────────
 function eggSVG(ticks) {
-  const BK = '#151005';
-  const crack1 = ticks > 8;
-  const crack2 = ticks > 16;
+  const BK='#151005';
   return `<svg viewBox="0 0 80 100" width="90" height="112"
           style="filter:drop-shadow(0 4px 7px rgba(120,60,0,0.22));overflow:visible">
-    <defs>
-      <radialGradient id="eg" cx="38%" cy="30%">
-        <stop offset="0%" stop-color="#FFFDE8"/>
-        <stop offset="100%" stop-color="#FFE44A"/>
-      </radialGradient>
-    </defs>
-    <ellipse cx="40" cy="56" rx="33" ry="44"
-             fill="url(#eg)" stroke="${BK}" stroke-width="4" stroke-linejoin="round"/>
+    <defs><radialGradient id="eg" cx="38%" cy="30%">
+      <stop offset="0%" stop-color="#FFFDE8"/><stop offset="100%" stop-color="#FFE44A"/>
+    </radialGradient></defs>
+    <ellipse cx="40" cy="56" rx="33" ry="44" fill="url(#eg)" stroke="${BK}" stroke-width="4"/>
     <ellipse cx="28" cy="36" rx="9" ry="14" fill="white" opacity="0.3" transform="rotate(-14 28 36)"/>
-    ${crack1 ? `<path d="M24,36 L30,47 L22,56" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>` : ''}
-    ${crack2 ? `<path d="M50,40 L56,53 L48,62" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>
-                <path d="M33,62 L39,73 L31,80" stroke="${BK}" stroke-width="2.5" fill="none" stroke-linecap="round"/>` : ''}
-    ${ticks > 13 ? `<text x="16" y="64" font-size="28" opacity="0.12">🐯</text>` : ''}
+    ${ticks>8  ? `<path d="M24,36 L30,47 L22,56" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>` : ''}
+    ${ticks>16 ? `<path d="M50,40 L56,53 L48,62" stroke="${BK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  <path d="M33,62 L39,73 L31,80" stroke="${BK}" stroke-width="2.5" fill="none" stroke-linecap="round"/>` : ''}
+    ${ticks>13 ? `<text x="16" y="64" font-size="28" opacity="0.12">🐯</text>` : ''}
   </svg>`;
 }
 
-// ── GAME STATE ────────────────────────────────────────────────────────────────
-const STAGES     = ['알', '아기 호랑이', '어린 호랑이', '청소년 호랑이', '어른 호랑이'];
-const STAGE_EMJS = ['🥚', '🐯', '🐯', '🐯', '🐯'];
-const STAGE_SZ   = [0, 0.67, 0.80, 0.91, 1.0];
-// seconds after hatch for each next evolution
-const EVO_SECS   = [0, 25, 180, 420, 840];
+// Small tiger for mini-game
+function tigerMini() {
+  return tigerSVG('happy', 0.42, G.stage || 1);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════════════
+const STAGES   = ['알','아기 호랑이','어린 호랑이','청소년 호랑이','어른 호랑이'];
+const STAGEE   = ['🥚','🐯','🐯','🐯','🐯'];
+const STAGE_SZ = [0,0.67,0.80,0.91,1.0];
+const EVO_SECS = [0,22,180,420,840];
 
 const MSGS = {
-  idle:     ['잘 놀고 있어~ 😊', '오늘도 최고야! 🐾', '같이 있으니 좋아~', '호랑이가 여기 있어!'],
-  hungry:   ['배고파... 밥 줘요 🍖', '꼬르륵~ 배가 고파!', '밥 주세요~ ꒰꒡﹃꒡꒱', '배고파 죽겠어요...'],
-  sad:      ['외롭다... 놀아줘 😢', '같이 놀아줘~ 🎮', '심심해... ㅠㅠ', '나 좀 봐줘요...'],
-  sick:     ['으으 아파요 💊', '머리가 아파...', '약 주세요 ㅠㅠ', '눕고 싶어...'],
-  sleeping: ['쿨쿨... 💤', 'Zzz... 꿈꾸는 중~', '자는 거 방해하지 마~', '이제 잘래... 💤'],
-  happy:    ['야호~ 너무 좋아! ✨', '움치치 동치치! 🎉', '행복해~ 💕', '같이 있어서 행복해!'],
+  idle:    ['잘 놀고 있어~ 😊','오늘도 최고야! 🐾','같이 있으니 좋아~','야호~ 기분 좋아!'],
+  hungry:  ['배고파... 밥 줘요 🍖','꼬르륵~ 배가 고파!','밥 주세요~ ꒰꒡﹃꒡꒱','배고파 죽겠어요...'],
+  sad:     ['외롭다... 놀아줘 😢','같이 놀아줘~ 🎮','심심해... ㅠㅠ','나 좀 봐줘요...'],
+  sick:    ['으으 아파요 💊','머리가 아파...','약 주세요 ㅠㅠ','귀찮은데... 아파'],
+  sleeping:['쿨쿨... 💤','Zzz... 꿈꾸는 중~','자는 거 방해하지 마~','이제 잘래... 💤'],
+  happy:   ['야호~ 너무 좋아! ✨','움치치 동치치! 🎉','행복해~ 💕','두근두근~ 최고야!'],
 };
 
 function newGame() {
   return {
-    stage:0, age:0, ticks:0,
-    hunger:80, happy:80, health:100, energy:100, clean:100,
-    alive:true, sleeping:false, saved:Date.now()
+    stage:0,age:0,ticks:0,
+    hunger:80,happy:80,health:100,energy:100,clean:100,
+    alive:true,sleeping:false,
+    name:'',soundOn:true,
+    saved:Date.now()
   };
 }
 
-let G = newGame();
+let G       = newGame();
 let animCls = 'idle';
 let ticker  = null;
 
-// ── LOAD SAVE ─────────────────────────────────────────────────────────────────
-;(function() {
+// Load save
+;(function(){
   try {
-    const d = localStorage.getItem('hrtama_v4');
+    const d = localStorage.getItem('hrtama_v5');
     if (!d) return;
     const sv = JSON.parse(d);
-    G = { ...newGame(), ...sv };
-    // apply offline decay (cap at 10 min)
-    const elapsed = Math.min(600, Math.floor((Date.now() - (sv.saved || Date.now())) / 1000));
-    if (elapsed > 0 && G.alive && !G.sleeping) {
-      G.hunger = Math.max(0, G.hunger - elapsed * 0.083);
-      G.happy  = Math.max(0, G.happy  - elapsed * 0.056);
-      G.energy = Math.max(0, G.energy - elapsed * 0.042);
-      G.clean  = Math.max(0, G.clean  - elapsed * 0.037);
-      if (G.hunger <= 0)  G.health = Math.max(0, G.health - elapsed * 0.12);
-      if (G.clean  < 20)  G.health = Math.max(0, G.health - elapsed * 0.04);
+    G = {...newGame(),...sv};
+    const elapsed = Math.min(600, Math.floor((Date.now()-(sv.saved||Date.now()))/1000));
+    if (elapsed>0 && G.alive && !G.sleeping) {
+      G.hunger = Math.max(0, G.hunger - elapsed*0.083);
+      G.happy  = Math.max(0, G.happy  - elapsed*0.056);
+      G.energy = Math.max(0, G.energy - elapsed*0.042);
+      G.clean  = Math.max(0, G.clean  - elapsed*0.037);
+      if (G.hunger<=0)  G.health=Math.max(0,G.health-elapsed*0.12);
+      if (G.clean <20)  G.health=Math.max(0,G.health-elapsed*0.04);
     }
   } catch(e) {}
 })();
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════
 function getMood() {
   if (!G.alive)       return 'sick';
   if (G.sleeping)     return 'sleeping';
   if (G.health < 30)  return 'sick';
   if (G.hunger < 20)  return 'hungry';
   if (G.happy  < 20)  return 'sad';
-  if (G.happy > 75 && G.hunger > 55) return 'happy';
+  if (G.happy>75 && G.hunger>55) return 'happy';
   return 'idle';
 }
 
@@ -458,192 +617,396 @@ function render() {
   const mood  = getMood();
   const ac    = G.sleeping ? 'sleeping' : animCls;
 
-  if (G.stage === 0) {
-    stage.innerHTML = `<div class="tiger-wrap idle">${eggSVG(G.ticks)}</div>`;
+  if (G.stage===0) {
+    stage.innerHTML=`<div class="tiger-wrap idle">${eggSVG(G.ticks)}</div>`;
   } else {
-    stage.innerHTML = `<div class="tiger-wrap ${ac}">${tigerSVG(mood, STAGE_SZ[G.stage])}</div>`;
+    stage.innerHTML=`<div class="tiger-wrap ${ac}">${tigerSVG(mood,STAGE_SZ[G.stage],G.stage)}</div>`;
   }
 
-  // stat bars
-  for (const [k, v] of Object.entries({hunger:G.hunger,happy:G.happy,health:G.health,energy:G.energy,clean:G.clean})) {
-    const el = document.getElementById(`b-${k}`);
+  for (const [k,v] of Object.entries({hunger:G.hunger,happy:G.happy,health:G.health,energy:G.energy,clean:G.clean})) {
+    const el=document.getElementById(`b-${k}`);
     if (!el) continue;
-    el.style.width = Math.max(0, Math.min(100, v)) + '%';
-    el.classList.toggle('low', v < 22);
+    el.style.width=Math.max(0,Math.min(100,v))+'%';
+    el.classList.toggle('low',v<22);
   }
 
-  document.getElementById('stage-name').textContent = STAGE_EMJS[G.stage] + ' ' + STAGES[G.stage];
-  document.getElementById('age-disp').textContent   = G.age + '일차';
-  const hr = new Date().getHours();
-  document.getElementById('time-icon').textContent  = (hr >= 7 && hr < 20) ? '☀️' : '🌙';
+  const nm = G.name || '';
+  document.getElementById('stage-name').textContent      = STAGEE[G.stage]+' '+STAGES[G.stage];
+  document.getElementById('tiger-name-disp').textContent = nm ? `[${nm}]` : '';
+  document.getElementById('age-disp').textContent        = G.age+'일차';
+  document.getElementById('sound-btn').textContent       = G.soundOn ? '🔊' : '🔇';
+  const hr=new Date().getHours();
+  document.getElementById('time-icon').textContent       = (hr>=7&&hr<20)?'☀️':'🌙';
+
+  // title shows name if set
+  if (nm) document.getElementById('game-title').textContent = `🐯 ${nm}의 다마고치`;
 }
 
 function setMsg(mood, custom) {
-  const el = document.getElementById('msg-bubble');
-  if (custom) { el.textContent = custom; return; }
-  const arr = MSGS[mood] || MSGS.idle;
-  el.textContent = arr[Math.floor(Math.random() * arr.length)];
+  const el=document.getElementById('msg-bubble');
+  if (custom) { el.textContent=custom; return; }
+  const arr=MSGS[mood]||MSGS.idle;
+  el.textContent=arr[Math.floor(Math.random()*arr.length)];
 }
 
 function showFX(emojis) {
-  const stage = document.getElementById('tiger-stage');
-  emojis.forEach((em, i) => setTimeout(() => {
-    const d = document.createElement('div');
-    d.className = 'fx';
-    d.textContent = em;
-    d.style.cssText = `left:${12+Math.random()*70}%;top:${25+Math.random()*40}%;position:absolute`;
+  const stage=document.getElementById('tiger-stage');
+  emojis.forEach((em,i)=>setTimeout(()=>{
+    const d=document.createElement('div');
+    d.className='fx'; d.textContent=em;
+    d.style.cssText=`left:${12+Math.random()*70}%;top:${25+Math.random()*40}%;position:absolute`;
     stage.appendChild(d);
-    setTimeout(() => d.remove(), 1050);
-  }, i * 155));
+    setTimeout(()=>d.remove(),1050);
+  },i*155));
 }
 
 function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2700);
+  el._t=setTimeout(()=>el.classList.remove('show'),2700);
 }
 
-function setAnim(cls, dur) {
-  animCls = cls;
-  setTimeout(() => { animCls = 'idle'; render(); }, dur || 950);
+function setAnim(cls,dur) {
+  animCls=cls;
+  setTimeout(()=>{ animCls='idle'; render(); },dur||950);
 }
 
-// ── ACTIONS ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  NAME MODAL
+// ═══════════════════════════════════════════════════════════
+function showNameModal() {
+  document.getElementById('name-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('name-input').focus(),100);
+}
+
+function confirmName() {
+  const val = document.getElementById('name-input').value.trim();
+  G.name = val || '호랑이';
+  document.getElementById('name-modal').style.display='none';
+  save(); render();
+  setMsg(null, `안녕! 나 ${G.name}이야! 잘 부탁해 🐾`);
+  toast(`${G.name} 탄생! 축하해! 🎉`);
+}
+
+document.getElementById('name-input').addEventListener('keydown', e=>{
+  if (e.key==='Enter') confirmName();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  SOUND TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleSound() {
+  G.soundOn = !G.soundOn;
+  render(); save();
+  if (G.soundOn) Sound.play('btn');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════════════════
 function doAction(a) {
   if (!G.alive) return;
-  let msg = '';
+  Sound.play('btn');
+  let msg='';
   switch(a) {
     case 'feed':
-      if (G.sleeping)    { toast('자고 있어서 밥을 못 먹어요 💤'); return; }
-      if (G.hunger >= 100) { toast('배가 불러요! 🍖'); return; }
-      G.hunger = Math.min(100, G.hunger + 30);
-      G.happy  = Math.min(100, G.happy  + 5);
-      msg = '냠냠~ 맛있어! 😋'; showFX(['🍖','✨','💕']); setAnim('happy');
+      if (G.sleeping)      { toast('자고 있어서 밥을 못 먹어요 💤'); return; }
+      if (G.hunger>=100)   { toast('배가 불러요! 🍖'); return; }
+      G.hunger=Math.min(100,G.hunger+30);
+      G.happy =Math.min(100,G.happy +5);
+      msg=`냠냠~ 맛있어! 😋`; showFX(['🍖','✨','💕']); setAnim('happy'); Sound.play('feed');
       break;
     case 'play':
-      if (G.sleeping)   { toast('자고 있어요 💤'); return; }
-      if (G.energy < 10) { toast('너무 피곤해서 못 놀아요 ⚡'); return; }
-      G.happy  = Math.min(100, G.happy  + 25);
-      G.energy = Math.max(0,   G.energy - 15);
-      G.hunger = Math.max(0,   G.hunger - 10);
-      msg = '움치치 동치치~ 🎉'; showFX(['🎮','⭐','💫','✨']); setAnim('happy');
-      break;
+      if (G.sleeping)    { toast('자고 있어요 💤'); return; }
+      if (G.energy<10)   { toast('너무 피곤해서 못 놀아요 ⚡'); return; }
+      startMG(); return;
     case 'sleep':
-      G.sleeping = !G.sleeping;
-      msg = G.sleeping ? '이제 잘래... 쿨쿨 💤' : '잘 잤어! 이제 일어났어~ ☀️';
-      toast(G.sleeping ? '호랑이가 잠들었어요 💤' : '호랑이가 일어났어요!');
+      G.sleeping=!G.sleeping;
+      msg=G.sleeping?'이제 잘래... 쿨쿨 💤':'잘 잤어! 이제 일어났어~ ☀️';
+      toast(G.sleeping?'호랑이가 잠들었어요 💤':'호랑이가 일어났어요!');
+      Sound.play('sleep');
       break;
     case 'clean':
-      if (G.clean >= 100) { toast('이미 깨끗해요! 🛁'); return; }
-      G.clean = Math.min(100, G.clean + 40);
-      G.happy = Math.min(100, G.happy + 8);
-      msg = '깨끗해졌다! 상쾌해~ 🛁'; showFX(['🛁','💧','✨','🌟']); setAnim('happy');
+      if (G.clean>=100) { toast('이미 깨끗해요! 🛁'); return; }
+      G.clean=Math.min(100,G.clean+40);
+      G.happy=Math.min(100,G.happy+8);
+      msg='깨끗해졌다! 상쾌해~ 🛁'; showFX(['🛁','💧','✨','🌟']); setAnim('happy'); Sound.play('clean');
       break;
     case 'heal':
-      if (G.health >= 100) { toast('건강해요! 💊'); return; }
-      G.health = Math.min(100, G.health + 30);
-      G.happy  = Math.max(0,   G.happy  - 5);
-      msg = '약 먹었어... 쓰지만 나을 거야 💊'; showFX(['💊','💚','✨']); setAnim('shaking', 500);
+      if (G.health>=100) { toast('건강해요! 💊'); return; }
+      G.health=Math.min(100,G.health+30);
+      G.happy =Math.max(0,  G.happy -5);
+      msg='약 먹었어... 쓰지만 나을 거야 💊'; showFX(['💊','💚','✨']); setAnim('shaking',500); Sound.play('heal');
       break;
     case 'pet':
       if (G.sleeping) { toast('자는 거 방해하지 마세요~ 💤'); return; }
-      G.happy = Math.min(100, G.happy + 15);
-      msg = '그루~ 기분 좋아! ❤️'; showFX(['❤️','💕','💗','✨']); setAnim('happy');
+      G.happy=Math.min(100,G.happy+15);
+      msg=`그루~ 기분 좋아! ❤️`; showFX(['❤️','💕','💗','✨']); setAnim('happy'); Sound.play('pet');
       break;
   }
-  if (msg) setMsg(null, msg);
+  if (msg) setMsg(null,msg);
   save(); render();
 }
 
-// ── GAME LOOP ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  MINI-GAME  🐟 음식을 잡아라!
+// ═══════════════════════════════════════════════════════════
+const FOODS = ['🍖','🐟','🍗','🍣','🥩','🦴','🐠','🥚','🍱'];
+let mg = { active:false, score:0, timeLeft:15, timerID:null, spawnID:null };
+
+function startMG() {
+  document.getElementById('minigame').style.display='flex';
+  document.getElementById('mg-result').style.display='none';
+  document.getElementById('mg-tiger-base').innerHTML = tigerMini();
+
+  mg = { active:true, score:0, timeLeft:15, timerID:null, spawnID:null };
+  document.getElementById('mg-score').textContent = 0;
+  document.getElementById('mg-timer').textContent = 15;
+
+  // clear old items
+  document.querySelectorAll('.mg-item,.mg-score-pop').forEach(e=>e.remove());
+
+  mg.spawnID  = setInterval(spawnFood, 700);
+  mg.timerID  = setInterval(()=>{
+    mg.timeLeft--;
+    document.getElementById('mg-timer').textContent = mg.timeLeft;
+    if (mg.timeLeft<=0) endMG();
+  }, 1000);
+
+  Sound.play('play');
+}
+
+function spawnFood() {
+  if (!mg.active) return;
+  const field = document.getElementById('mg-field');
+  const el    = document.createElement('div');
+  el.className  = 'mg-item';
+  el.textContent= FOODS[Math.floor(Math.random()*FOODS.length)];
+  el.style.left = (4 + Math.random()*82)+'%';
+  el.style.top  = (8 + Math.random()*60)+'%';
+
+  el.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    if (!mg.active || el.classList.contains('caught')) return;
+    el.classList.add('caught');
+    mg.score++;
+    document.getElementById('mg-score').textContent = mg.score;
+    Sound.play('catch');
+
+    // +1 popup
+    const pop=document.createElement('div');
+    pop.className='mg-score-pop';
+    pop.textContent='+1';
+    pop.style.left=el.style.left;
+    pop.style.top =(parseFloat(el.style.top)-5)+'%';
+    field.appendChild(pop);
+    setTimeout(()=>pop.remove(),550);
+    setTimeout(()=>el.remove(),280);
+  });
+
+  field.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 2600);
+}
+
+function endMG() {
+  mg.active=false;
+  clearInterval(mg.timerID);
+  clearInterval(mg.spawnID);
+  document.querySelectorAll('.mg-item').forEach(e=>e.remove());
+
+  const hpGain = Math.min(45, mg.score*3);
+  G.happy  = Math.min(100, G.happy  + hpGain);
+  G.energy = Math.max(0,   G.energy - 15);
+  G.hunger = Math.max(0,   G.hunger - 10);
+
+  document.getElementById('mg-final').textContent = mg.score;
+  document.getElementById('mg-hp').textContent    = '+'+hpGain;
+  document.getElementById('mg-result').style.display='flex';
+
+  Sound.play('mgend');
+  save(); render();
+}
+
+function closeMG() {
+  document.getElementById('minigame').style.display='none';
+  const nm = G.name||'호랑이';
+  setMsg(null, `${nm}: 음식 ${mg.score}개 잡았어! 야호~ 🐟`);
+  setAnim('happy');
+}
+
+function forceCloseMG() {
+  mg.active=false;
+  clearInterval(mg.timerID);
+  clearInterval(mg.spawnID);
+  document.querySelectorAll('.mg-item').forEach(e=>e.remove());
+  document.getElementById('minigame').style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BACKGROUND SCENE  (day / night)
+// ═══════════════════════════════════════════════════════════
+function buildBG() {
+  const wrap = document.getElementById('bg-wrap');
+  wrap.innerHTML='';
+  const hr   = new Date().getHours();
+  const isDay= hr>=7 && hr<20;
+
+  document.body.className = isDay ? 'day' : 'night';
+
+  const mk=(emoji,style)=>{
+    const d=document.createElement('div');
+    d.className='bg-el'; d.textContent=emoji;
+    d.style.cssText=style;
+    wrap.appendChild(d);
+  };
+
+  if (isDay) {
+    // sun
+    mk('☀️','top:4%;right:6%;font-size:46px;animation:sunPulse 4s ease-in-out infinite');
+    // clouds
+    [[8,'4%','120s'],  [22,'35%','160s'],  [12,'65%','200s']].forEach(([top,size,dur])=>{
+      mk('☁️',`top:${top}%;left:110%;font-size:${size};animation:cloudDrift ${dur} linear infinite`);
+    });
+    // trees
+    mk('🌲','bottom:10px;left:2%;font-size:44px');
+    mk('🌳','bottom:8px;left:8%;font-size:52px');
+    mk('🌲','bottom:10px;right:3%;font-size:40px');
+    mk('🌸','bottom:6px;left:15%;font-size:22px');
+    mk('🌻','bottom:4px;right:12%;font-size:26px');
+  } else {
+    // moon
+    mk('🌙','top:5%;right:7%;font-size:42px');
+    // stars
+    const sp=['5%|8%','15%|20%','8%|40%','3%|60%','18%|75%',
+              '88%|10%','92%|30%','85%|55%','78%|72%','95%|65%',
+              '45%|4%','60%|6%','30%|3%','70%|9%','50%|92%'];
+    sp.forEach((pos,i)=>{
+      const [top,left]=pos.split('|');
+      mk('⭐',`top:${top};left:${left};font-size:${14+Math.random()*10}px;animation:starTwinkle ${2+Math.random()*3}s ease-in-out ${i*0.3}s infinite`);
+    });
+    mk('🌲','bottom:10px;left:2%;font-size:44px;filter:brightness(0.4)');
+    mk('🌳','bottom:8px;left:8%;font-size:52px;filter:brightness(0.4)');
+    mk('🌲','bottom:10px;right:3%;font-size:40px;filter:brightness(0.4)');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAME LOOP
+// ═══════════════════════════════════════════════════════════
 function tick() {
   if (!G.alive) return;
   G.ticks++;
 
   if (G.sleeping) {
-    G.energy = Math.min(100, G.energy + 0.7);
-    G.hunger = Math.max(0,   G.hunger - 0.06);
-    if (G.energy >= 100) {
-      G.sleeping = false;
-      setMsg(null, '잘 잤어! 좋은 아침~ ☀️');
+    G.energy=Math.min(100,G.energy+0.7);
+    G.hunger=Math.max(0,  G.hunger-0.06);
+    if (G.energy>=100) {
+      G.sleeping=false;
+      const nm=G.name||'호랑이';
+      setMsg(null,`${nm}: 잘 잤어! 좋은 아침~ ☀️`);
       toast('호랑이가 자연스럽게 일어났어요!');
     }
   } else {
-    G.hunger = Math.max(0, G.hunger - 0.083);
-    G.happy  = Math.max(0, G.happy  - 0.056);
-    G.energy = Math.max(0, G.energy - 0.042);
-    G.clean  = Math.max(0, G.clean  - 0.037);
-    if (G.hunger <= 0)  G.health = Math.max(0, G.health - 0.17);
-    if (G.clean  < 15)  G.health = Math.max(0, G.health - 0.05);
-    if (G.happy  < 15)  G.health = Math.max(0, G.health - 0.03);
-    // slow recovery when well-fed
-    if (G.hunger > 55 && G.clean > 50 && G.happy > 45 && G.health < 100)
-      G.health = Math.min(100, G.health + 0.06);
-    // random illness
-    if (G.ticks % 90 === 0 && Math.random() < 0.18) {
-      G.health = Math.max(0, G.health - 12);
+    G.hunger=Math.max(0,G.hunger-0.083);
+    G.happy =Math.max(0,G.happy -0.056);
+    G.energy=Math.max(0,G.energy-0.042);
+    G.clean =Math.max(0,G.clean -0.037);
+    if (G.hunger<=0)  G.health=Math.max(0,G.health-0.17);
+    if (G.clean <15)  G.health=Math.max(0,G.health-0.05);
+    if (G.happy <15)  G.health=Math.max(0,G.health-0.03);
+    if (G.hunger>55&&G.clean>50&&G.happy>45&&G.health<100)
+      G.health=Math.min(100,G.health+0.06);
+    if (G.ticks%90===0 && Math.random()<0.18) {
+      G.health=Math.max(0,G.health-12);
       toast('앗! 갑자기 아파요! 💊');
-      setMsg(null, '으으... 갑자기 아파졌어 💊');
+      setMsg(null,'으으... 갑자기 아파졌어 💊');
     }
   }
 
-  // age: 1 day = 60 real seconds
-  if (G.ticks % 60 === 0) G.age++;
+  if (G.ticks%60===0) G.age++;
 
-  // egg hatch
-  if (G.stage === 0 && G.ticks >= 22) evolve(1);
+  // hatch
+  if (G.stage===0 && G.ticks>=22) evolve(1);
 
   // evolution
-  const sSinceHatch = G.ticks - 22;
-  if (G.stage === 1 && sSinceHatch >= EVO_SECS[2]) evolve(2);
-  if (G.stage === 2 && sSinceHatch >= EVO_SECS[3]) evolve(3);
-  if (G.stage === 3 && sSinceHatch >= EVO_SECS[4]) evolve(4);
+  const ss=G.ticks-22;
+  if (G.stage===1 && ss>=EVO_SECS[2]) evolve(2);
+  if (G.stage===2 && ss>=EVO_SECS[3]) evolve(3);
+  if (G.stage===3 && ss>=EVO_SECS[4]) evolve(4);
 
-  // death check
-  if (G.health <= 0 && G.alive) {
-    G.alive = false;
-    document.getElementById('dead-overlay').style.display = 'flex';
-    setMsg(null, '안녕... 잘 있어... 😢');
+  // death
+  if (G.health<=0 && G.alive) {
+    G.alive=false;
+    const nm=G.name||'호랑이';
+    document.getElementById('dead-name-msg').textContent=`${nm}가 하늘나라로...`;
+    document.getElementById('dead-overlay').style.display='flex';
+    setMsg(null,'안녕... 잘 있어... 😢');
+    Sound.play('die');
     clearInterval(ticker);
   }
 
-  if (G.ticks % 2 === 0)  render();
-  if (G.ticks % 25 === 0) setMsg(getMood());
+  if (G.ticks%2===0)  render();
+  if (G.ticks%25===0) setMsg(getMood());
+
+  // refresh bg every minute
+  if (G.ticks%60===0) buildBG();
+
   save();
 }
 
-// ── EVOLVE ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  EVOLVE
+// ═══════════════════════════════════════════════════════════
 function evolve(n) {
-  if (G.stage >= n) return;
-  G.stage = n;
-  const fl = document.getElementById('evoFlash');
-  fl.style.opacity = '1';
-  setTimeout(() => { fl.style.opacity = '0'; }, 130);
-  toast('✨ ' + STAGES[n] + '로 성장했어요! ✨');
-  setMsg(null, '우와~ ' + STAGES[n] + '가 됐어! ✨🐯');
+  if (G.stage>=n) return;
+  G.stage=n;
+
+  const fl=document.getElementById('evoFlash');
+  fl.style.opacity='1';
+  setTimeout(()=>{ fl.style.opacity='0'; },130);
+
+  Sound.play(n===1?'hatch':'evolve');
+
+  if (n===1) {
+    // hatch → show name modal if no name yet
+    toast('🐣 알이 깨졌어! 이름을 지어줘!');
+    setTimeout(()=>{ if(!G.name) showNameModal(); },800);
+  } else {
+    toast('✨ '+STAGES[n]+'로 성장했어요! ✨');
+    setMsg(null,'우와~ '+STAGES[n]+'가 됐어! ✨🐯');
+  }
 }
 
-// ── PERSIST ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  PERSIST
+// ═══════════════════════════════════════════════════════════
 function save() {
-  try { localStorage.setItem('hrtama_v4', JSON.stringify({...G, saved:Date.now()})); } catch(e) {}
+  try { localStorage.setItem('hrtama_v5',JSON.stringify({...G,saved:Date.now()})); } catch(e) {}
 }
 
 function restartGame() {
-  G = newGame();
-  document.getElementById('dead-overlay').style.display = 'none';
-  animCls = 'idle';
+  const prevName  = G.name;
+  const prevSound = G.soundOn;
+  G=newGame();
+  G.name=prevName; G.soundOn=prevSound;
+  document.getElementById('dead-overlay').style.display='none';
+  animCls='idle';
   save(); render(); setMsg('idle');
   clearInterval(ticker);
-  ticker = setInterval(tick, 1000);
+  ticker=setInterval(tick,1000);
 }
 
-// ── START ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+buildBG();
 render();
-setMsg(G.sleeping ? 'sleeping' : getMood());
-if (!G.alive) document.getElementById('dead-overlay').style.display = 'flex';
-ticker = setInterval(tick, 1000);
+setMsg(G.sleeping?'sleeping':getMood());
+if (!G.alive) document.getElementById('dead-overlay').style.display='flex';
+ticker=setInterval(tick,1000);
+// show name modal if no name and already hatched
+if (G.stage>=1 && !G.name) setTimeout(showNameModal,500);
 </script>
 </body>
 </html>
