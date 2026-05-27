@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thyroid Finding Tool - K-TIRADS 2021</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; background: #f5f5f5; color: #222; }
+
+/* TOP BAR */
+#top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #fff; border-bottom: 2px solid #ddd; display: flex; align-items: center; padding: 0 8px; height: 48px; gap: 4px; }
+.tab-btn { padding: 0 16px; height: 48px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 14px; font-weight: 500; color: #555; transition: color 0.2s; }
+.tab-btn:hover { color: #1976D2; }
+.tab-btn.active { color: #1976D2; border-bottom: 3px solid #1976D2; }
+.top-spacer { flex: 1; }
+.report-btn { background: #2980B9; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; margin-right: 6px; }
+.report-btn:hover { background: #2471a3; }
+.reset-all-btn { background: #C71585; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.reset-all-btn:hover { background: #a01070; }
+
+/* MAIN CONTENT */
+#main { margin-top: 48px; padding: 12px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ACTION BAR */
+.action-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pink-btn { background: #C71585; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+.pink-btn:hover { background: #a01070; }
+.blue-btn { background: #2980B9; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+.blue-btn:hover { background: #2471a3; }
+
+/* TABLES */
+table.data-table { border-collapse: collapse; width: 100%; margin-bottom: 12px; background: #fff; }
+table.data-table th, table.data-table td { border: 1px solid #000; padding: 5px 8px; vertical-align: middle; }
+table.data-table th { background: #555; color: #fff; text-align: center; font-weight: 600; font-size: 13px; }
+table.data-table td.label-cell { background: #f0f0f0; font-weight: 600; width: 160px; font-size: 12px; }
+table.data-table td.required-cell { background: #FEF3BD; }
+table.data-table td.section-header { background: #888; color: #fff; font-weight: 700; text-align: center; }
+
+/* RADIO / CHECKBOX GROUPS */
+.radio-group, .check-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.radio-group label, .check-group label { display: flex; align-items: center; gap: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; }
+.radio-group input[type=radio], .check-group input[type=checkbox] { cursor: pointer; }
+
+/* TEXT INPUTS */
+input[type=text] { padding: 3px 5px; border: 1px solid #aaa; border-radius: 3px; font-size: 12px; }
+input[type=text]:disabled { background: #eee; color: #999; }
+select { padding: 3px 4px; border: 1px solid #aaa; border-radius: 3px; font-size: 12px; }
+textarea { padding: 4px 6px; border: 1px solid #aaa; border-radius: 3px; font-size: 12px; resize: vertical; font-family: inherit; }
+textarea:disabled { background: #eee; color: #999; }
+
+/* NODULE SECTION */
+.nodule-section { display: flex; gap: 8px; align-items: flex-start; }
+.nodule-col { flex: 1; min-width: 0; }
+.nodule-col-header { background: #555; color: #fff; text-align: center; padding: 6px; font-weight: 700; font-size: 13px; border: 1px solid #000; border-bottom: 0; }
+.nodule-item { margin-bottom: 8px; }
+.nodule-item table.data-table th.lbl-col { width: 150px; }
+
+.add-nodule-btn { width: 100%; padding: 5px; background: #eee; border: 1px dashed #aaa; cursor: pointer; font-size: 12px; margin-top: 4px; }
+.add-nodule-btn:hover:not(:disabled) { background: #ddd; }
+.add-nodule-btn:disabled { color: #999; cursor: not-allowed; }
+
+.tirads-display { font-weight: 700; color: #1976D2; font-size: 12px; }
+
+/* LYMPH NODE TABLE */
+.ln-table-wrap { overflow-x: auto; }
+table.ln-table { border-collapse: collapse; background: #fff; font-size: 12px; }
+table.ln-table th, table.ln-table td { border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: middle; }
+table.ln-table th { background: #555; color: #fff; font-weight: 600; }
+table.ln-table th.sub-header { background: #888; color: #fff; }
+table.ln-table td.row-label { background: #f0f0f0; font-weight: 600; text-align: left; white-space: nowrap; }
+table.ln-table td.required-cell { background: #FEF3BD; }
+
+/* BOTTOM INFO */
+#bottom-section { margin-top: 20px; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
+#bottom-section .info-text { font-size: 12px; line-height: 1.7; color: #333; }
+
+/* DIALOG OVERLAY */
+.dialog-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+.dialog-overlay.show { display: flex; }
+.dialog-box { background: #fff; border-radius: 6px; padding: 20px; max-width: 700px; width: 90%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.dialog-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #333; }
+.dialog-body { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.6; border: 1px solid #ddd; padding: 12px; background: #fafafa; white-space: pre-wrap; font-family: 'Courier New', monospace; }
+.dialog-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+.copy-feedback { font-size: 12px; color: green; align-self: center; margin-right: auto; }
+
+/* MISC */
+hr.section-sep { border: none; border-top: 1px solid #ccc; margin: 6px 0; }
+.size-inputs { display: flex; align-items: center; gap: 4px; }
+.size-inputs input[type=text] { width: 52px; }
+.size-auto { font-size: 11px; color: #555; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="top-bar">
+  <button class="tab-btn active" onclick="switchTab('thyroid')" id="tab-thyroid">Thyroid</button>
+  <button class="tab-btn" onclick="switchTab('lymph')" id="tab-lymph">Cervical Lymph Node</button>
+  <button class="tab-btn" onclick="switchTab('extra')" id="tab-extra">Extrathyroidal Lesion</button>
+  <div class="top-spacer"></div>
+  <button class="report-btn" onclick="generateReport()">판독문</button>
+  <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+  <!-- TAB 1: THYROID -->
+  <div class="tab-content active" id="tab-content-thyroid">
+    <div class="action-bar">
+      <button class="pink-btn" onclick="resetThyroid()">갑상선 초기화</button>
+      <label><input type="checkbox" id="normalThyroid" onchange="onNormalThyroidChange()"> Normal Thyroid</label>
+    </div>
+
+    <!-- Section A: Clinical Information -->
+    <table class="data-table" id="clinicalTable">
+      <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">Clinical Indication</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="clinInd" value="Diagnostic workup" onchange="onClinIndChange()"> Diagnostic workup</label>
+              <label><input type="radio" name="clinInd" value="Thyroid nodule" onchange="onClinIndChange()" checked> Thyroid nodule</label>
+              <label><input type="radio" name="clinInd" value="custom" onchange="onClinIndChange()"> <input type="text" id="clinIndCustom" placeholder="custom" style="width:160px" oninput="onClinIndCustomChange()"></label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Previous Biopsy</td>
+          <td>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+              <span>Date:</span>
+              <input type="text" id="prevBxYear" placeholder="YYYY" style="width:52px"> .
+              <input type="text" id="prevBxMonth" placeholder="MM" style="width:38px"> .
+              <input type="text" id="prevBxDay" placeholder="DD" style="width:38px">
+              &nbsp; Target: <input type="text" id="prevBxTarget" placeholder="Target nodule" style="width:100px">
+              &nbsp; <label><input type="checkbox" id="prevBxFNA" onchange="saveState()"> FNA</label>
+              <label><input type="checkbox" id="prevBxCNB" onchange="saveState()"> CNB</label>
+              &nbsp; Path Dx: <input type="text" id="prevBxPathDx" placeholder="Pathologic diagnosis" style="width:160px" oninput="saveState()">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">US Comparison</td>
+          <td>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span>Date:</span>
+              <input type="text" id="compYear" placeholder="YYYY" style="width:52px"> .
+              <input type="text" id="compMonth" placeholder="MM" style="width:38px"> .
+              <input type="text" id="compDay" placeholder="DD" style="width:38px">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section B: Thyroid Parenchyma -->
+    <table class="data-table" id="parenchymaTable">
+      <thead><tr><th colspan="2">Thyroid Parenchyma</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">Thyroid Size</td>
+          <td>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;">
+              <div class="radio-group" style="align-self:center;">
+                <label><input type="radio" name="thySize" value="Decreased" onchange="saveState()"> Decreased</label>
+                <label><input type="radio" name="thySize" value="Normal" onchange="saveState()" checked> Normal</label>
+                <label><input type="radio" name="thySize" value="Increased" onchange="saveState()"> Increased</label>
+              </div>
+              <div id="sizeInputsWrap" style="display:flex;flex-wrap:wrap;gap:8px;">
+                <label style="display:flex;align-items:center;gap:4px;">
+                  <input type="checkbox" id="sizeRight" onchange="toggleSizeInputs()"> Right
+                  <span id="sizeRightInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
+                    <input type="text" id="sizeRightAP" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeRightT" placeholder="T" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeRightL" placeholder="L" style="width:42px" oninput="saveState()">
+                    <select id="sizeRightUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
+                  </span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;">
+                  <input type="checkbox" id="sizeIsthmus" onchange="toggleSizeInputs()"> Isthmus
+                  <span id="sizeIsthmusInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
+                    <input type="text" id="sizeIsthmusAP" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeIsthmusL" placeholder="L" style="width:42px" oninput="saveState()">
+                    <select id="sizeIsthmusUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
+                  </span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;">
+                  <input type="checkbox" id="sizeLeft" onchange="toggleSizeInputs()"> Left
+                  <span id="sizeLeftInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
+                    <input type="text" id="sizeLeftAP" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeLeftT" placeholder="T" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeLeftL" placeholder="L" style="width:42px" oninput="saveState()">
+                    <select id="sizeLeftUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Diffuse Thyroid Disease</td>
+          <td><label><input type="checkbox" id="diffuseDis" onchange="onDiffuseDisChange()"> Yes</label></td>
+        </tr>
+        <tr>
+          <td class="label-cell">Parenchymal echotexture</td>
+          <td>
+            <div class="radio-group" id="echotextureGroup">
+              <label><input type="radio" name="echotexture" value="Homo" disabled onchange="saveState()"> Homo</label>
+              <label><input type="radio" name="echotexture" value="Hetero" disabled onchange="saveState()"> Hetero</label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Parenchymal Vascularity</td>
+          <td>
+            <div class="radio-group" id="parVascGroup">
+              <label><input type="radio" name="parVasc" value="Normal" disabled onchange="saveState()"> Normal</label>
+              <label><input type="radio" name="parVasc" value="Increased" disabled onchange="saveState()"> Increased</label>
+              <label><input type="radio" name="parVasc" value="Decreased" disabled onchange="saveState()"> Decreased</label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Multinodular Goiter</td>
+          <td><label><input type="checkbox" id="multinodular" onchange="saveState()"> Yes</label></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section C: Thyroid Nodule -->
+    <div style="background:#555;color:#fff;padding:6px 10px;font-weight:700;border:1px solid #000;font-size:13px;">Thyroid Nodule</div>
+    <div class="nodule-section" id="noduleSection">
+      <div class="nodule-col" id="col-right">
+        <div class="nodule-col-header">Right Lobe</div>
+        <div id="nodules-right"></div>
+        <button class="add-nodule-btn" id="addRight" onclick="addNodule('right')">+ Add Nodule</button>
+      </div>
+      <div class="nodule-col" id="col-left">
+        <div class="nodule-col-header">Left Lobe</div>
+        <div id="nodules-left"></div>
+        <button class="add-nodule-btn" id="addLeft" onclick="addNodule('left')">+ Add Nodule</button>
+      </div>
+      <div class="nodule-col" id="col-isthmus">
+        <div class="nodule-col-header">Isthmus</div>
+        <div id="nodules-isthmus"></div>
+        <button class="add-nodule-btn" id="addIsthmus" onclick="addNodule('isthmus')">+ Add Nodule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: CERVICAL LYMPH NODE -->
+  <div class="tab-content" id="tab-content-lymph">
+    <div class="action-bar">
+      <button class="pink-btn" onclick="resetLymph()">경부 림프 초기화</button>
+      <label><input type="checkbox" id="normalLymph" onchange="saveState()"> Normal Lymph Node</label>
+    </div>
+    <div class="ln-table-wrap">
+      <table class="ln-table" id="lnTable">
+        <thead>
+          <tr>
+            <th rowspan="2" style="min-width:140px;">Location</th>
+            <th colspan="4">Lateral Neck</th>
+            <th colspan="4">Central Neck</th>
+          </tr>
+          <tr>
+            <th colspan="2">Right</th>
+            <th colspan="2">Left</th>
+            <th colspan="2">Right</th>
+            <th colspan="2">Left</th>
+          </tr>
+          <tr>
+            <th class="sub-header">Imaging Diagnosis</th>
+            <th class="sub-header">indeterminate</th>
+            <th class="sub-header">suspicious</th>
+            <th class="sub-header">indeterminate</th>
+            <th class="sub-header">suspicious</th>
+            <th class="sub-header">indeterminate</th>
+            <th class="sub-header">suspicious</th>
+            <th class="sub-header">indeterminate</th>
+            <th class="sub-header">suspicious</th>
+          </tr>
+        </thead>
+        <tbody id="lnTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 3: EXTRATHYROIDAL LESION -->
+  <div class="tab-content" id="tab-content-extra">
+    <div class="action-bar">
+      <button class="pink-btn" onclick="resetExtra()">갑상선외 병변 초기화</button>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Extrathyroidal Lesion</th></tr></thead>
+      <tbody>
+        <tr><td><textarea id="extraLesion" rows="8" style="width:100%" oninput="saveState()"></textarea></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- end main -->
+
+<!-- BOTTOM SECTION -->
+<div id="bottom-section" style="margin:12px;">
+  <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+    <input type="checkbox" id="addToReport" onchange="saveState()">
+    <span style="font-weight:600;">아래 판독문에 추가하기</span>
+  </label>
+  <div class="info-text">
+    <strong>K-TIRADS 2021 Guidelines:</strong><br>
+    <strong>K-TIRADS 1:</strong> No thyroid nodule<br>
+    <strong>K-TIRADS 2:</strong> Benign (malignancy risk &lt; 3%): iso-/hyperechoic spongiform nodule, partially cystic with echogenic foci and comet tail artifacts, pure cyst [Biopsy: Not indicated]<br>
+    <strong>K-TIRADS 3:</strong> Low suspicion (malignancy risk 3-10%): isoechoic or partially cystic nodules without suspicious US features. [Biopsy: &gt; 20 mm]<br>
+    <strong>K-TIRADS 4:</strong> Intermediate suspicion (malignancy risk 10-40%): solid hypoechoic nodule without suspicious US feature / isoechoic or partially cystic nodules with suspicious US features. Entirely calcified nodule. [Biopsy: &gt; 10-15 mm]<br>
+    <strong>K-TIRADS 5:</strong> High suspicion (malignancy risk &gt; 60%): solid hypoechoic nodule with suspicious US features. [Biopsy: &gt; 10 mm]<br>
+    <br>
+    <span style="color:#888;font-size:11px;">Version 4.3, Last updated Apr 11, 2024 by TwinLab</span>
+  </div>
+</div>
+
+<!-- REPORT DIALOG -->
+<div class="dialog-overlay" id="reportDialog">
+  <div class="dialog-box">
+    <div class="dialog-title">판독문 (Radiology Report)</div>
+    <div class="dialog-body" id="reportContent"></div>
+    <div class="dialog-actions">
+      <span class="copy-feedback" id="copyFeedback"></span>
+      <button class="blue-btn" onclick="copyReport()">Copy to Clipboard</button>
+      <button class="pink-btn" onclick="closeDialog('reportDialog')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ERROR DIALOG -->
+<div class="dialog-overlay" id="errorDialog">
+  <div class="dialog-box" style="max-width:500px;">
+    <div class="dialog-title">Validation Error</div>
+    <div class="dialog-body" id="errorContent" style="font-family:inherit;"></div>
+    <div class="dialog-actions">
+      <button class="pink-btn" onclick="closeDialog('errorDialog')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="dialog-overlay" id="confirmDialog">
+  <div class="dialog-box" style="max-width:380px;">
+    <div class="dialog-title">전체 초기화</div>
+    <div class="dialog-body" style="font-family:inherit;border:none;background:#fff;padding:0;">Are you sure you want to reset all data? This cannot be undone.</div>
+    <div class="dialog-actions">
+      <button class="blue-btn" onclick="closeDialog('confirmDialog')">Cancel</button>
+      <button class="pink-btn" onclick="doResetAll()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== STATE ====================
+const defaultState = {
+  activeTab: 'thyroid',
+  normalThyroid: false,
+  clinInd: 'Thyroid nodule',
+  clinIndCustom: '',
+  prevBxYear: '', prevBxMonth: '', prevBxDay: '',
+  prevBxTarget: '', prevBxFNA: false, prevBxCNB: false, prevBxPathDx: '',
+  compYear: '', compMonth: '', compDay: '',
+  thySize: 'Normal',
+  sizeRight: false, sizeRightAP: '', sizeRightT: '', sizeRightL: '', sizeRightUnit: 'cm',
+  sizeIsthmus: false, sizeIsthmusAP: '', sizeIsthmusL: '', sizeIsthmusUnit: 'cm',
+  sizeLeft: false, sizeLeftAP: '', sizeLeftT: '', sizeLeftL: '', sizeLeftUnit: 'cm',
+  diffuseDis: false,
+  echotexture: '',
+  parVasc: '',
+  multinodular: false,
+  nodules: { right: [], left: [], isthmus: [] },
+  normalLymph: false,
+  lymphNodes: {
+    lateralRight: [ defaultLN(), defaultLN() ],
+    lateralLeft: [ defaultLN(), defaultLN() ],
+    centralRight: [ defaultLN(), defaultLN() ],
+    centralLeft: [ defaultLN(), defaultLN() ]
+  },
+  extraLesion: '',
+  addToReport: false
+};
+
+function defaultLN() {
+  return { ldValue: '', ldUnit: 'cm', sdValue: '', sdUnit: 'cm', comment: '', biopsy: false, fnaLevels: [], cnbLevels: [], compNo: true, compYes: false, compText: '' };
+}
+
+function defaultNodule() {
+  return {
+    location: '',
+    diamAP: '', diamT: '', diamL: '', diamUnit: 'cm', maxSize: '',
+    composition: '',
+    echogenicity: '',
+    sizeChangeInitial: false, sizeChangeFU: false, sizeChangeType: '',
+    orientation: '',
+    margin: '',
+    calcification_micro: false,
+    calcification_rim: false,
+    calcification_macro: false,
+    calcification_entire: '',
+    vascularity_none: false, vascularity_peri: false, vascularity_mild: false, vascularity_marked: false,
+    spongiform: '',
+    cometTailArtifact: '',
+    diffuseLesion: '',
+    eteType: '', eteMinorAnt: false, eteMinorPost: false,
+    eteGrossTrachea: false, eteGrossRLN: false, eteGrossStrap: false, eteGrossOthers: false, eteGrossOthersText: '',
+    comment: '',
+    biopsyDone: false, biopsyType: '',
+    fnaGauge: '', cnbSize: '',
+    compNo: true, compYes: false, compIntra: false, compPeri: false, compOthers: false, compOthersText: '',
+    recommendation: ''
+  };
+}
+
+let state = JSON.parse(JSON.stringify(defaultState));
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('thyroidTool_v4');
+    if (s) {
+      const parsed = JSON.parse(s);
+      state = deepMerge(JSON.parse(JSON.stringify(defaultState)), parsed);
+    }
+  } catch(e) { console.warn('Failed to load state', e); }
+}
+
+function saveState() {
+  try { localStorage.setItem('thyroidTool_v4', JSON.stringify(state)); } catch(e) {}
+}
+
+function deepMerge(target, source) {
+  for (const key in source) {
+    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+      deepMerge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+// ==================== TAB SWITCHING ====================
+function switchTab(tab) {
+  state.activeTab = tab;
+  saveState();
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tab-content-' + tab).classList.add('active');
+}
+
+// ==================== RENDER ====================
+function renderAll() {
+  // Active tab
+  switchTab(state.activeTab || 'thyroid');
+
+  // Normal thyroid checkbox
+  document.getElementById('normalThyroid').checked = state.normalThyroid;
+  applyNormalThyroidDisable();
+
+  // Clinical info
+  const cinds = document.querySelectorAll('input[name="clinInd"]');
+  cinds.forEach(r => r.checked = (r.value === state.clinInd));
+  document.getElementById('clinIndCustom').value = state.clinIndCustom;
+  document.getElementById('prevBxYear').value = state.prevBxYear;
+  document.getElementById('prevBxMonth').value = state.prevBxMonth;
+  document.getElementById('prevBxDay').value = state.prevBxDay;
+  document.getElementById('prevBxTarget').value = state.prevBxTarget;
+  document.getElementById('prevBxFNA').checked = state.prevBxFNA;
+  document.getElementById('prevBxCNB').checked = state.prevBxCNB;
+  document.getElementById('prevBxPathDx').value = state.prevBxPathDx;
+  document.getElementById('compYear').value = state.compYear;
+  document.getElementById('compMonth').value = state.compMonth;
+  document.getElementById('compDay').value = state.compDay;
+
+  // Thyroid size
+  document.querySelectorAll('input[name="thySize"]').forEach(r => r.checked = (r.value === state.thySize));
+  document.getElementById('sizeRight').checked = state.sizeRight;
+  document.getElementById('sizeIsthmus').checked = state.sizeIsthmus;
+  document.getElementById('sizeLeft').checked = state.sizeLeft;
+  toggleSizeInputs(true);
+  document.getElementById('sizeRightAP').value = state.sizeRightAP;
+  document.getElementById('sizeRightT').value = state.sizeRightT;
+  document.getElementById('sizeRightL').value = state.sizeRightL;
+  document.getElementById('sizeRightUnit').value = state.sizeRightUnit;
+  document.getElementById('sizeIsthmusAP').value = state.sizeIsthmusAP;
+  document.getElementById('sizeIsthmusL').value = state.sizeIsthmusL;
+  document.getElementById('sizeIsthmusUnit').value = state.sizeIsthmusUnit;
+  document.getElementById('sizeLeftAP').value = state.sizeLeftAP;
+  document.getElementById('sizeLeftT').value = state.sizeLeftT;
+  document.getElementById('sizeLeftL').value = state.sizeLeftL;
+  document.getElementById('sizeLeftUnit').value = state.sizeLeftUnit;
+
+  // Parenchyma
+  document.getElementById('diffuseDis').checked = state.diffuseDis;
+  const echoInputs = document.querySelectorAll('input[name="echotexture"]');
+  echoInputs.forEach(r => { r.checked = (r.value === state.echotexture); r.disabled = !state.diffuseDis; });
+  const pvInputs = document.querySelectorAll('input[name="parVasc"]');
+  pvInputs.forEach(r => { r.checked = (r.value === state.parVasc); r.disabled = !state.diffuseDis; });
+  document.getElementById('multinodular').checked = state.multinodular;
+
+  // Nodules
+  renderNoduleCol('right');
+  renderNoduleCol('left');
+  renderNoduleCol('isthmus');
+
+  // Lymph node
+  document.getElementById('normalLymph').checked = state.normalLymph;
+  renderLymphTable();
+
+  // Extra
+  document.getElementById('extraLesion').value = state.extraLesion;
+
+  // Bottom
+  document.getElementById('addToReport').checked = state.addToReport;
+}
+
+// ==================== PARENCHYMA ====================
+function onNormalThyroidChange() {
+  state.normalThyroid = document.getElementById('normalThyroid').checked;
+  applyNormalThyroidDisable();
+  saveState();
+  rerenderNoduleTirads();
+}
+
+function applyNormalThyroidDisable() {
+  const dis = state.normalThyroid;
+  const sections = ['clinicalTable', 'parenchymaTable', 'addRight', 'addLeft', 'addIsthmus'];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.querySelectorAll('input,select,textarea,button').forEach(i => { if (id !== 'addRight' && id !== 'addLeft' && id !== 'addIsthmus') i.disabled = dis; });
+    }
+  });
+  if (dis) {
+    ['addRight','addLeft','addIsthmus'].forEach(id => { const el=document.getElementById(id); if(el) el.disabled=true; });
+  } else {
+    updateAddBtns();
+  }
+  rerenderNoduleTirads();
+}
+
+function onDiffuseDisChange() {
+  state.diffuseDis = document.getElementById('diffuseDis').checked;
+  const echoInputs = document.querySelectorAll('input[name="echotexture"]');
+  const pvInputs = document.querySelectorAll('input[name="parVasc"]');
+  echoInputs.forEach(r => r.disabled = !state.diffuseDis);
+  pvInputs.forEach(r => r.disabled = !state.diffuseDis);
+  if (!state.diffuseDis) { state.echotexture = ''; state.parVasc = ''; echoInputs.forEach(r=>r.checked=false); pvInputs.forEach(r=>r.checked=false); }
+  saveState();
+}
+
+function onClinIndChange() {
+  const sel = document.querySelector('input[name="clinInd"]:checked');
+  state.clinInd = sel ? sel.value : '';
+  saveState();
+}
+
+function onClinIndCustomChange() {
+  state.clinIndCustom = document.getElementById('clinIndCustom').value;
+  // auto-select custom radio
+  const customRadio = document.querySelector('input[name="clinInd"][value="custom"]');
+  if (customRadio) customRadio.checked = true;
+  state.clinInd = 'custom';
+  saveState();
+}
+
+function toggleSizeInputs(noSave) {
+  ['Right','Isthmus','Left'].forEach(side => {
+    const chk = document.getElementById('size'+side);
+    const wrap = document.getElementById('size'+side+'Inputs');
+    if (chk && wrap) {
+      wrap.style.display = chk.checked ? 'flex' : 'none';
+      state['size'+side] = chk.checked;
+    }
+  });
+  if (!noSave) saveState();
+}
+
+// ==================== NODULE RENDERING ====================
+const LOBE_LABELS = { right: 'R', left: 'L', isthmus: 'I' };
+
+function renderNoduleCol(lobe) {
+  const container = document.getElementById('nodules-' + lobe);
+  const nodules = state.nodules[lobe] || [];
+  container.innerHTML = '';
+  nodules.forEach((nod, idx) => {
+    container.appendChild(buildNoduleTable(lobe, idx, nod));
+  });
+  updateAddBtns();
+}
+
+function updateAddBtns() {
+  if (state.normalThyroid) {
+    ['right','left','isthmus'].forEach(l => {
+      const btn = document.getElementById('add'+l.charAt(0).toUpperCase()+l.slice(1));
+      if (btn) btn.disabled = true;
+    });
+    return;
+  }
+  ['right','left','isthmus'].forEach(l => {
+    const btn = document.getElementById('add'+l.charAt(0).toUpperCase()+l.slice(1));
+    if (btn) btn.disabled = (state.nodules[l].length >= 3);
+  });
+}
+
+function addNodule(lobe) {
+  if (state.nodules[lobe].length >= 3) return;
+  state.nodules[lobe].push(defaultNodule());
+  saveState();
+  renderNoduleCol(lobe);
+}
+
+function removeNodule(lobe, idx) {
+  state.nodules[lobe].splice(idx, 1);
+  saveState();
+  renderNoduleCol(lobe);
+}
+
+function buildNoduleTable(lobe, idx, nod) {
+  const wrap = document.createElement('div');
+  wrap.className = 'nodule-item';
+  const label = LOBE_LABELS[lobe] + (idx + 1);
+  const tirads = getKTIRADS(nod, state.normalThyroid);
+  const maxSizeCalc = calcMaxSize(nod);
+
+  // Helper: make a row
+  function row(labelText, cellContent, isRequired) {
+    const tr = document.createElement('tr');
+    const tdL = document.createElement('td');
+    tdL.style.width = '150px';
+    tdL.style.fontWeight = '600';
+    tdL.style.fontSize = '12px';
+    tdL.style.backgroundColor = isRequired ? '#FEF3BD' : '#f0f0f0';
+    tdL.style.border = '1px solid #000';
+    tdL.style.padding = '5px 8px';
+    tdL.textContent = labelText;
+    const tdR = document.createElement('td');
+    tdR.style.border = '1px solid #000';
+    tdR.style.padding = '5px 8px';
+    tdR.style.backgroundColor = isRequired ? '#FEF3BD' : '';
+    if (typeof cellContent === 'string') tdR.innerHTML = cellContent;
+    else tdR.appendChild(cellContent);
+    tr.appendChild(tdL);
+    tr.appendChild(tdR);
+    return tr;
+  }
+
+  function sectionRow(text) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 2;
+    td.style.background = '#888';
+    td.style.color = '#fff';
+    td.style.fontWeight = '700';
+    td.style.textAlign = 'center';
+    td.style.border = '1px solid #000';
+    td.style.padding = '4px';
+    td.textContent = text;
+    tr.appendChild(td);
+    return tr;
+  }
+
+  const tbl = document.createElement('table');
+  tbl.style.borderCollapse = 'collapse';
+  tbl.style.width = '100%';
+  tbl.style.marginBottom = '6px';
+  tbl.style.background = '#fff';
+  tbl.style.border = '2px solid #333';
+
+  // Header row
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  const hth = document.createElement('th');
+  hth.colSpan = 2;
+  hth.style.background = '#333';
+  hth.style.color = '#fff';
+  hth.style.padding = '6px';
+  hth.style.fontSize = '13px';
+  hth.style.fontWeight = '700';
+  hth.style.border = '1px solid #000';
+  hth.innerHTML = `Nodule ${label} &nbsp; <span class="tirads-display" style="color:#7ec8e3;">${tirads}</span>`;
+  htr.appendChild(hth);
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+
+  // --- Location (required) ---
+  const locDiv = document.createElement('div');
+  locDiv.className = 'radio-group';
+  ['Upper','Middle','Lower'].forEach(v => {
+    const lbl = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type = 'radio'; inp.name = `loc_${lobe}_${idx}`; inp.value = v;
+    inp.checked = (nod.location === v);
+    inp.addEventListener('change', () => { nod.location = v; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(inp); lbl.append(' ' + v);
+    locDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Location *', locDiv, true));
+
+  // --- Diameter (required) ---
+  const diamDiv = document.createElement('div');
+  diamDiv.style.display = 'flex';
+  diamDiv.style.flexDirection = 'column';
+  diamDiv.style.gap = '4px';
+  const diamRow1 = document.createElement('div');
+  diamRow1.style.display = 'flex';
+  diamRow1.style.alignItems = 'center';
+  diamRow1.style.gap = '4px';
+  diamRow1.style.flexWrap = 'wrap';
+
+  function mkDiamInput(placeholder, stateKey) {
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.placeholder = placeholder; inp.style.width = '46px';
+    inp.value = nod[stateKey] || '';
+    inp.addEventListener('input', () => { nod[stateKey] = inp.value; updateNodule(lobe, idx, nod); });
+    return inp;
+  }
+
+  const apI = mkDiamInput('AP','diamAP');
+  const tI  = mkDiamInput('T','diamT');
+  const lI  = mkDiamInput('L','diamL');
+  const unitSel = document.createElement('select');
+  unitSel.innerHTML = '<option>cm</option><option>mm</option>';
+  unitSel.value = nod.diamUnit || 'cm';
+  unitSel.addEventListener('change', () => { nod.diamUnit = unitSel.value; updateNodule(lobe, idx, nod); });
+
+  diamRow1.append('AP:'); diamRow1.appendChild(apI);
+  diamRow1.append(' × T:'); diamRow1.appendChild(tI);
+  diamRow1.append(' × L:'); diamRow1.appendChild(lI);
+  diamRow1.appendChild(unitSel);
+
+  const diamInfo = document.createElement('div');
+  diamInfo.className = 'size-auto';
+  const ms = maxSizeCalc;
+  const volCalc = (parseFloat(nod.diamAP)||0) * (parseFloat(nod.diamT)||0) * (parseFloat(nod.diamL)||0) * 0.5233;
+  let infoText = '';
+  if (ms > 0) infoText += `Max: ${ms} ${nod.diamUnit}`;
+  if (volCalc > 0) infoText += `  Vol: ${volCalc.toFixed(2)} mL`;
+  diamInfo.textContent = infoText;
+
+  diamDiv.appendChild(diamRow1);
+  diamDiv.appendChild(diamInfo);
+  tbody.appendChild(row('Diameter *', diamDiv, true));
+
+  // --- Composition ---
+  const isEntireCalc = nod.calcification_entire === 'entire';
+  const isSpong = nod.spongiform === 'Yes';
+  const compDiv = document.createElement('div');
+  compDiv.className = 'radio-group';
+  ['Solid','P.Solid','P.Cystic','Cystic'].forEach(v => {
+    const lbl = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type = 'radio'; inp.name = `comp_${lobe}_${idx}`; inp.value = v;
+    inp.checked = (nod.composition === v);
+    inp.disabled = isEntireCalc;
+    inp.addEventListener('change', () => { nod.composition = v; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(inp); lbl.append(' ' + v);
+    compDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Composition', compDiv, false));
+
+  // --- Echogenicity ---
+  const echoDiv = document.createElement('div');
+  echoDiv.className = 'radio-group';
+  ['Marked hypo','Mild hypo','Iso','Hyper'].forEach(v => {
+    const lbl = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type = 'radio'; inp.name = `echo_${lobe}_${idx}`; inp.value = v;
+    inp.checked = (nod.echogenicity === v);
+    inp.disabled = isEntireCalc;
+    inp.addEventListener('change', () => { nod.echogenicity = v; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(inp); lbl.append(' ' + v);
+    echoDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Echogenicity', echoDiv, false));
+
+  // --- Size Change ---
+  const scDiv = document.createElement('div');
+  scDiv.style.display = 'flex'; scDiv.style.flexDirection = 'column'; scDiv.style.gap = '4px';
+  const scRow1 = document.createElement('div');
+  scRow1.className = 'check-group';
+  const initialChk = document.createElement('input'); initialChk.type = 'checkbox';
+  initialChk.checked = nod.sizeChangeInitial;
+  initialChk.addEventListener('change', () => { nod.sizeChangeInitial = initialChk.checked; updateNodule(lobe, idx, nod); });
+  const fuChk = document.createElement('input'); fuChk.type = 'checkbox';
+  fuChk.checked = nod.sizeChangeFU;
+  fuChk.addEventListener('change', () => { nod.sizeChangeFU = fuChk.checked; updateNodule(lobe, idx, nod); });
+  const lbl1 = document.createElement('label'); lbl1.style.display='flex';lbl1.style.alignItems='center';lbl1.style.gap='3px';
+  lbl1.appendChild(initialChk); lbl1.append(' Initial');
+  const lbl2 = document.createElement('label'); lbl2.style.display='flex';lbl2.style.alignItems='center';lbl2.style.gap='3px';
+  lbl2.appendChild(fuChk); lbl2.append(' Follow-up');
+  scRow1.appendChild(lbl1); scRow1.appendChild(lbl2);
+  const scRow2 = document.createElement('div');
+  scRow2.className = 'radio-group';
+  const scTypes = ['New','Increased','Decreased','Stable'];
+  scTypes.forEach(v => {
+    const l2 = document.createElement('label');
+    const r2 = document.createElement('input'); r2.type='radio'; r2.name=`sc_${lobe}_${idx}`; r2.value=v;
+    r2.checked = (nod.sizeChangeType === v);
+    r2.addEventListener('change', () => { nod.sizeChangeType = v; updateNodule(lobe, idx, nod); });
+    l2.appendChild(r2); l2.append(' '+v);
+    scRow2.appendChild(l2);
+  });
+  scDiv.appendChild(scRow1); scDiv.appendChild(scRow2);
+  tbody.appendChild(row('Size Change', scDiv, false));
+
+  // --- Orientation ---
+  const orDiv = document.createElement('div');
+  orDiv.className = 'radio-group';
+  ['Parallel','Nonparallel (taller-than-wide)'].forEach(v => {
+    const lbl = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type = 'radio'; inp.name = `or_${lobe}_${idx}`; inp.value = v;
+    inp.checked = (nod.orientation === v);
+    inp.disabled = isEntireCalc;
+    inp.addEventListener('change', () => { nod.orientation = v; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(inp); lbl.append(' ' + v);
+    orDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Orientation', orDiv, false));
+
+  // --- Margin ---
+  const marginDiv = document.createElement('div');
+  marginDiv.className = 'radio-group';
+  ['Smooth','Ill-defined','Irregular (spiculated/microlobulated)'].forEach(v => {
+    const lbl = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type = 'radio'; inp.name = `margin_${lobe}_${idx}`; inp.value = v;
+    inp.checked = (nod.margin === v);
+    inp.disabled = isEntireCalc;
+    inp.addEventListener('change', () => { nod.margin = v; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(inp); lbl.append(' ' + v);
+    marginDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Margin', marginDiv, false));
+
+  // --- Echogenic Foci (calcification) ---
+  const calcDiv = document.createElement('div');
+  calcDiv.style.display = 'flex'; calcDiv.style.flexDirection = 'column'; calcDiv.style.gap = '4px';
+
+  const calcRow1 = document.createElement('div'); calcRow1.className = 'check-group';
+  function mkCalcChk(labelText, stateKey) {
+    const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='3px';
+    const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = nod[stateKey];
+    chk.addEventListener('change', () => { nod[stateKey] = chk.checked; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(chk); lbl.append(' '+labelText);
+    return lbl;
+  }
+  calcRow1.appendChild(mkCalcChk('Punctate echogenic foci (microcalcification)','calcification_micro'));
+  calcRow1.appendChild(mkCalcChk('Rim','calcification_rim'));
+
+  const calcRow2 = document.createElement('div'); calcRow2.className = 'check-group';
+  const macroLbl = mkCalcChk('Macro','calcification_macro');
+  calcRow2.appendChild(macroLbl);
+
+  if (nod.calcification_macro) {
+    const entireLbl = document.createElement('label'); entireLbl.style.display='flex';entireLbl.style.alignItems='center';entireLbl.style.gap='3px';
+    const entireR = document.createElement('input'); entireR.type='radio'; entireR.name=`calcentire_${lobe}_${idx}`; entireR.value='entire';
+    entireR.checked = (nod.calcification_entire === 'entire');
+    entireR.addEventListener('change', () => { nod.calcification_entire = 'entire'; updateNodule(lobe, idx, nod); });
+    entireLbl.appendChild(entireR); entireLbl.append(' Entirely calcified nodule');
+    calcRow2.appendChild(entireLbl);
+  }
+
+  calcDiv.appendChild(calcRow1);
+  calcDiv.appendChild(calcRow2);
+  tbody.appendChild(row('Echogenic foci\n(calcification)', calcDiv, false));
+
+  // --- Vascularity ---
+  const vascDiv = document.createElement('div');
+  vascDiv.className = 'check-group';
+  [['None','vascularity_none'],['Peripheral','vascularity_peri'],['Mild intranodular','vascularity_mild'],['Marked intranodular','vascularity_marked']].forEach(([labelT,sk]) => {
+    const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+    const c = document.createElement('input'); c.type='checkbox'; c.checked = nod[sk];
+    c.addEventListener('change', () => { nod[sk] = c.checked; updateNodule(lobe, idx, nod); });
+    l.appendChild(c); l.append(' '+labelT);
+    vascDiv.appendChild(l);
+  });
+  tbody.appendChild(row('Vascularity', vascDiv, false));
+
+  // --- Spongiform ---
+  const spongDiv = document.createElement('div');
+  spongDiv.className = 'radio-group';
+  const spongLbl = document.createElement('label'); spongLbl.style.display='flex';spongLbl.style.alignItems='center';spongLbl.style.gap='3px';
+  const spongR = document.createElement('input'); spongR.type='radio'; spongR.name=`spong_${lobe}_${idx}`; spongR.value='Yes';
+  spongR.checked = (nod.spongiform === 'Yes');
+  const spongDisabled = (nod.composition === 'Solid' || nod.composition === 'Cystic');
+  spongR.disabled = spongDisabled;
+  spongR.addEventListener('change', () => { nod.spongiform = 'Yes'; updateNodule(lobe, idx, nod); });
+  spongLbl.appendChild(spongR); spongLbl.append(' Yes');
+  spongDiv.appendChild(spongLbl);
+  tbody.appendChild(row('Spongiform', spongDiv, false));
+
+  // --- Comet Tail Artifact ---
+  const cometDiv = document.createElement('div');
+  cometDiv.className = 'radio-group';
+  const cometLbl = document.createElement('label'); cometLbl.style.display='flex';cometLbl.style.alignItems='center';cometLbl.style.gap='3px';
+  const cometR = document.createElement('input'); cometR.type='radio'; cometR.name=`comet_${lobe}_${idx}`; cometR.value='Yes';
+  cometR.checked = (nod.cometTailArtifact === 'Yes');
+  cometR.disabled = (nod.composition === 'Solid');
+  cometR.addEventListener('change', () => { nod.cometTailArtifact = 'Yes'; updateNodule(lobe, idx, nod); });
+  cometLbl.appendChild(cometR); cometLbl.append(' Yes');
+  cometDiv.appendChild(cometLbl);
+  tbody.appendChild(row('Intracystic echogenic\nfoci with comet tail\nartifact', cometDiv, false));
+
+  // --- Diffuse Lesion ---
+  const diffDiv = document.createElement('div');
+  diffDiv.className = 'radio-group';
+  [['Extensive parenchymal PEF','extensive'],['Diffuse infiltrative lesion','infiltrative']].forEach(([labelT, val]) => {
+    const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='3px';
+    const r = document.createElement('input'); r.type='radio'; r.name=`diff_${lobe}_${idx}`; r.value=val;
+    r.checked = (nod.diffuseLesion === val);
+    r.addEventListener('change', () => { nod.diffuseLesion = val; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(r); lbl.append(' '+labelT);
+    diffDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Diffuse lesion', diffDiv, false));
+
+  // --- ETE ---
+  const eteDiv = document.createElement('div');
+  eteDiv.style.display='flex'; eteDiv.style.flexDirection='column'; eteDiv.style.gap='4px';
+
+  const eteRow1 = document.createElement('div'); eteRow1.className='radio-group';
+
+  const eteNoLbl = document.createElement('label'); eteNoLbl.style.display='flex';eteNoLbl.style.alignItems='center';eteNoLbl.style.gap='3px';
+  const eteNoR = document.createElement('input'); eteNoR.type='radio'; eteNoR.name=`ete_${lobe}_${idx}`; eteNoR.value='none';
+  eteNoR.checked = (nod.eteType === 'none');
+  eteNoR.addEventListener('change', () => { nod.eteType='none'; updateNodule(lobe,idx,nod); });
+  eteNoLbl.appendChild(eteNoR); eteNoLbl.append(' No ETE');
+  eteRow1.appendChild(eteNoLbl);
+
+  const eteMinorLbl = document.createElement('label'); eteMinorLbl.style.display='flex';eteMinorLbl.style.alignItems='center';eteMinorLbl.style.gap='3px';
+  const eteMinorR = document.createElement('input'); eteMinorR.type='radio'; eteMinorR.name=`ete_${lobe}_${idx}`; eteMinorR.value='minor';
+  eteMinorR.checked = (nod.eteType === 'minor');
+  eteMinorR.addEventListener('change', () => { nod.eteType='minor'; updateNodule(lobe,idx,nod); });
+  eteMinorLbl.appendChild(eteMinorR); eteMinorLbl.append(' Minor ETE');
+  eteRow1.appendChild(eteMinorLbl);
+
+  if (nod.eteType === 'minor') {
+    [['ant','eteMinorAnt'],['post','eteMinorPost']].forEach(([labelT,sk]) => {
+      const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+      const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
+      c.addEventListener('change', () => { nod[sk]=c.checked; updateNodule(lobe,idx,nod); });
+      l.appendChild(c); l.append(' '+labelT);
+      eteRow1.appendChild(l);
+    });
+  }
+
+  const eteGrossLbl = document.createElement('label'); eteGrossLbl.style.display='flex';eteGrossLbl.style.alignItems='center';eteGrossLbl.style.gap='3px';
+  const eteGrossR = document.createElement('input'); eteGrossR.type='radio'; eteGrossR.name=`ete_${lobe}_${idx}`; eteGrossR.value='gross';
+  eteGrossR.checked = (nod.eteType === 'gross');
+  eteGrossR.addEventListener('change', () => { nod.eteType='gross'; updateNodule(lobe,idx,nod); });
+  eteGrossLbl.appendChild(eteGrossR); eteGrossLbl.append(' Gross ETE');
+  eteRow1.appendChild(eteGrossLbl);
+  eteDiv.appendChild(eteRow1);
+
+  if (nod.eteType === 'gross') {
+    const eteRow2 = document.createElement('div'); eteRow2.className='check-group';
+    [['trachea','eteGrossTrachea'],['RLN','eteGrossRLN'],['strap muscle','eteGrossStrap'],['others','eteGrossOthers']].forEach(([labelT,sk]) => {
+      const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+      const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
+      c.addEventListener('change', () => { nod[sk]=c.checked; updateNodule(lobe,idx,nod); });
+      l.appendChild(c); l.append(' '+labelT);
+      eteRow2.appendChild(l);
+    });
+    if (nod.eteGrossOthers) {
+      const othTxt = document.createElement('input'); othTxt.type='text'; othTxt.placeholder='specify'; othTxt.value=nod.eteGrossOthersText||'';
+      othTxt.addEventListener('input', () => { nod.eteGrossOthersText=othTxt.value; updateNodule(lobe,idx,nod); });
+      eteRow2.appendChild(othTxt);
+    }
+    eteDiv.appendChild(eteRow2);
+  }
+
+  tbody.appendChild(row('Extrathyroidal\nextension (ETE)', eteDiv, false));
+
+  // --- Comment ---
+  const commentTA = document.createElement('textarea');
+  commentTA.rows = 4; commentTA.style.width = '100%';
+  commentTA.value = nod.comment || '';
+  commentTA.addEventListener('input', () => { nod.comment = commentTA.value; updateNodule(lobe, idx, nod); });
+  tbody.appendChild(row('Comment', commentTA, false));
+
+  // Biopsy section
+  tbody.appendChild(sectionRow('--- Biopsy ---'));
+
+  // --- Biopsy ---
+  const bxDiv = document.createElement('div');
+  bxDiv.style.display='flex'; bxDiv.style.flexDirection='column'; bxDiv.style.gap='4px';
+  const bxRow1 = document.createElement('div'); bxRow1.className='check-group';
+  const bxChkLbl = document.createElement('label'); bxChkLbl.style.display='flex';bxChkLbl.style.alignItems='center';bxChkLbl.style.gap='3px';
+  const bxChk = document.createElement('input'); bxChk.type='checkbox'; bxChk.checked=nod.biopsyDone;
+  bxChk.addEventListener('change', () => { nod.biopsyDone=bxChk.checked; updateNodule(lobe,idx,nod); });
+  bxChkLbl.appendChild(bxChk); bxChkLbl.append(' Yes');
+  bxRow1.appendChild(bxChkLbl);
+  bxDiv.appendChild(bxRow1);
+
+  if (nod.biopsyDone) {
+    const bxRow2 = document.createElement('div'); bxRow2.className='radio-group';
+
+    const fnaLbl = document.createElement('label'); fnaLbl.style.display='flex';fnaLbl.style.alignItems='center';fnaLbl.style.gap='3px';
+    const fnaR = document.createElement('input'); fnaR.type='radio'; fnaR.name=`bxtype_${lobe}_${idx}`; fnaR.value='FNA';
+    fnaR.checked = (nod.biopsyType==='FNA');
+    fnaR.addEventListener('change', () => { nod.biopsyType='FNA'; updateNodule(lobe,idx,nod); });
+    fnaLbl.appendChild(fnaR); fnaLbl.append(' FNA');
+    bxRow2.appendChild(fnaLbl);
+    if (nod.biopsyType==='FNA') {
+      const gaugeTxt = document.createElement('input'); gaugeTxt.type='text'; gaugeTxt.placeholder='gauge'; gaugeTxt.style.width='52px'; gaugeTxt.value=nod.fnaGauge||'';
+      gaugeTxt.addEventListener('input',()=>{nod.fnaGauge=gaugeTxt.value;updateNodule(lobe,idx,nod);});
+      bxRow2.append(' G '); bxRow2.appendChild(gaugeTxt);
+    }
+
+    const cnbLbl = document.createElement('label'); cnbLbl.style.display='flex';cnbLbl.style.alignItems='center';cnbLbl.style.gap='3px';
+    const cnbR = document.createElement('input'); cnbR.type='radio'; cnbR.name=`bxtype_${lobe}_${idx}`; cnbR.value='CNB';
+    cnbR.checked = (nod.biopsyType==='CNB');
+    cnbR.addEventListener('change', () => { nod.biopsyType='CNB'; updateNodule(lobe,idx,nod); });
+    cnbLbl.appendChild(cnbR); cnbLbl.append(' CNB');
+    bxRow2.appendChild(cnbLbl);
+    if (nod.biopsyType==='CNB') {
+      const sizeTxt = document.createElement('input'); sizeTxt.type='text'; sizeTxt.placeholder='size'; sizeTxt.style.width='52px'; sizeTxt.value=nod.cnbSize||'';
+      sizeTxt.addEventListener('input',()=>{nod.cnbSize=sizeTxt.value;updateNodule(lobe,idx,nod);});
+      bxRow2.append(' cm '); bxRow2.appendChild(sizeTxt);
+    }
+
+    bxDiv.appendChild(bxRow2);
+
+    // Complications
+    const compDiv2 = document.createElement('div'); compDiv2.className='check-group';
+    const noLbl = document.createElement('label'); noLbl.style.display='flex';noLbl.style.alignItems='center';noLbl.style.gap='3px';
+    const noChk = document.createElement('input'); noChk.type='checkbox'; noChk.checked=nod.compNo;
+    noChk.addEventListener('change',()=>{nod.compNo=noChk.checked;if(noChk.checked){nod.compYes=false;nod.compIntra=false;nod.compPeri=false;nod.compOthers=false;}updateNodule(lobe,idx,nod);});
+    noLbl.appendChild(noChk); noLbl.append(' No');
+    compDiv2.appendChild(noLbl);
+
+    const yesLbl = document.createElement('label'); yesLbl.style.display='flex';yesLbl.style.alignItems='center';yesLbl.style.gap='3px';
+    const yesChk = document.createElement('input'); yesChk.type='checkbox'; yesChk.checked=nod.compYes;
+    yesChk.addEventListener('change',()=>{nod.compYes=yesChk.checked;if(yesChk.checked){nod.compNo=false;}updateNodule(lobe,idx,nod);});
+    yesLbl.appendChild(yesChk); yesLbl.append(' Yes');
+    compDiv2.appendChild(yesLbl);
+
+    if (nod.compYes) {
+      [['intrathyroidal hematoma','compIntra'],['perithyroidal hematoma','compPeri'],['others','compOthers']].forEach(([labelT,sk])=>{
+        const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+        const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
+        c.addEventListener('change',()=>{nod[sk]=c.checked;updateNodule(lobe,idx,nod);});
+        l.appendChild(c); l.append(' '+labelT);
+        compDiv2.appendChild(l);
+      });
+      if (nod.compOthers) {
+        const othTxt = document.createElement('input'); othTxt.type='text'; othTxt.placeholder='specify'; othTxt.value=nod.compOthersText||'';
+        othTxt.addEventListener('input',()=>{nod.compOthersText=othTxt.value;updateNodule(lobe,idx,nod);});
+        compDiv2.appendChild(othTxt);
+      }
+    }
+    const compWrap = document.createElement('div');
+    const compLabelSpan = document.createElement('span'); compLabelSpan.style.fontSize='11px';compLabelSpan.style.marginRight='6px';compLabelSpan.textContent='Complications:';
+    compWrap.appendChild(compLabelSpan); compWrap.appendChild(compDiv2);
+    bxDiv.appendChild(compWrap);
+  }
+  tbody.appendChild(row('Biopsy', bxDiv, false));
+
+  // Note section
+  tbody.appendChild(sectionRow('--- Note ---'));
+
+  // --- Recommendation ---
+  const recTA = document.createElement('textarea');
+  recTA.rows = 4; recTA.style.width='100%';
+  recTA.value = nod.recommendation || '';
+  recTA.addEventListener('input', () => { nod.recommendation = recTA.value; updateNodule(lobe, idx, nod); });
+  tbody.appendChild(row('Recommendation', recTA, false));
+
+  // Reset button
+  const resetTr = document.createElement('tr');
+  const resetTd = document.createElement('td');
+  resetTd.colSpan = 2;
+  resetTd.style.border = '1px solid #000';
+  resetTd.style.padding = '6px';
+  resetTd.style.textAlign = 'center';
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'pink-btn';
+  resetBtn.textContent = 'Reset this nodule';
+  resetBtn.addEventListener('click', () => { state.nodules[lobe][idx] = defaultNodule(); saveState(); renderNoduleCol(lobe); });
+  resetTd.appendChild(resetBtn);
+  resetTr.appendChild(resetTd);
+  tbody.appendChild(resetTr);
+
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
+  return wrap;
+}
+
+function calcMaxSize(nod) {
+  const ap = parseFloat(nod.diamAP) || 0;
+  const t  = parseFloat(nod.diamT)  || 0;
+  const l  = parseFloat(nod.diamL)  || 0;
+  return Math.max(ap, t, l);
+}
+
+function updateNodule(lobe, idx, nod) {
+  state.nodules[lobe][idx] = nod;
+  // Auto-recommendation
+  const tirads = getKTIRADS(nod, state.normalThyroid);
+  const ms = calcMaxSize(nod);
+  const sizeInCm = nod.diamUnit === 'mm' ? ms * 0.1 : ms;
+  let rec = '';
+  if (tirads === '[K-TIRADS 5, High suspicion]' && sizeInCm >= 1)
+    rec = 'K-TIRADS 5,\nBiopsy recommendation';
+  else if (tirads === '[K-TIRADS 4, Intermediate suspicion]' && sizeInCm >= 1.5)
+    rec = 'K-TIRADS 4,\nBiopsy recommendation';
+  else if (tirads === '[K-TIRADS 3, Low suspicion]' && sizeInCm >= 2)
+    rec = 'K-TIRADS 3,\nBiopsy recommendation';
+  else if (tirads === '[K-TIRADS 4, Intermediate suspicion]' && nod.diffuseLesion)
+    rec = 'K-TIRADS 4,\nCNB recommendation';
+  nod.recommendation = rec;
+  saveState();
+  renderNoduleCol(lobe);
+}
+
+function rerenderNoduleTirads() {
+  ['right','left','isthmus'].forEach(lobe => renderNoduleCol(lobe));
+}
+
+// ==================== K-TIRADS ====================
+function hasSuspiciousFeature(nod) {
+  return nod.calcification_micro === true ||
+         nod.orientation === 'Nonparallel (taller-than-wide)' ||
+         nod.margin === 'Irregular (spiculated/microlobulated)';
+}
+
+function getKTIRADS(nod, normalThy) {
+  if (normalThy) return '';
+  const s = hasSuspiciousFeature(nod);
+
+  // K-TIRADS 5
+  if (s && nod.composition === 'Solid' && ['Mild hypo','Marked hypo','Hyper'].includes(nod.echogenicity))
+    return '[K-TIRADS 5, High suspicion]';
+
+  // K-TIRADS 4
+  if ((nod.composition === 'Solid' && !s && ['Mild hypo','Marked hypo'].includes(nod.echogenicity)) ||
+      (['P.Cystic','P.Solid'].includes(nod.composition) && s) ||
+      (['Iso','Hyper'].includes(nod.echogenicity) && s) ||
+      nod.diffuseLesion === 'extensive' || nod.diffuseLesion === 'infiltrative' ||
+      nod.calcification_entire === 'entire')
+    return '[K-TIRADS 4, Intermediate suspicion]';
+
+  // K-TIRADS 2 (spongiform)
+  if (nod.spongiform === 'Yes') return '[K-TIRADS 2, Benign]';
+
+  // K-TIRADS 2 (cystic/comet tail)
+  if ((['P.Cystic','P.Solid'].includes(nod.composition) && nod.cometTailArtifact === 'Yes') ||
+      nod.composition === 'Cystic')
+    return '[K-TIRADS 2, Benign]';
+
+  // K-TIRADS 3
+  if ((['P.Cystic','P.Solid'].includes(nod.composition) && !s) ||
+      (['Iso','Hyper'].includes(nod.echogenicity) && !s))
+    return '[K-TIRADS 3, Low suspicion]';
+
+  return '';
+}
+
+// ==================== LYMPH NODE ====================
+// Columns: [lateralRightIndet, lateralRightSusp, lateralLeftIndet, lateralLeftSusp, centralRightIndet, centralRightSusp, centralLeftIndet, centralLeftSusp]
+const LN_COLS = [
+  {key:'lateralRight', sub:0, label:'LR-indet'}, {key:'lateralRight', sub:1, label:'LR-susp'},
+  {key:'lateralLeft',  sub:0, label:'LL-indet'}, {key:'lateralLeft',  sub:1, label:'LL-susp'},
+  {key:'centralRight', sub:0, label:'CR-indet'}, {key:'centralRight', sub:1, label:'CR-susp'},
+  {key:'centralLeft',  sub:0, label:'CL-indet'}, {key:'centralLeft',  sub:1, label:'CL-susp'},
+];
+
+function getLN(colIdx) {
+  const col = LN_COLS[colIdx];
+  if (!state.lymphNodes[col.key]) state.lymphNodes[col.key] = [defaultLN(), defaultLN()];
+  return state.lymphNodes[col.key][col.sub];
+}
+
+function setLN(colIdx, data) {
+  const col = LN_COLS[colIdx];
+  if (!state.lymphNodes[col.key]) state.lymphNodes[col.key] = [defaultLN(), defaultLN()];
+  state.lymphNodes[col.key][col.sub] = data;
+}
+
+function isLateral(colIdx) { return colIdx < 4; }
+
+function renderLymphTable() {
+  const tbody = document.getElementById('lnTableBody');
+  tbody.innerHTML = '';
+
+  // Row 1: Neck Level
+  const tr1 = document.createElement('tr');
+  const td1L = document.createElement('td'); td1L.className='row-label'; td1L.textContent='Neck Level'; tr1.appendChild(td1L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td'); td.style.verticalAlign='top';
+    const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
+    levels.forEach(lvl => {
+      const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='2px';lbl.style.whiteSpace='nowrap';
+      const chk = document.createElement('input'); chk.type='checkbox';
+      const key = 'level_'+lvl;
+      chk.checked = !!(ln[key]);
+      chk.addEventListener('change',()=>{ const cur=getLN(ci); cur[key]=chk.checked; setLN(ci,cur); saveState(); });
+      lbl.appendChild(chk); lbl.append(' '+lvl);
+      td.appendChild(lbl);
+    });
+    tr1.appendChild(td);
+  }
+  tbody.appendChild(tr1);
+
+  // Row 2: Largest LN Diameter (yellow)
+  const tr2 = document.createElement('tr');
+  const td2L = document.createElement('td'); td2L.className='row-label required-cell'; td2L.textContent='Largest LN diameter'; tr2.appendChild(td2L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td'); td.className='required-cell';
+    const mkInp = (ph, stk, ww) => {
+      const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.style.width=ww||'50px'; i.value=ln[stk]||'';
+      i.addEventListener('input',()=>{ const cur=getLN(ci); cur[stk]=i.value; setLN(ci,cur); saveState(); });
+      return i;
+    };
+    const mkSel = (stk) => {
+      const s = document.createElement('select'); s.innerHTML='<option>cm</option><option>mm</option>'; s.value=ln[stk]||'cm';
+      s.addEventListener('change',()=>{ const cur=getLN(ci); cur[stk]=s.value; setLN(ci,cur); saveState(); });
+      return s;
+    };
+    const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
+    const r1 = document.createElement('div'); r1.style.display='flex';r1.style.alignItems='center';r1.style.gap='3px';
+    r1.append('LD:'); r1.appendChild(mkInp('LD','ldValue')); r1.appendChild(mkSel('ldUnit'));
+    const r2 = document.createElement('div'); r2.style.display='flex';r2.style.alignItems='center';r2.style.gap='3px';
+    r2.append('SD:'); r2.appendChild(mkInp('SD','sdValue')); r2.appendChild(mkSel('sdUnit'));
+    d.appendChild(r1); d.appendChild(r2);
+    td.appendChild(d);
+    tr2.appendChild(td);
+  }
+  tbody.appendChild(tr2);
+
+  // Row 3: Comment
+  const tr3 = document.createElement('tr');
+  const td3L = document.createElement('td'); td3L.className='row-label'; td3L.textContent='Comment'; tr3.appendChild(td3L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td');
+    const ta = document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=ln.comment||'';
+    ta.addEventListener('input',()=>{ const cur=getLN(ci); cur.comment=ta.value; setLN(ci,cur); saveState(); });
+    td.appendChild(ta); tr3.appendChild(td);
+  }
+  tbody.appendChild(tr3);
+
+  // Biopsy header
+  const trBxH = document.createElement('tr');
+  const tdBxH = document.createElement('td'); tdBxH.colSpan=9; tdBxH.style.background='#888';tdBxH.style.color='#fff';tdBxH.style.fontWeight='700';tdBxH.style.textAlign='center';tdBxH.style.padding='4px';
+  tdBxH.textContent='--- Biopsy ---'; trBxH.appendChild(tdBxH);
+  tbody.appendChild(trBxH);
+
+  // Row 4: Biopsy
+  const tr4 = document.createElement('tr');
+  const td4L = document.createElement('td'); td4L.className='row-label'; td4L.textContent='Biopsy'; tr4.appendChild(td4L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td');
+    const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='3px';
+    const chk = document.createElement('input'); chk.type='checkbox'; chk.checked=!!ln.biopsy;
+    chk.addEventListener('change',()=>{ const cur=getLN(ci); cur.biopsy=chk.checked; setLN(ci,cur); saveState(); renderLymphTable(); });
+    lbl.appendChild(chk); lbl.append(' Yes');
+    td.appendChild(lbl); tr4.appendChild(td);
+  }
+  tbody.appendChild(tr4);
+
+  // Row 5: FNA
+  const tr5 = document.createElement('tr');
+  const td5L = document.createElement('td'); td5L.className='row-label'; td5L.textContent='FNA'; tr5.appendChild(td5L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td');
+    const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
+    levels.forEach(lvl => {
+      const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='2px';
+      const chk = document.createElement('input'); chk.type='checkbox';
+      chk.disabled = !ln.biopsy;
+      chk.checked = !!(ln['fna_'+lvl]);
+      chk.addEventListener('change',()=>{ const cur=getLN(ci); cur['fna_'+lvl]=chk.checked; setLN(ci,cur); saveState(); });
+      lbl.appendChild(chk); lbl.append(' '+lvl);
+      td.appendChild(lbl);
+    });
+    tr5.appendChild(td);
+  }
+  tbody.appendChild(tr5);
+
+  // Row 6: CNB
+  const tr6 = document.createElement('tr');
+  const td6L = document.createElement('td'); td6L.className='row-label'; td6L.textContent='CNB'; tr6.appendChild(td6L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td');
+    const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
+    levels.forEach(lvl => {
+      const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='2px';
+      const chk = document.createElement('input'); chk.type='checkbox';
+      chk.disabled = !ln.biopsy;
+      chk.checked = !!(ln['cnb_'+lvl]);
+      chk.addEventListener('change',()=>{ const cur=getLN(ci); cur['cnb_'+lvl]=chk.checked; setLN(ci,cur); saveState(); });
+      lbl.appendChild(chk); lbl.append(' '+lvl);
+      td.appendChild(lbl);
+    });
+    tr6.appendChild(td);
+  }
+  tbody.appendChild(tr6);
+
+  // Row 7: Complications
+  const tr7 = document.createElement('tr');
+  const td7L = document.createElement('td'); td7L.className='row-label'; td7L.textContent='Complications'; tr7.appendChild(td7L);
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const td = document.createElement('td');
+    const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
+    const r1 = document.createElement('div'); r1.className='check-group';
+
+    const noLbl = document.createElement('label'); noLbl.style.display='flex';noLbl.style.alignItems='center';noLbl.style.gap='3px';
+    const noChk = document.createElement('input'); noChk.type='checkbox'; noChk.checked=ln.compNo!==false;
+    noChk.addEventListener('change',()=>{ const cur=getLN(ci); cur.compNo=noChk.checked; if(noChk.checked)cur.compYes=false; setLN(ci,cur); saveState(); renderLymphTable(); });
+    noLbl.appendChild(noChk); noLbl.append(' No'); r1.appendChild(noLbl);
+
+    const yesLbl = document.createElement('label'); yesLbl.style.display='flex';yesLbl.style.alignItems='center';yesLbl.style.gap='3px';
+    const yesChk = document.createElement('input'); yesChk.type='checkbox'; yesChk.checked=!!ln.compYes;
+    yesChk.addEventListener('change',()=>{ const cur=getLN(ci); cur.compYes=yesChk.checked; if(yesChk.checked)cur.compNo=false; setLN(ci,cur); saveState(); renderLymphTable(); });
+    yesLbl.appendChild(yesChk); yesLbl.append(' Yes'); r1.appendChild(yesLbl);
+
+    d.appendChild(r1);
+
+    if (ln.compYes) {
+      const compTxt = document.createElement('input'); compTxt.type='text'; compTxt.placeholder='specify'; compTxt.style.width='100%'; compTxt.value=ln.compText||'';
+      compTxt.addEventListener('input',()=>{ const cur=getLN(ci); cur.compText=compTxt.value; setLN(ci,cur); saveState(); });
+      d.appendChild(compTxt);
+    }
+
+    td.appendChild(d); tr7.appendChild(td);
+  }
+  tbody.appendChild(tr7);
+}
+
+// ==================== RESET FUNCTIONS ====================
+function resetThyroid() {
+  const keys = ['normalThyroid','clinInd','clinIndCustom','prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNA','prevBxCNB','prevBxPathDx','compYear','compMonth','compDay','thySize','sizeRight','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmus','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeft','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
+  const def = JSON.parse(JSON.stringify(defaultState));
+  keys.forEach(k => state[k] = def[k]);
+  state.nodules = { right: [], left: [], isthmus: [] };
+  saveState();
+  renderAll();
+}
+
+function resetLymph() {
+  state.normalLymph = false;
+  state.lymphNodes = {
+    lateralRight: [defaultLN(), defaultLN()],
+    lateralLeft: [defaultLN(), defaultLN()],
+    centralRight: [defaultLN(), defaultLN()],
+    centralLeft: [defaultLN(), defaultLN()]
+  };
+  saveState();
+  renderAll();
+}
+
+function resetExtra() {
+  state.extraLesion = '';
+  saveState();
+  document.getElementById('extraLesion').value = '';
+}
+
+function confirmResetAll() {
+  document.getElementById('confirmDialog').classList.add('show');
+}
+
+function doResetAll() {
+  state = JSON.parse(JSON.stringify(defaultState));
+  saveState();
+  closeDialog('confirmDialog');
+  renderAll();
+}
+
+// ==================== REPORT GENERATION ====================
+function generateReport() {
+  const errors = validateReport();
+  if (errors.length > 0) {
+    document.getElementById('errorContent').textContent = errors.join('\n');
+    document.getElementById('errorDialog').classList.add('show');
+    return;
+  }
+
+  const lines = [];
+
+  // Clinical information
+  let clinIndText = state.clinInd === 'custom' ? (state.clinIndCustom || '') : state.clinInd;
+  lines.push('Clinical information: ' + clinIndText);
+
+  // Comparison
+  if (state.compYear || state.compMonth || state.compDay) {
+    const yr = state.compYear || 'YYYY';
+    const mo = state.compMonth ? state.compMonth.padStart(2,'0') : 'MM';
+    const dy = state.compDay ? state.compDay.padStart(2,'0') : 'DD';
+    lines.push('Comparison: US (' + yr + '/' + mo + '/' + dy + ')');
+  } else {
+    lines.push('Comparison: not available');
+  }
+
+  lines.push('');
+  lines.push('Findings:');
+
+  let findingNum = 1;
+
+  // 1. Thyroid parenchyma
+  lines.push(findingNum++ + '. Thyroid parenchyma');
+  if (state.normalThyroid) {
+    lines.push('   Normal thyroid');
+  } else {
+    const parLines = [];
+    const szParts = [];
+    if (state.thySize !== 'Normal') szParts.push(state.thySize + ' thyroid');
+    if (szParts.length > 0) parLines.push(szParts.join(', '));
+    if (state.diffuseDis) {
+      let parDesc = 'Diffuse thyroid disease';
+      if (state.echotexture) parDesc += ', ' + state.echotexture + 'geneous echotexture';
+      if (state.parVasc) parDesc += ', ' + state.parVasc.toLowerCase() + ' vascularity';
+      parLines.push(parDesc);
+    }
+    if (state.multinodular) parLines.push('Multinodular goiter');
+    if (parLines.length === 0) parLines.push('No diffuse thyroid disease');
+    parLines.forEach(l => lines.push('   ' + l));
+  }
+
+  // 2. Thyroid nodule
+  const allNodules = [];
+  ['right','left','isthmus'].forEach(lobe => {
+    (state.nodules[lobe]||[]).forEach((nod,idx) => { allNodules.push({lobe,idx,nod}); });
+  });
+
+  if (allNodules.length > 0) {
+    lines.push(findingNum++ + '. Thyroid nodule');
+
+    ['right','left','isthmus'].forEach(lobe => {
+      const nods = state.nodules[lobe] || [];
+      if (nods.length === 0) return;
+      const lobeName = lobe === 'right' ? '1) Right lobe' : lobe === 'left' ? '2) Left lobe' : '3) Isthmus';
+      lines.push('   ' + lobeName);
+      nods.forEach((nod, idx) => {
+        const label = LOBE_LABELS[lobe] + (idx+1);
+        const parts = [label + ':'];
+        if (nod.location) parts.push(nod.location);
+        const ms = calcMaxSize(nod);
+        if (nod.diamAP || nod.diamT || nod.diamL) {
+          const dimStr = [nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×') + ' ' + (nod.diamUnit||'cm');
+          parts.push(dimStr);
+        }
+        if (nod.composition) parts.push(nod.composition);
+        if (nod.echogenicity) parts.push(nod.echogenicity);
+        if (nod.orientation === 'Nonparallel (taller-than-wide)') parts.push('nonparallel');
+        if (nod.margin === 'Irregular (spiculated/microlobulated)') parts.push('irregular margin');
+        if (nod.calcification_micro) parts.push('PEF/microcalcification');
+        if (nod.calcification_rim) parts.push('rim calcification');
+        if (nod.calcification_macro) { parts.push('macrocalcification'); if (nod.calcification_entire==='entire') parts.push('(entirely calcified)'); }
+        if (nod.spongiform === 'Yes') parts.push('spongiform');
+        if (nod.cometTailArtifact === 'Yes') parts.push('comet tail artifact');
+        if (nod.diffuseLesion === 'extensive') parts.push('extensive parenchymal PEF');
+        if (nod.diffuseLesion === 'infiltrative') parts.push('diffuse infiltrative lesion');
+        if (nod.eteType && nod.eteType !== 'none') {
+          if (nod.eteType === 'minor') {
+            let eteStr = 'minor ETE';
+            const dirs = [];
+            if (nod.eteMinorAnt) dirs.push('ant');
+            if (nod.eteMinorPost) dirs.push('post');
+            if (dirs.length) eteStr += ' (' + dirs.join(', ') + ')';
+            parts.push(eteStr);
+          } else if (nod.eteType === 'gross') {
+            let eteStr = 'gross ETE';
+            const sites = [];
+            if (nod.eteGrossTrachea) sites.push('trachea');
+            if (nod.eteGrossRLN) sites.push('RLN');
+            if (nod.eteGrossStrap) sites.push('strap muscle');
+            if (nod.eteGrossOthers) sites.push(nod.eteGrossOthersText||'others');
+            if (sites.length) eteStr += ' (' + sites.join(', ') + ')';
+            parts.push(eteStr);
+          }
+        }
+        if (nod.sizeChangeInitial) parts.push('initial');
+        else if (nod.sizeChangeFU && nod.sizeChangeType) parts.push(nod.sizeChangeType.toLowerCase());
+        const tirads = getKTIRADS(nod, state.normalThyroid);
+        if (tirads) parts.push(tirads);
+        lines.push('      ' + parts.join(', '));
+        if (nod.comment) lines.push('      Comment: ' + nod.comment);
+      });
+    });
+  }
+
+  // Cervical lymph node
+  const lnLines = buildLNFindingLines();
+  if (lnLines.length > 0) {
+    lines.push(findingNum++ + '. Cervical lymph node');
+    lnLines.forEach(l => lines.push('   ' + l));
+  }
+
+  // Extrathyroidal lesion
+  if (state.extraLesion && state.extraLesion.trim()) {
+    lines.push(findingNum++ + '. Extrathyroidal lesion');
+    lines.push('   ' + state.extraLesion.trim());
+  }
+
+  // CONCLUSION
+  lines.push('');
+  lines.push('Conclusion:');
+  let concNum = 1;
+
+  // Thyroid parenchyma conclusion
+  if (state.normalThyroid) {
+    lines.push(concNum++ + '. Normal thyroid');
+  } else if (state.diffuseDis) {
+    lines.push(concNum++ + '. Diffuse thyroid disease');
+  }
+
+  // Nodule conclusions (sorted by K-TIRADS desc, size desc)
+  const tiradsOrder = { '[K-TIRADS 5, High suspicion]': 5, '[K-TIRADS 4, Intermediate suspicion]': 4, '[K-TIRADS 3, Low suspicion]': 3, '[K-TIRADS 2, Benign]': 2, '': 0 };
+
+  if (allNodules.length > 0) {
+    const sorted = [...allNodules].sort((a, b) => {
+      const ta = tiradsOrder[getKTIRADS(a.nod, state.normalThyroid)] || 0;
+      const tb = tiradsOrder[getKTIRADS(b.nod, state.normalThyroid)] || 0;
+      if (tb !== ta) return tb - ta;
+      const sa = (state.nodules[a.lobe]?.[a.idx] ? calcMaxSizeCm(a.nod) : 0);
+      const sb = (state.nodules[b.lobe]?.[b.idx] ? calcMaxSizeCm(b.nod) : 0);
+      return sb - sa;
+    });
+
+    lines.push(concNum++ + '. Thyroid nodule');
+    let nodNum = 1;
+    sorted.forEach(({lobe, idx, nod}) => {
+      const label = LOBE_LABELS[lobe] + (idx+1);
+      const tirads = getKTIRADS(nod, state.normalThyroid);
+      const ms = calcMaxSize(nod);
+      const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
+      let line = nodNum++ + ') ' + label;
+      if (nod.location) line += ', ' + nod.location;
+      if (msStr) line += ', ' + msStr;
+      if (tirads) line += ', ' + tirads;
+      if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
+      lines.push('   ' + line);
+    });
+  }
+
+  // Cervical lymph node conclusion
+  const lnConclusion = buildLNConclusionLines();
+  if (lnConclusion.length > 0) {
+    lines.push(concNum++ + '. Cervical lymph node');
+    lnConclusion.forEach(l => lines.push('   ' + l));
+  }
+
+  // Biopsy
+  const bxLines = buildBiopsyLines();
+  if (bxLines.length > 0) {
+    lines.push(concNum++ + '. Biopsy');
+    bxLines.forEach(l => lines.push('   ' + l));
+  }
+
+  // Recommendation
+  const recLines = [];
+  allNodules.forEach(({lobe,idx,nod}) => {
+    if (nod.recommendation) recLines.push(LOBE_LABELS[lobe]+(idx+1)+': '+nod.recommendation);
+  });
+  if (recLines.length > 0) {
+    lines.push(concNum++ + '. Recommendation');
+    recLines.forEach(l => lines.push('   ' + l));
+  }
+
+  const reportText = lines.join('\n');
+  document.getElementById('reportContent').textContent = reportText;
+  document.getElementById('copyFeedback').textContent = '';
+  document.getElementById('reportDialog').classList.add('show');
+}
+
+function calcMaxSizeCm(nod) {
+  const ms = calcMaxSize(nod);
+  return nod.diamUnit === 'mm' ? ms * 0.1 : ms;
+}
+
+function buildLNFindingLines() {
+  const lines = [];
+  if (state.normalLymph) { lines.push('No abnormal cervical lymph node'); return lines; }
+
+  const suspSides = [], indetSides = [];
+  const colNames = ['LR','LR','LL','LL','CR','CR','CL','CL'];
+  const diagTypes = ['indeterminate','suspicious','indeterminate','suspicious','indeterminate','suspicious','indeterminate','suspicious'];
+
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
+    const hasLevel = levels.some(lvl => ln['level_'+lvl]);
+    const hasDiam = ln.ldValue || ln.sdValue;
+    if (!hasLevel && !hasDiam) continue;
+    const checkedLevels = levels.filter(lvl => ln['level_'+lvl]);
+    const levelStr = checkedLevels.length > 0 ? 'level ' + checkedLevels.join(',') : '';
+    const sideMap = ['Right lateral','Right lateral','Left lateral','Left lateral','Right central','Right central','Left central','Left central'];
+    const entry = sideMap[ci] + (levelStr ? ' ' + levelStr : '');
+    if (diagTypes[ci] === 'suspicious') suspSides.push(entry);
+    else indetSides.push(entry);
+  }
+
+  if (suspSides.length) lines.push('Suspicious lymph node: ' + suspSides.join('; '));
+  if (indetSides.length) lines.push('Indeterminate lymph node: ' + indetSides.join('; '));
+  if (lines.length === 0 && !state.normalLymph) lines.push('No significant abnormality');
+  return lines;
+}
+
+function buildLNConclusionLines() {
+  const lines = [];
+  if (state.normalLymph) { lines.push('Normal cervical lymph node'); return lines; }
+  const hasAny = Object.values(state.lymphNodes).some(grp => grp.some(ln => ln.ldValue || ln.sdValue || Object.keys(ln).some(k => k.startsWith('level_') && ln[k])));
+  if (!hasAny) { lines.push('Normal cervical lymph node'); return lines; }
+  return buildLNFindingLines();
+}
+
+function buildBiopsyLines() {
+  const lines = [];
+  ['right','left','isthmus'].forEach(lobe => {
+    (state.nodules[lobe]||[]).forEach((nod,idx) => {
+      if (nod.biopsyDone && nod.biopsyType) {
+        const label = LOBE_LABELS[lobe]+(idx+1);
+        let line = label + ': ' + nod.biopsyType;
+        if (nod.biopsyType==='FNA' && nod.fnaGauge) line += ' (' + nod.fnaGauge + 'G)';
+        if (nod.biopsyType==='CNB' && nod.cnbSize) line += ' (' + nod.cnbSize + 'cm)';
+        lines.push(line);
+      }
+    });
+  });
+  // LN biopsy
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    if (!ln.biopsy) continue;
+    const sideMap = ['Right lateral','Right lateral','Left lateral','Left lateral','Right central','Right central','Left central','Left central'];
+    const diagTypes = ['indeterminate','suspicious','indeterminate','suspicious','indeterminate','suspicious','indeterminate','suspicious'];
+    const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
+    const fnaL = levels.filter(lvl => ln['fna_'+lvl]);
+    const cnbL = levels.filter(lvl => ln['cnb_'+lvl]);
+    if (fnaL.length) lines.push('LN FNA: ' + sideMap[ci] + ' (' + diagTypes[ci] + ') level ' + fnaL.join(','));
+    if (cnbL.length) lines.push('LN CNB: ' + sideMap[ci] + ' (' + diagTypes[ci] + ') level ' + cnbL.join(','));
+  }
+  return lines;
+}
+
+function validateReport() {
+  const errors = [];
+  ['right','left','isthmus'].forEach(lobe => {
+    (state.nodules[lobe]||[]).forEach((nod,idx) => {
+      const label = LOBE_LABELS[lobe]+(idx+1);
+      const hasContent = nod.composition || nod.echogenicity || nod.comment || nod.diamAP || nod.diamT || nod.diamL;
+      if (!hasContent) return; // skip empty nodules
+      if (!nod.location) errors.push('Nodule '+label+': Location is required');
+      if (!nod.diamAP && !nod.diamT && !nod.diamL && !nod.comment)
+        errors.push('Nodule '+label+': Diameter or Comment is required');
+    });
+  });
+  // LN validation
+  for (let ci=0; ci<8; ci++) {
+    const ln = getLN(ci);
+    const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
+    const hasLevel = levels.some(lvl => ln['level_'+lvl]);
+    if (hasLevel && !ln.ldValue && !ln.sdValue && !ln.comment) {
+      const sideMap = ['LR-indet','LR-susp','LL-indet','LL-susp','CR-indet','CR-susp','CL-indet','CL-susp'];
+      errors.push('Lymph node '+sideMap[ci]+': Diameter or Comment is required');
+    }
+  }
+  return errors;
+}
+
+function copyReport() {
+  const text = document.getElementById('reportContent').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('copyFeedback').textContent = 'Copied to Clipboard';
+    setTimeout(() => { document.getElementById('copyFeedback').textContent = ''; }, 3000);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    document.getElementById('copyFeedback').textContent = 'Copied to Clipboard';
+    setTimeout(() => { document.getElementById('copyFeedback').textContent = ''; }, 3000);
+  });
+}
+
+function closeDialog(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// ==================== INIT ====================
+// Bind remaining inputs to saveState
+function bindInputSave(id, eventType) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(eventType, () => {
+    const stateKey = id.replace(/-([a-z])/g, (m,p1)=>p1.toUpperCase());
+    state[id] = el.type==='checkbox' ? el.checked : el.value;
+    // handle specific IDs
+    const simpleIds = ['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxPathDx','compYear','compMonth','compDay','extraLesion'];
+    if (simpleIds.includes(id)) { state[id] = el.value; saveState(); }
+    else if (id==='prevBxFNA'||id==='prevBxCNB') { state[id]=el.checked; saveState(); }
+    else if (id==='multinodular') { state[id]=el.checked; saveState(); }
+    else if (id==='normalLymph') { state[id]=el.checked; saveState(); }
+    else if (id==='addToReport') { state[id]=el.checked; saveState(); }
+  });
+}
+
+// Bind parenchyma radios
+document.querySelectorAll('input[name="thySize"]').forEach(r => r.addEventListener('change', () => { state.thySize=r.value; saveState(); }));
+document.querySelectorAll('input[name="echotexture"]').forEach(r => r.addEventListener('change', () => { state.echotexture=r.value; saveState(); }));
+document.querySelectorAll('input[name="parVasc"]').forEach(r => r.addEventListener('change', () => { state.parVasc=r.value; saveState(); }));
+
+// Bind text inputs in clinical/parenchyma sections
+['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxPathDx'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
+});
+['compYear','compMonth','compDay'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
+});
+['sizeRightAP','sizeRightT','sizeRightL','sizeIsthmusAP','sizeIsthmusL','sizeLeftAP','sizeLeftT','sizeLeftL'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
+});
+['sizeRightUnit','sizeIsthmusUnit','sizeLeftUnit'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', () => { state[id]=el.value; saveState(); });
+});
+
+// Load and render
+loadState();
+renderAll();
+</script>
+</body>
+</html>
