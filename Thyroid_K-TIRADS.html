@@ -48,7 +48,7 @@ body {
 .reset-all-btn:hover { background: #ff453a; color: #fff; border-color: #ff453a; }
 
 /* ===== MAIN ===== */
-#main { margin-top: 52px; padding: 20px 28px; max-width: 1100px; }
+#main { margin-top: 52px; padding: 20px 28px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
@@ -113,7 +113,7 @@ table.data-table td.section-header {
   transition: all 0.15s; white-space: nowrap; user-select: none;
 }
 .radio-group input[type=radio] {
-  position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+  position: absolute; opacity: 0; width: 0; height: 0;
 }
 /* Active segment: white pill with shadow */
 .radio-group label:has(input:checked) {
@@ -122,10 +122,28 @@ table.data-table td.section-header {
 }
 .radio-group label:hover:not(:has(input:checked)) { color: #1d1d1f; }
 
-/* ===== CHECKBOXES ===== */
-.check-group { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.check-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
-input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3; }
+/* ===== CHECKBOX GROUPS ===== */
+.check-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.check-group label {
+  display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px;
+  padding: 4px 9px; border-radius: 7px; transition: background 0.15s; user-select: none;
+}
+.check-group label:hover { background: rgba(0,0,0,0.06); }
+.check-group label:has(input:checked) { background: rgba(0,113,227,0.1); color: #0071e3; font-weight: 500; }
+
+/* Standalone checkbox labels (FNA, CNB, Yes, etc.) */
+.inline-check-label {
+  display: inline-flex !important; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; transition: background 0.15s; user-select: none;
+}
+.inline-check-label:hover { background: rgba(0,0,0,0.06); }
+.inline-check-label:has(input:checked) {
+  background: rgba(0,113,227,0.1); color: #0071e3; font-weight: 500;
+}
+
+/* Global label cursor */
+label { cursor: pointer; }
 
 /* ===== TEXT INPUTS ===== */
 input[type=text] {
@@ -283,8 +301,8 @@ hr.section-sep { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 1
               <input type="text" id="prevBxMonth" placeholder="MM" style="width:38px"> .
               <input type="text" id="prevBxDay" placeholder="DD" style="width:38px">
               &nbsp; Target: <input type="text" id="prevBxTarget" placeholder="Target nodule" style="width:100px">
-              &nbsp; <label><input type="checkbox" id="prevBxFNA" onchange="saveState()"> FNA</label>
-              <label><input type="checkbox" id="prevBxCNB" onchange="saveState()"> CNB</label>
+              &nbsp; <label class="inline-check-label"><input type="checkbox" id="prevBxFNA" onchange="saveState()"> FNA</label>
+              <label class="inline-check-label"><input type="checkbox" id="prevBxCNB" onchange="saveState()"> CNB</label>
               &nbsp; Path Dx: <input type="text" id="prevBxPathDx" placeholder="Pathologic diagnosis" style="width:160px" oninput="saveState()">
             </div>
           </td>
@@ -349,7 +367,7 @@ hr.section-sep { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 1
         </tr>
         <tr>
           <td class="label-cell">Diffuse Thyroid Disease</td>
-          <td><label><input type="checkbox" id="diffuseDis" onchange="onDiffuseDisChange()"> Yes</label></td>
+          <td><label class="inline-check-label"><input type="checkbox" id="diffuseDis" onchange="onDiffuseDisChange()"> Yes</label></td>
         </tr>
         <tr>
           <td class="label-cell">Parenchymal echotexture</td>
@@ -372,7 +390,7 @@ hr.section-sep { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 1
         </tr>
         <tr>
           <td class="label-cell">Multinodular Goiter</td>
-          <td><label><input type="checkbox" id="multinodular" onchange="saveState()"> Yes</label></td>
+          <td><label class="inline-check-label"><input type="checkbox" id="multinodular" onchange="saveState()"> Yes</label></td>
         </tr>
       </tbody>
     </table>
@@ -775,17 +793,10 @@ function buildNoduleTable(lobe, idx, nod) {
   function row(labelText, cellContent, isRequired) {
     const tr = document.createElement('tr');
     const tdL = document.createElement('td');
-    tdL.style.width = '150px';
-    tdL.style.fontWeight = '600';
-    tdL.style.fontSize = '12px';
-    tdL.style.backgroundColor = isRequired ? '#FEF3BD' : '#f0f0f0';
-    tdL.style.border = '1px solid #000';
-    tdL.style.padding = '5px 8px';
+    tdL.style.cssText = `width:140px;font-weight:500;font-size:13px;background:${isRequired?'#fffbeb':'#fafafa'};padding:9px 12px;border-bottom:1px solid rgba(0,0,0,0.06);border-right:1px solid rgba(0,0,0,0.06);color:#6e6e73;white-space:pre-line;vertical-align:top;`;
     tdL.textContent = labelText;
     const tdR = document.createElement('td');
-    tdR.style.border = '1px solid #000';
-    tdR.style.padding = '5px 8px';
-    tdR.style.backgroundColor = isRequired ? '#FEF3BD' : '';
+    tdR.style.cssText = `padding:8px 12px;border-bottom:1px solid rgba(0,0,0,0.06);background:${isRequired?'#fffbeb':'#fff'};`;
     if (typeof cellContent === 'string') tdR.innerHTML = cellContent;
     else tdR.appendChild(cellContent);
     tr.appendChild(tdL);
@@ -797,40 +808,28 @@ function buildNoduleTable(lobe, idx, nod) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = 2;
-    td.style.background = '#888';
-    td.style.color = '#fff';
-    td.style.fontWeight = '700';
-    td.style.textAlign = 'center';
-    td.style.border = '1px solid #000';
-    td.style.padding = '4px';
-    td.textContent = text;
+    td.style.cssText = 'background:#f5f5f7;color:#6e6e73;font-weight:600;text-align:center;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid rgba(0,0,0,0.06);';
+    td.textContent = text.replace(/---\s*/g,'').replace(/\s*---/g,'').trim();
     tr.appendChild(td);
     return tr;
   }
 
   const tbl = document.createElement('table');
-  tbl.style.borderCollapse = 'collapse';
-  tbl.style.width = '100%';
-  tbl.style.marginBottom = '6px';
-  tbl.style.background = '#fff';
-  tbl.style.border = '2px solid #333';
+  tbl.style.cssText = 'border-collapse:collapse;width:100%;background:#fff;';
 
   // Header row
   const thead = document.createElement('thead');
   const htr = document.createElement('tr');
   const hth = document.createElement('th');
   hth.colSpan = 2;
-  hth.style.background = '#333';
-  hth.style.color = '#fff';
-  hth.style.padding = '6px';
-  hth.style.fontSize = '13px';
-  hth.style.fontWeight = '700';
-  hth.style.border = '1px solid #1a237e';
-  hth.style.display = 'flex';
-  hth.style.alignItems = 'center';
-  hth.style.justifyContent = 'space-between';
+  hth.style.cssText = 'background:#1d1d1f;color:#fff;padding:0;border:none;';
+
+  // Inner div for flex layout (needed so colspan works correctly)
+  const hthInner = document.createElement('div');
+  hthInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;';
 
   const titleSpan = document.createElement('span');
+  titleSpan.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;';
   let tiradsClass = 'tirads-none';
   if (tirads.includes('5')) tiradsClass = 'tirads-5';
   else if (tirads.includes('4')) tiradsClass = 'tirads-4';
@@ -843,8 +842,9 @@ function buildNoduleTable(lobe, idx, nod) {
   delBtn.className = 'del-nodule-btn';
   delBtn.onclick = (e) => { e.stopPropagation(); removeNodule(lobe, idx); };
 
-  hth.appendChild(titleSpan);
-  hth.appendChild(delBtn);
+  hthInner.appendChild(titleSpan);
+  hthInner.appendChild(delBtn);
+  hth.appendChild(hthInner);
   htr.appendChild(hth);
   thead.appendChild(htr);
   tbl.appendChild(thead);
@@ -953,9 +953,9 @@ function buildNoduleTable(lobe, idx, nod) {
   const fuChk = document.createElement('input'); fuChk.type = 'checkbox';
   fuChk.checked = nod.sizeChangeFU;
   fuChk.addEventListener('change', () => { nod.sizeChangeFU = fuChk.checked; updateNodule(lobe, idx, nod); });
-  const lbl1 = document.createElement('label'); lbl1.style.display='flex';lbl1.style.alignItems='center';lbl1.style.gap='3px';
+  const lbl1 = document.createElement('label'); lbl1.className = 'inline-check-label';
   lbl1.appendChild(initialChk); lbl1.append(' Initial');
-  const lbl2 = document.createElement('label'); lbl2.style.display='flex';lbl2.style.alignItems='center';lbl2.style.gap='3px';
+  const lbl2 = document.createElement('label'); lbl2.className = 'inline-check-label';
   lbl2.appendChild(fuChk); lbl2.append(' Follow-up');
   scRow1.appendChild(lbl1); scRow1.appendChild(lbl2);
   const scRow2 = document.createElement('div');
@@ -1008,7 +1008,7 @@ function buildNoduleTable(lobe, idx, nod) {
 
   const calcRow1 = document.createElement('div'); calcRow1.className = 'check-group';
   function mkCalcChk(labelText, stateKey) {
-    const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='3px';
+    const lbl = document.createElement('label'); lbl.className = 'inline-check-label';
     const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = nod[stateKey];
     chk.addEventListener('change', () => { nod[stateKey] = chk.checked; updateNodule(lobe, idx, nod); });
     lbl.appendChild(chk); lbl.append(' '+labelText);
@@ -1022,7 +1022,7 @@ function buildNoduleTable(lobe, idx, nod) {
   calcRow2.appendChild(macroLbl);
 
   if (nod.calcification_macro) {
-    const entireLbl = document.createElement('label'); entireLbl.style.display='flex';entireLbl.style.alignItems='center';entireLbl.style.gap='3px';
+    const entireLbl = document.createElement('label'); entireLbl.className='inline-check-label';
     const entireR = document.createElement('input'); entireR.type='radio'; entireR.name=`calcentire_${lobe}_${idx}`; entireR.value='entire';
     entireR.checked = (nod.calcification_entire === 'entire');
     entireR.addEventListener('change', () => { nod.calcification_entire = 'entire'; updateNodule(lobe, idx, nod); });
@@ -1038,7 +1038,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const vascDiv = document.createElement('div');
   vascDiv.className = 'check-group';
   [['None','vascularity_none'],['Peripheral','vascularity_peri'],['Mild intranodular','vascularity_mild'],['Marked intranodular','vascularity_marked']].forEach(([labelT,sk]) => {
-    const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+    const l = document.createElement('label'); l.className='inline-check-label';
     const c = document.createElement('input'); c.type='checkbox'; c.checked = nod[sk];
     c.addEventListener('change', () => { nod[sk] = c.checked; updateNodule(lobe, idx, nod); });
     l.appendChild(c); l.append(' '+labelT);
@@ -1049,7 +1049,7 @@ function buildNoduleTable(lobe, idx, nod) {
   // --- Spongiform ---
   const spongDiv = document.createElement('div');
   spongDiv.className = 'radio-group';
-  const spongLbl = document.createElement('label'); spongLbl.style.display='flex';spongLbl.style.alignItems='center';spongLbl.style.gap='3px';
+  const spongLbl = document.createElement('label');
   const spongR = document.createElement('input'); spongR.type='radio'; spongR.name=`spong_${lobe}_${idx}`; spongR.value='Yes';
   spongR.checked = (nod.spongiform === 'Yes');
   const spongDisabled = (nod.composition === 'Solid' || nod.composition === 'Cystic');
@@ -1062,7 +1062,7 @@ function buildNoduleTable(lobe, idx, nod) {
   // --- Comet Tail Artifact ---
   const cometDiv = document.createElement('div');
   cometDiv.className = 'radio-group';
-  const cometLbl = document.createElement('label'); cometLbl.style.display='flex';cometLbl.style.alignItems='center';cometLbl.style.gap='3px';
+  const cometLbl = document.createElement('label');
   const cometR = document.createElement('input'); cometR.type='radio'; cometR.name=`comet_${lobe}_${idx}`; cometR.value='Yes';
   cometR.checked = (nod.cometTailArtifact === 'Yes');
   cometR.disabled = (nod.composition === 'Solid');
@@ -1075,7 +1075,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const diffDiv = document.createElement('div');
   diffDiv.className = 'radio-group';
   [['Extensive parenchymal PEF','extensive'],['Diffuse infiltrative lesion','infiltrative']].forEach(([labelT, val]) => {
-    const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='3px';
+    const lbl = document.createElement('label');
     const r = document.createElement('input'); r.type='radio'; r.name=`diff_${lobe}_${idx}`; r.value=val;
     r.checked = (nod.diffuseLesion === val);
     r.addEventListener('change', () => { nod.diffuseLesion = val; updateNodule(lobe, idx, nod); });
@@ -1090,14 +1090,14 @@ function buildNoduleTable(lobe, idx, nod) {
 
   const eteRow1 = document.createElement('div'); eteRow1.className='radio-group';
 
-  const eteNoLbl = document.createElement('label'); eteNoLbl.style.display='flex';eteNoLbl.style.alignItems='center';eteNoLbl.style.gap='3px';
+  const eteNoLbl = document.createElement('label'); eteNoLbl.className='inline-check-label';
   const eteNoR = document.createElement('input'); eteNoR.type='radio'; eteNoR.name=`ete_${lobe}_${idx}`; eteNoR.value='none';
   eteNoR.checked = (nod.eteType === 'none');
   eteNoR.addEventListener('change', () => { nod.eteType='none'; updateNodule(lobe,idx,nod); });
   eteNoLbl.appendChild(eteNoR); eteNoLbl.append(' No ETE');
   eteRow1.appendChild(eteNoLbl);
 
-  const eteMinorLbl = document.createElement('label'); eteMinorLbl.style.display='flex';eteMinorLbl.style.alignItems='center';eteMinorLbl.style.gap='3px';
+  const eteMinorLbl = document.createElement('label'); eteMinorLbl.className='inline-check-label';
   const eteMinorR = document.createElement('input'); eteMinorR.type='radio'; eteMinorR.name=`ete_${lobe}_${idx}`; eteMinorR.value='minor';
   eteMinorR.checked = (nod.eteType === 'minor');
   eteMinorR.addEventListener('change', () => { nod.eteType='minor'; updateNodule(lobe,idx,nod); });
@@ -1106,7 +1106,7 @@ function buildNoduleTable(lobe, idx, nod) {
 
   if (nod.eteType === 'minor') {
     [['ant','eteMinorAnt'],['post','eteMinorPost']].forEach(([labelT,sk]) => {
-      const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+      const l = document.createElement('label'); l.className='inline-check-label';
       const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
       c.addEventListener('change', () => { nod[sk]=c.checked; updateNodule(lobe,idx,nod); });
       l.appendChild(c); l.append(' '+labelT);
@@ -1114,7 +1114,7 @@ function buildNoduleTable(lobe, idx, nod) {
     });
   }
 
-  const eteGrossLbl = document.createElement('label'); eteGrossLbl.style.display='flex';eteGrossLbl.style.alignItems='center';eteGrossLbl.style.gap='3px';
+  const eteGrossLbl = document.createElement('label'); eteGrossLbl.className='inline-check-label';
   const eteGrossR = document.createElement('input'); eteGrossR.type='radio'; eteGrossR.name=`ete_${lobe}_${idx}`; eteGrossR.value='gross';
   eteGrossR.checked = (nod.eteType === 'gross');
   eteGrossR.addEventListener('change', () => { nod.eteType='gross'; updateNodule(lobe,idx,nod); });
@@ -1125,7 +1125,7 @@ function buildNoduleTable(lobe, idx, nod) {
   if (nod.eteType === 'gross') {
     const eteRow2 = document.createElement('div'); eteRow2.className='check-group';
     [['trachea','eteGrossTrachea'],['RLN','eteGrossRLN'],['strap muscle','eteGrossStrap'],['others','eteGrossOthers']].forEach(([labelT,sk]) => {
-      const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+      const l = document.createElement('label'); l.className='inline-check-label';
       const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
       c.addEventListener('change', () => { nod[sk]=c.checked; updateNodule(lobe,idx,nod); });
       l.appendChild(c); l.append(' '+labelT);
@@ -1155,7 +1155,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const bxDiv = document.createElement('div');
   bxDiv.style.display='flex'; bxDiv.style.flexDirection='column'; bxDiv.style.gap='4px';
   const bxRow1 = document.createElement('div'); bxRow1.className='check-group';
-  const bxChkLbl = document.createElement('label'); bxChkLbl.style.display='flex';bxChkLbl.style.alignItems='center';bxChkLbl.style.gap='3px';
+  const bxChkLbl = document.createElement('label'); bxChkLbl.className='inline-check-label';
   const bxChk = document.createElement('input'); bxChk.type='checkbox'; bxChk.checked=nod.biopsyDone;
   bxChk.addEventListener('change', () => { nod.biopsyDone=bxChk.checked; updateNodule(lobe,idx,nod); });
   bxChkLbl.appendChild(bxChk); bxChkLbl.append(' Yes');
@@ -1165,7 +1165,7 @@ function buildNoduleTable(lobe, idx, nod) {
   if (nod.biopsyDone) {
     const bxRow2 = document.createElement('div'); bxRow2.className='radio-group';
 
-    const fnaLbl = document.createElement('label'); fnaLbl.style.display='flex';fnaLbl.style.alignItems='center';fnaLbl.style.gap='3px';
+    const fnaLbl = document.createElement('label');
     const fnaR = document.createElement('input'); fnaR.type='radio'; fnaR.name=`bxtype_${lobe}_${idx}`; fnaR.value='FNA';
     fnaR.checked = (nod.biopsyType==='FNA');
     fnaR.addEventListener('change', () => { nod.biopsyType='FNA'; updateNodule(lobe,idx,nod); });
@@ -1177,7 +1177,7 @@ function buildNoduleTable(lobe, idx, nod) {
       bxRow2.append(' G '); bxRow2.appendChild(gaugeTxt);
     }
 
-    const cnbLbl = document.createElement('label'); cnbLbl.style.display='flex';cnbLbl.style.alignItems='center';cnbLbl.style.gap='3px';
+    const cnbLbl = document.createElement('label');
     const cnbR = document.createElement('input'); cnbR.type='radio'; cnbR.name=`bxtype_${lobe}_${idx}`; cnbR.value='CNB';
     cnbR.checked = (nod.biopsyType==='CNB');
     cnbR.addEventListener('change', () => { nod.biopsyType='CNB'; updateNodule(lobe,idx,nod); });
@@ -1193,13 +1193,13 @@ function buildNoduleTable(lobe, idx, nod) {
 
     // Complications
     const compDiv2 = document.createElement('div'); compDiv2.className='check-group';
-    const noLbl = document.createElement('label'); noLbl.style.display='flex';noLbl.style.alignItems='center';noLbl.style.gap='3px';
+    const noLbl = document.createElement('label'); noLbl.className='inline-check-label';
     const noChk = document.createElement('input'); noChk.type='checkbox'; noChk.checked=nod.compNo;
     noChk.addEventListener('change',()=>{nod.compNo=noChk.checked;if(noChk.checked){nod.compYes=false;nod.compIntra=false;nod.compPeri=false;nod.compOthers=false;}updateNodule(lobe,idx,nod);});
     noLbl.appendChild(noChk); noLbl.append(' No');
     compDiv2.appendChild(noLbl);
 
-    const yesLbl = document.createElement('label'); yesLbl.style.display='flex';yesLbl.style.alignItems='center';yesLbl.style.gap='3px';
+    const yesLbl = document.createElement('label'); yesLbl.className='inline-check-label';
     const yesChk = document.createElement('input'); yesChk.type='checkbox'; yesChk.checked=nod.compYes;
     yesChk.addEventListener('change',()=>{nod.compYes=yesChk.checked;if(yesChk.checked){nod.compNo=false;}updateNodule(lobe,idx,nod);});
     yesLbl.appendChild(yesChk); yesLbl.append(' Yes');
@@ -1207,7 +1207,7 @@ function buildNoduleTable(lobe, idx, nod) {
 
     if (nod.compYes) {
       [['intrathyroidal hematoma','compIntra'],['perithyroidal hematoma','compPeri'],['others','compOthers']].forEach(([labelT,sk])=>{
-        const l = document.createElement('label'); l.style.display='flex';l.style.alignItems='center';l.style.gap='3px';
+        const l = document.createElement('label'); l.className='inline-check-label';
         const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
         c.addEventListener('change',()=>{nod[sk]=c.checked;updateNodule(lobe,idx,nod);});
         l.appendChild(c); l.append(' '+labelT);
@@ -1240,9 +1240,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const resetTr = document.createElement('tr');
   const resetTd = document.createElement('td');
   resetTd.colSpan = 2;
-  resetTd.style.border = '1px solid #000';
-  resetTd.style.padding = '6px';
-  resetTd.style.textAlign = 'center';
+  resetTd.style.cssText = 'padding:10px;text-align:center;border-bottom:none;background:#fafafa;';
   const resetBtn = document.createElement('button');
   resetBtn.className = 'pink-btn';
   resetBtn.textContent = 'Reset this nodule';
@@ -1361,7 +1359,7 @@ function renderLymphTable() {
     const td = document.createElement('td'); td.style.verticalAlign='top';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
-      const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='2px';lbl.style.whiteSpace='nowrap';
+      const lbl = document.createElement('label'); lbl.style.cssText='display:flex;align-items:center;gap:4px;white-space:nowrap;cursor:pointer;padding:3px 6px;border-radius:6px;transition:background 0.15s;';
       const chk = document.createElement('input'); chk.type='checkbox';
       const key = 'level_'+lvl;
       chk.checked = !!(ln[key]);
@@ -1424,7 +1422,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
-    const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='3px';
+    const lbl = document.createElement('label'); lbl.className='inline-check-label';
     const chk = document.createElement('input'); chk.type='checkbox'; chk.checked=!!ln.biopsy;
     chk.addEventListener('change',()=>{ const cur=getLN(ci); cur.biopsy=chk.checked; setLN(ci,cur); saveState(); renderLymphTable(); });
     lbl.appendChild(chk); lbl.append(' Yes');
@@ -1440,7 +1438,7 @@ function renderLymphTable() {
     const td = document.createElement('td');
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
-      const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='2px';
+      const lbl = document.createElement('label'); lbl.style.cssText='display:flex;align-items:center;gap:4px;cursor:pointer;padding:3px 6px;border-radius:6px;transition:background 0.15s;';
       const chk = document.createElement('input'); chk.type='checkbox';
       chk.disabled = !ln.biopsy;
       chk.checked = !!(ln['fna_'+lvl]);
@@ -1460,7 +1458,7 @@ function renderLymphTable() {
     const td = document.createElement('td');
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
-      const lbl = document.createElement('label'); lbl.style.display='flex';lbl.style.alignItems='center';lbl.style.gap='2px';
+      const lbl = document.createElement('label'); lbl.style.cssText='display:flex;align-items:center;gap:4px;cursor:pointer;padding:3px 6px;border-radius:6px;transition:background 0.15s;';
       const chk = document.createElement('input'); chk.type='checkbox';
       chk.disabled = !ln.biopsy;
       chk.checked = !!(ln['cnb_'+lvl]);
@@ -1481,12 +1479,12 @@ function renderLymphTable() {
     const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
     const r1 = document.createElement('div'); r1.className='check-group';
 
-    const noLbl = document.createElement('label'); noLbl.style.display='flex';noLbl.style.alignItems='center';noLbl.style.gap='3px';
+    const noLbl = document.createElement('label'); noLbl.className='inline-check-label';
     const noChk = document.createElement('input'); noChk.type='checkbox'; noChk.checked=ln.compNo!==false;
     noChk.addEventListener('change',()=>{ const cur=getLN(ci); cur.compNo=noChk.checked; if(noChk.checked)cur.compYes=false; setLN(ci,cur); saveState(); renderLymphTable(); });
     noLbl.appendChild(noChk); noLbl.append(' No'); r1.appendChild(noLbl);
 
-    const yesLbl = document.createElement('label'); yesLbl.style.display='flex';yesLbl.style.alignItems='center';yesLbl.style.gap='3px';
+    const yesLbl = document.createElement('label'); yesLbl.className='inline-check-label';
     const yesChk = document.createElement('input'); yesChk.type='checkbox'; yesChk.checked=!!ln.compYes;
     yesChk.addEventListener('change',()=>{ const cur=getLN(ci); cur.compYes=yesChk.checked; if(yesChk.checked)cur.compNo=false; setLN(ci,cur); saveState(); renderLymphTable(); });
     yesLbl.appendChild(yesChk); yesLbl.append(' Yes'); r1.appendChild(yesLbl);
