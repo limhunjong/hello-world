@@ -305,8 +305,8 @@ hr.section-sep { border: none; border-top: 1px solid #eceff1; margin: 8px 0; }
           <td class="label-cell">Parenchymal echotexture</td>
           <td>
             <div class="radio-group" id="echotextureGroup">
-              <label><input type="radio" name="echotexture" value="Homo" disabled onchange="saveState()"> Homo</label>
-              <label><input type="radio" name="echotexture" value="Hetero" disabled onchange="saveState()"> Hetero</label>
+              <label><input type="radio" name="echotexture" value="Homo" onchange="saveState()"> Homo</label>
+              <label><input type="radio" name="echotexture" value="Hetero" onchange="saveState()"> Hetero</label>
             </div>
           </td>
         </tr>
@@ -314,9 +314,9 @@ hr.section-sep { border: none; border-top: 1px solid #eceff1; margin: 8px 0; }
           <td class="label-cell">Parenchymal Vascularity</td>
           <td>
             <div class="radio-group" id="parVascGroup">
-              <label><input type="radio" name="parVasc" value="Normal" disabled onchange="saveState()"> Normal</label>
-              <label><input type="radio" name="parVasc" value="Increased" disabled onchange="saveState()"> Increased</label>
-              <label><input type="radio" name="parVasc" value="Decreased" disabled onchange="saveState()"> Decreased</label>
+              <label><input type="radio" name="parVasc" value="Normal" onchange="saveState()"> Normal</label>
+              <label><input type="radio" name="parVasc" value="Increased" onchange="saveState()"> Increased</label>
+              <label><input type="radio" name="parVasc" value="Decreased" onchange="saveState()"> Decreased</label>
             </div>
           </td>
         </tr>
@@ -517,7 +517,7 @@ let state = JSON.parse(JSON.stringify(defaultState));
 
 function loadState() {
   try {
-    const s = localStorage.getItem('thyroidTool_v4');
+    const s = localStorage.getItem('thyroidTool_v5');
     if (s) {
       const parsed = JSON.parse(s);
       state = deepMerge(JSON.parse(JSON.stringify(defaultState)), parsed);
@@ -526,7 +526,7 @@ function loadState() {
 }
 
 function saveState() {
-  try { localStorage.setItem('thyroidTool_v4', JSON.stringify(state)); } catch(e) {}
+  try { localStorage.setItem('thyroidTool_v5', JSON.stringify(state)); } catch(e) {}
 }
 
 function deepMerge(target, source) {
@@ -596,9 +596,9 @@ function renderAll() {
   // Parenchyma
   document.getElementById('diffuseDis').checked = state.diffuseDis;
   const echoInputs = document.querySelectorAll('input[name="echotexture"]');
-  echoInputs.forEach(r => { r.checked = (r.value === state.echotexture); r.disabled = !state.diffuseDis; });
+  echoInputs.forEach(r => { r.checked = (r.value === state.echotexture); r.disabled = false; });
   const pvInputs = document.querySelectorAll('input[name="parVasc"]');
-  pvInputs.forEach(r => { r.checked = (r.value === state.parVasc); r.disabled = !state.diffuseDis; });
+  pvInputs.forEach(r => { r.checked = (r.value === state.parVasc); r.disabled = false; });
   document.getElementById('multinodular').checked = state.multinodular;
 
   // Nodules
@@ -644,11 +644,6 @@ function applyNormalThyroidDisable() {
 
 function onDiffuseDisChange() {
   state.diffuseDis = document.getElementById('diffuseDis').checked;
-  const echoInputs = document.querySelectorAll('input[name="echotexture"]');
-  const pvInputs = document.querySelectorAll('input[name="parVasc"]');
-  echoInputs.forEach(r => r.disabled = !state.diffuseDis);
-  pvInputs.forEach(r => r.disabled = !state.diffuseDis);
-  if (!state.diffuseDis) { state.echotexture = ''; state.parVasc = ''; echoInputs.forEach(r=>r.checked=false); pvInputs.forEach(r=>r.checked=false); }
   saveState();
 }
 
