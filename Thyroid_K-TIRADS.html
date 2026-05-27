@@ -255,6 +255,21 @@ hr.section-sep { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 1
   font-weight: 600; font-size: 14px; border-radius: 12px 12px 0 0; margin-bottom: 0;
 }
 
+/* ===== iOS / TOUCH FIX ===== */
+/* Removes 300ms tap delay and prevents ghost-click issues on iOS Safari */
+button, label, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button { -webkit-appearance: none; }
+
+/* ===== DATE SELECT ===== */
+.date-select {
+  padding: 5px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px;
+  font-size: 13px; background: #fff; cursor: pointer; font-family: inherit;
+}
+.date-select:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+
 /* ===== NODULE LABEL COLUMN ===== */
 .nodule-label-cell {
   width: 140px; font-weight: 500; font-size: 13px;
@@ -386,9 +401,11 @@ html { -webkit-text-size-adjust: 100%; }
           <td>
             <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
               <span>Date:</span>
-              <input type="text" id="prevBxYear" placeholder="YYYY" style="width:52px"> .
-              <input type="text" id="prevBxMonth" placeholder="MM" style="width:38px"> .
-              <input type="text" id="prevBxDay" placeholder="DD" style="width:38px">
+              <select id="prevBxYear" class="date-select" onchange="state.prevBxYear=this.value;saveState()"><option value="">Year</option></select>
+              <span>.</span>
+              <select id="prevBxMonth" class="date-select" onchange="state.prevBxMonth=this.value;saveState()"><option value="">MM</option></select>
+              <span>.</span>
+              <select id="prevBxDay" class="date-select" onchange="state.prevBxDay=this.value;saveState()"><option value="">DD</option></select>
               &nbsp; Target: <input type="text" id="prevBxTarget" placeholder="Target nodule" style="width:100px">
               &nbsp; <label class="inline-check-label"><input type="checkbox" id="prevBxFNA" onchange="saveState()"> FNA</label>
               <label class="inline-check-label"><input type="checkbox" id="prevBxCNB" onchange="saveState()"> CNB</label>
@@ -401,9 +418,11 @@ html { -webkit-text-size-adjust: 100%; }
           <td>
             <div style="display:flex;gap:8px;align-items:center;">
               <span>Date:</span>
-              <input type="text" id="compYear" placeholder="YYYY" style="width:52px"> .
-              <input type="text" id="compMonth" placeholder="MM" style="width:38px"> .
-              <input type="text" id="compDay" placeholder="DD" style="width:38px">
+              <select id="compYear" class="date-select" onchange="state.compYear=this.value;saveState()"><option value="">Year</option></select>
+              <span>.</span>
+              <select id="compMonth" class="date-select" onchange="state.compMonth=this.value;saveState()"><option value="">MM</option></select>
+              <span>.</span>
+              <select id="compDay" class="date-select" onchange="state.compDay=this.value;saveState()"><option value="">DD</option></select>
             </div>
           </td>
         </tr>
@@ -1963,13 +1982,15 @@ document.querySelectorAll('input[name="echotexture"]').forEach(r => r.addEventLi
 document.querySelectorAll('input[name="parVasc"]').forEach(r => r.addEventListener('change', () => { state.parVasc=r.value; saveState(); }));
 
 // Bind text inputs in clinical/parenchyma sections
-['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxPathDx'].forEach(id => {
+// Text-only fields use 'input' event
+['prevBxTarget','prevBxPathDx'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
 });
-['compYear','compMonth','compDay'].forEach(id => {
+// Date selects use 'change' event (handled by inline onchange, but add listener for robustness)
+['prevBxYear','prevBxMonth','prevBxDay','compYear','compMonth','compDay'].forEach(id => {
   const el = document.getElementById(id);
-  if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
+  if (el) el.addEventListener('change', () => { state[id]=el.value; saveState(); });
 });
 ['sizeRightAP','sizeRightT','sizeRightL','sizeIsthmusAP','sizeIsthmusL','sizeLeftAP','sizeLeftT','sizeLeftL'].forEach(id => {
   const el = document.getElementById(id);
@@ -1988,6 +2009,43 @@ document.querySelectorAll('table.data-table').forEach(t => {
   wrapper.appendChild(t);
 });
 
+// Populate date selects with year/month/day options
+function populateDateSelects() {
+  const curYear = new Date().getFullYear();
+  // Years: curYear+2 down to curYear-20
+  ['prevBxYear','compYear'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    for (let y = curYear + 2; y >= curYear - 20; y--) {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y; sel.appendChild(opt);
+    }
+  });
+  // Months 01–12
+  ['prevBxMonth','compMonth'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    for (let m = 1; m <= 12; m++) {
+      const v = String(m).padStart(2,'0');
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v; sel.appendChild(opt);
+    }
+  });
+  // Days 01–31
+  ['prevBxDay','compDay'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    for (let d = 1; d <= 31; d++) {
+      const v = String(d).padStart(2,'0');
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v; sel.appendChild(opt);
+    }
+  });
+}
+
 // Adjust #main margin-top to match actual top-bar height (important for mobile wrap)
 function adjustMainTop() {
   const bar = document.getElementById('top-bar');
@@ -1996,10 +2054,11 @@ function adjustMainTop() {
 }
 window.addEventListener('resize', adjustMainTop);
 
-// Load and render
-loadState();
-renderAll();
-// Run after layout is computed
+// Init sequence
+loadState();            // 1. restore saved state
+populateDateSelects(); // 2. fill year/month/day options
+renderAll();            // 3. apply state to DOM (sets select values)
+// Adjust top margin after layout (for mobile wrapped navbar)
 requestAnimationFrame(() => requestAnimationFrame(adjustMainTop));
 </script>
 </body>
