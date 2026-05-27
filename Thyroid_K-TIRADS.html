@@ -4,93 +4,188 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thyroid Finding Tool - K-TIRADS 2021</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; background: #f5f5f5; color: #222; }
+body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 13px; background: #f0f2f5; color: #1a1a2e; line-height: 1.5; }
 
 /* TOP BAR */
-#top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #fff; border-bottom: 2px solid #ddd; display: flex; align-items: center; padding: 0 8px; height: 48px; gap: 4px; }
-.tab-btn { padding: 0 16px; height: 48px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 14px; font-weight: 500; color: #555; transition: color 0.2s; }
-.tab-btn:hover { color: #1976D2; }
-.tab-btn.active { color: #1976D2; border-bottom: 3px solid #1976D2; }
+#top-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: linear-gradient(135deg, #1a237e 0%, #1565c0 100%);
+  display: flex; align-items: center; padding: 0 16px; height: 52px; gap: 2px;
+  box-shadow: 0 2px 12px rgba(21,101,192,0.4);
+}
+.tab-btn {
+  padding: 0 18px; height: 52px; background: none; border: none;
+  border-bottom: 3px solid transparent; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.75);
+  transition: all 0.2s; letter-spacing: 0.3px;
+}
+.tab-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.tab-btn.active { color: #fff; border-bottom: 3px solid #82b1ff; font-weight: 600; }
 .top-spacer { flex: 1; }
-.report-btn { background: #2980B9; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; margin-right: 6px; }
-.report-btn:hover { background: #2471a3; }
-.reset-all-btn { background: #C71585; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
-.reset-all-btn:hover { background: #a01070; }
+.report-btn {
+  background: #00897b; color: #fff; border: none; padding: 7px 18px;
+  border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600;
+  margin-right: 8px; letter-spacing: 0.5px; transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0,137,123,0.4);
+}
+.report-btn:hover { background: #00796b; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,137,123,0.5); }
+.reset-all-btn {
+  background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+  padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 12px;
+  font-weight: 500; transition: all 0.2s;
+}
+.reset-all-btn:hover { background: rgba(199,21,133,0.8); border-color: transparent; }
 
 /* MAIN CONTENT */
-#main { margin-top: 48px; padding: 12px; }
+#main { margin-top: 52px; padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
 /* ACTION BAR */
-.action-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.pink-btn { background: #C71585; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
-.pink-btn:hover { background: #a01070; }
-.blue-btn { background: #2980B9; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
-.blue-btn:hover { background: #2471a3; }
+.action-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.pink-btn {
+  background: #c62828; color: #fff; border: none; padding: 6px 14px;
+  border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+  transition: all 0.2s; box-shadow: 0 1px 4px rgba(198,40,40,0.3);
+}
+.pink-btn:hover { background: #b71c1c; box-shadow: 0 3px 8px rgba(198,40,40,0.4); transform: translateY(-1px); }
+.blue-btn {
+  background: #1565c0; color: #fff; border: none; padding: 6px 14px;
+  border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+  transition: all 0.2s; box-shadow: 0 1px 4px rgba(21,101,192,0.3);
+}
+.blue-btn:hover { background: #0d47a1; transform: translateY(-1px); }
 
-/* TABLES */
-table.data-table { border-collapse: collapse; width: 100%; margin-bottom: 12px; background: #fff; }
-table.data-table th, table.data-table td { border: 1px solid #000; padding: 5px 8px; vertical-align: middle; }
-table.data-table th { background: #555; color: #fff; text-align: center; font-weight: 600; font-size: 13px; }
-table.data-table td.label-cell { background: #f0f0f0; font-weight: 600; width: 160px; font-size: 12px; }
-table.data-table td.required-cell { background: #FEF3BD; }
-table.data-table td.section-header { background: #888; color: #fff; font-weight: 700; text-align: center; }
+/* CARDS / TABLES */
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); margin-bottom: 14px; overflow: hidden; }
+table.data-table { border-collapse: collapse; width: 100%; background: #fff; }
+table.data-table th, table.data-table td { border: 1px solid #e0e0e0; padding: 6px 10px; vertical-align: middle; }
+table.data-table th {
+  background: linear-gradient(135deg, #37474f, #546e7a);
+  color: #fff; text-align: center; font-weight: 600; font-size: 12px; letter-spacing: 0.5px;
+}
+table.data-table td.label-cell {
+  background: #f5f7fa; font-weight: 600; width: 155px; font-size: 12px;
+  color: #37474f; border-right: 2px solid #e0e0e0;
+}
+table.data-table td.required-cell { background: #fffde7; }
+table.data-table td.section-header {
+  background: linear-gradient(135deg, #546e7a, #78909c);
+  color: #fff; font-weight: 700; text-align: center; font-size: 12px; letter-spacing: 0.5px;
+}
 
 /* RADIO / CHECKBOX GROUPS */
-.radio-group, .check-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.radio-group label, .check-group label { display: flex; align-items: center; gap: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; }
-.radio-group input[type=radio], .check-group input[type=checkbox] { cursor: pointer; }
+.radio-group, .check-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.radio-group label, .check-group label {
+  display: flex; align-items: center; gap: 4px; cursor: pointer;
+  font-size: 12px; white-space: nowrap; padding: 2px 0;
+}
+.radio-group input[type=radio], .check-group input[type=checkbox] { cursor: pointer; accent-color: #1565c0; }
 
 /* TEXT INPUTS */
-input[type=text] { padding: 3px 5px; border: 1px solid #aaa; border-radius: 3px; font-size: 12px; }
-input[type=text]:disabled { background: #eee; color: #999; }
-select { padding: 3px 4px; border: 1px solid #aaa; border-radius: 3px; font-size: 12px; }
-textarea { padding: 4px 6px; border: 1px solid #aaa; border-radius: 3px; font-size: 12px; resize: vertical; font-family: inherit; }
-textarea:disabled { background: #eee; color: #999; }
+input[type=text] {
+  padding: 4px 7px; border: 1px solid #cfd8dc; border-radius: 5px; font-size: 12px;
+  transition: border-color 0.2s; background: #fff;
+}
+input[type=text]:focus { outline: none; border-color: #1565c0; box-shadow: 0 0 0 2px rgba(21,101,192,0.12); }
+input[type=text]:disabled { background: #f5f5f5; color: #bbb; border-color: #e0e0e0; }
+select {
+  padding: 4px 6px; border: 1px solid #cfd8dc; border-radius: 5px; font-size: 12px;
+  background: #fff; cursor: pointer;
+}
+select:focus { outline: none; border-color: #1565c0; }
+textarea {
+  padding: 5px 8px; border: 1px solid #cfd8dc; border-radius: 5px;
+  font-size: 12px; resize: vertical; font-family: inherit; background: #fff;
+  transition: border-color 0.2s;
+}
+textarea:focus { outline: none; border-color: #1565c0; box-shadow: 0 0 0 2px rgba(21,101,192,0.12); }
+textarea:disabled { background: #f5f5f5; color: #bbb; border-color: #e0e0e0; }
 
 /* NODULE SECTION */
-.nodule-section { display: flex; gap: 8px; align-items: flex-start; }
+.nodule-section { display: flex; gap: 10px; align-items: flex-start; }
 .nodule-col { flex: 1; min-width: 0; }
-.nodule-col-header { background: #555; color: #fff; text-align: center; padding: 6px; font-weight: 700; font-size: 13px; border: 1px solid #000; border-bottom: 0; }
-.nodule-item { margin-bottom: 8px; }
-.nodule-item table.data-table th.lbl-col { width: 150px; }
+.nodule-col-header {
+  background: linear-gradient(135deg, #1565c0, #1976d2);
+  color: #fff; text-align: center; padding: 8px; font-weight: 700;
+  font-size: 13px; border-radius: 8px 8px 0 0; letter-spacing: 0.5px;
+}
+.nodule-item { margin-bottom: 10px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
-.add-nodule-btn { width: 100%; padding: 5px; background: #eee; border: 1px dashed #aaa; cursor: pointer; font-size: 12px; margin-top: 4px; }
-.add-nodule-btn:hover:not(:disabled) { background: #ddd; }
-.add-nodule-btn:disabled { color: #999; cursor: not-allowed; }
+.add-nodule-btn {
+  width: 100%; padding: 8px; background: #e8f5e9; border: 2px dashed #81c784;
+  cursor: pointer; font-size: 12px; margin-top: 6px; border-radius: 6px;
+  color: #388e3c; font-weight: 600; transition: all 0.2s;
+}
+.add-nodule-btn:hover:not(:disabled) { background: #c8e6c9; border-color: #4caf50; }
+.add-nodule-btn:disabled { color: #bbb; cursor: not-allowed; background: #f5f5f5; border-color: #ddd; }
 
-.tirads-display { font-weight: 700; color: #1976D2; font-size: 12px; }
+/* Delete nodule button */
+.del-nodule-btn {
+  background: rgba(229,57,53,0.85); color: #fff; border: none;
+  border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px;
+  font-weight: 600; transition: all 0.2s; margin-left: 8px;
+}
+.del-nodule-btn:hover { background: #e53935; }
+
+.tirads-display { font-weight: 700; font-size: 12px; }
+.tirads-5 { color: #ff6b6b; }
+.tirads-4 { color: #ffa726; }
+.tirads-3 { color: #66bb6a; }
+.tirads-2 { color: #42a5f5; }
+.tirads-none { color: #b0bec5; }
 
 /* LYMPH NODE TABLE */
-.ln-table-wrap { overflow-x: auto; }
+.ln-table-wrap { overflow-x: auto; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
 table.ln-table { border-collapse: collapse; background: #fff; font-size: 12px; }
-table.ln-table th, table.ln-table td { border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: middle; }
-table.ln-table th { background: #555; color: #fff; font-weight: 600; }
-table.ln-table th.sub-header { background: #888; color: #fff; }
-table.ln-table td.row-label { background: #f0f0f0; font-weight: 600; text-align: left; white-space: nowrap; }
-table.ln-table td.required-cell { background: #FEF3BD; }
+table.ln-table th, table.ln-table td { border: 1px solid #e0e0e0; padding: 5px 7px; text-align: center; vertical-align: middle; }
+table.ln-table th { background: linear-gradient(135deg, #37474f, #546e7a); color: #fff; font-weight: 600; }
+table.ln-table th.sub-header { background: linear-gradient(135deg, #546e7a, #78909c); color: #fff; }
+table.ln-table td.row-label { background: #f5f7fa; font-weight: 600; text-align: left; white-space: nowrap; color: #37474f; border-right: 2px solid #e0e0e0; }
+table.ln-table td.required-cell { background: #fffde7; }
 
 /* BOTTOM INFO */
-#bottom-section { margin-top: 20px; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
-#bottom-section .info-text { font-size: 12px; line-height: 1.7; color: #333; }
+#bottom-section {
+  margin-top: 24px; padding: 16px 20px; background: #fff;
+  border: 1px solid #e0e0e0; border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+#bottom-section .info-text { font-size: 12px; line-height: 1.9; color: #455a64; }
+#bottom-section .info-text strong { color: #1565c0; }
 
 /* DIALOG OVERLAY */
-.dialog-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+.dialog-overlay { display: none; position: fixed; inset: 0; background: rgba(15,20,50,0.6); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
 .dialog-overlay.show { display: flex; }
-.dialog-box { background: #fff; border-radius: 6px; padding: 20px; max-width: 700px; width: 90%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-.dialog-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #333; }
-.dialog-body { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.6; border: 1px solid #ddd; padding: 12px; background: #fafafa; white-space: pre-wrap; font-family: 'Courier New', monospace; }
-.dialog-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
-.copy-feedback { font-size: 12px; color: green; align-self: center; margin-right: auto; }
+.dialog-box {
+  background: #fff; border-radius: 12px; padding: 24px;
+  max-width: 720px; width: 92%; max-height: 82vh; display: flex; flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+}
+.dialog-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; color: #1a237e; border-bottom: 2px solid #e8eaf6; padding-bottom: 10px; }
+.dialog-body {
+  flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.7;
+  border: 1px solid #e0e0e0; padding: 14px; background: #fafafa;
+  white-space: pre-wrap; font-family: 'Courier New', monospace;
+  border-radius: 6px;
+}
+.dialog-actions { display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end; align-items: center; }
+.copy-feedback { font-size: 12px; color: #00897b; align-self: center; margin-right: auto; font-weight: 600; }
 
 /* MISC */
-hr.section-sep { border: none; border-top: 1px solid #ccc; margin: 6px 0; }
+hr.section-sep { border: none; border-top: 1px solid #eceff1; margin: 8px 0; }
 .size-inputs { display: flex; align-items: center; gap: 4px; }
 .size-inputs input[type=text] { width: 52px; }
-.size-auto { font-size: 11px; color: #555; }
+.size-auto { font-size: 11px; color: #78909c; margin-top: 2px; }
+
+/* Section title above nodule columns */
+.nodule-section-title {
+  background: linear-gradient(135deg, #263238, #37474f);
+  color: #fff; padding: 8px 14px; font-weight: 700; font-size: 13px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; letter-spacing: 0.5px;
+}
 </style>
 </head>
 <body>
@@ -233,7 +328,7 @@ hr.section-sep { border: none; border-top: 1px solid #ccc; margin: 6px 0; }
     </table>
 
     <!-- Section C: Thyroid Nodule -->
-    <div style="background:#555;color:#fff;padding:6px 10px;font-weight:700;border:1px solid #000;font-size:13px;">Thyroid Nodule</div>
+    <div class="nodule-section-title">Thyroid Nodule</div>
     <div class="nodule-section" id="noduleSection">
       <div class="nodule-col" id="col-right">
         <div class="nodule-col-header">Right Lobe</div>
@@ -318,8 +413,6 @@ hr.section-sep { border: none; border-top: 1px solid #ccc; margin: 6px 0; }
     <strong>K-TIRADS 3:</strong> Low suspicion (malignancy risk 3-10%): isoechoic or partially cystic nodules without suspicious US features. [Biopsy: &gt; 20 mm]<br>
     <strong>K-TIRADS 4:</strong> Intermediate suspicion (malignancy risk 10-40%): solid hypoechoic nodule without suspicious US feature / isoechoic or partially cystic nodules with suspicious US features. Entirely calcified nodule. [Biopsy: &gt; 10-15 mm]<br>
     <strong>K-TIRADS 5:</strong> High suspicion (malignancy risk &gt; 60%): solid hypoechoic nodule with suspicious US features. [Biopsy: &gt; 10 mm]<br>
-    <br>
-    <span style="color:#888;font-size:11px;">Version 4.3, Last updated Apr 11, 2024 by TwinLab</span>
   </div>
 </div>
 
@@ -687,8 +780,26 @@ function buildNoduleTable(lobe, idx, nod) {
   hth.style.padding = '6px';
   hth.style.fontSize = '13px';
   hth.style.fontWeight = '700';
-  hth.style.border = '1px solid #000';
-  hth.innerHTML = `Nodule ${label} &nbsp; <span class="tirads-display" style="color:#7ec8e3;">${tirads}</span>`;
+  hth.style.border = '1px solid #1a237e';
+  hth.style.display = 'flex';
+  hth.style.alignItems = 'center';
+  hth.style.justifyContent = 'space-between';
+
+  const titleSpan = document.createElement('span');
+  let tiradsClass = 'tirads-none';
+  if (tirads.includes('5')) tiradsClass = 'tirads-5';
+  else if (tirads.includes('4')) tiradsClass = 'tirads-4';
+  else if (tirads.includes('3')) tiradsClass = 'tirads-3';
+  else if (tirads.includes('2')) tiradsClass = 'tirads-2';
+  titleSpan.innerHTML = `Nodule ${label} &nbsp; <span class="tirads-display ${tiradsClass}">${tirads}</span>`;
+
+  const delBtn = document.createElement('button');
+  delBtn.textContent = '✕ 삭제';
+  delBtn.className = 'del-nodule-btn';
+  delBtn.onclick = (e) => { e.stopPropagation(); removeNodule(lobe, idx); };
+
+  hth.appendChild(titleSpan);
+  hth.appendChild(delBtn);
   htr.appendChild(hth);
   thead.appendChild(htr);
   tbl.appendChild(thead);
