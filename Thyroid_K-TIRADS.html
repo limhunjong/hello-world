@@ -1268,7 +1268,17 @@ function buildNoduleTable(lobe, idx, nod) {
     const lbl = document.createElement('label');
     const chk = document.createElement('input'); chk.type='checkbox';
     chk.checked = (nod[key] === true);
-    chk.addEventListener('change', () => { nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
+    chk.addEventListener('change', () => {
+      nod[key] = chk.checked;
+      if (chk.checked) {
+        if (key === 'calcification_entire') {
+          nod.calcification_micro = false; nod.calcification_rim = false; nod.calcification_macro = false;
+        } else {
+          nod.calcification_entire = false;
+        }
+      }
+      updateNodule(lobe, idx, nod);
+    });
     lbl.appendChild(chk); lbl.append(' ' + labelT);
     calcDiv.appendChild(lbl);
   });
@@ -1281,7 +1291,17 @@ function buildNoduleTable(lobe, idx, nod) {
     const lbl = document.createElement('label');
     const chk = document.createElement('input'); chk.type='checkbox';
     chk.checked = (nod[key] === true);
-    chk.addEventListener('change', () => { nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
+    chk.addEventListener('change', () => {
+      nod[key] = chk.checked;
+      if (chk.checked) {
+        if (key === 'vascularity_none') {
+          nod.vascularity_peri = false; nod.vascularity_mild = false; nod.vascularity_marked = false;
+        } else {
+          nod.vascularity_none = false;
+        }
+      }
+      updateNodule(lobe, idx, nod);
+    });
     lbl.appendChild(chk); lbl.append(' ' + labelT);
     vascDiv.appendChild(lbl);
   });
