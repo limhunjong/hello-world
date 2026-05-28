@@ -727,19 +727,254 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
   transition: transform 0.18s;
 }
 
-/* On narrow screens: right panel stacks below */
-@media (max-width: 1024px) {
-  #app-layout { flex-direction: column; }
-  #right-panel {
-    width: 100%;
-    position: static;
-    height: auto;
-    padding: 0 16px 16px;
-  }
-  #live-preview-pane { height: auto; max-height: 60vh; }
+/* ================================================================
+   RESPONSIVE DESIGN SYSTEM
+   xs  < 375px   · sm  375–429px · md  430–767px
+   lg  768–1023px · xl  1024–1439px · 2xl  1440px+
+================================================================ */
+
+/* ===== PREVIEW FAB (tablet + mobile) ===== */
+#preview-fab {
+  display: none;
+  position: fixed;
+  bottom: max(20px, calc(16px + env(safe-area-inset-bottom, 0px)));
+  right: max(16px, calc(12px + env(safe-area-inset-right, 0px)));
+  z-index: 140;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 26px;
+  padding: 0 20px;
+  height: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.38), 0 1px 6px rgba(0,0,0,0.22);
+  align-items: center;
+  gap: 7px;
+  letter-spacing: -0.2px;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
-@media (max-width: 680px) {
-  #right-panel { padding: 0 12px 12px; }
+#preview-fab:active { opacity: 0.82; transform: scale(0.96); }
+#preview-fab svg { display: block; flex-shrink: 0; }
+
+/* ===== PREVIEW BACKDROP ===== */
+#preview-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 145;
+  background: rgba(0,0,0,0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background 0.28s, backdrop-filter 0.28s;
+}
+#preview-backdrop.show {
+  display: block;
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+}
+
+/* Preview sheet close button */
+.preview-close-btn {
+  display: none;
+  background: var(--fill3);
+  border: none;
+  color: var(--label2);
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px; line-height: 1;
+  font-family: inherit;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.preview-close-btn:active { background: var(--fill2); }
+
+/* ===== LOBE TABS (mobile only) ===== */
+.lobe-tabs {
+  display: none;
+  background: var(--bg1);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border-bottom: 0.5px solid var(--sep);
+  margin-bottom: 0;
+}
+.lobe-tab {
+  flex: 1; background: none; border: none;
+  padding: 12px 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--label3);
+  cursor: pointer; font-family: inherit;
+  border-bottom: 2.5px solid transparent;
+  transition: color 0.18s, border-color 0.18s;
+  display: flex; align-items: center; justify-content: center;
+  gap: 5px; min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; letter-spacing: -0.1px;
+}
+.lobe-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+.lobe-tab-badge {
+  background: var(--blue-bg); color: var(--blue);
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+  padding: 1px 7px; min-width: 20px; text-align: center; display: none;
+}
+.lobe-tab.active .lobe-tab-badge { background: var(--blue); color: #fff; }
+.lobe-tab-badge.visible { display: inline-block; }
+
+/* ===== DESKTOP LARGE (≥ 1440px) ===== */
+@media (min-width: 1440px) {
+  #main { padding: 20px; }
+  #bottom-section { margin: 0 20px 20px; }
+  table.data-table th, table.data-table td { padding: 14px 18px; }
+  #right-panel { width: 420px; }
+}
+
+/* ===== LAPTOP (1024px–1439px) ===== */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  #right-panel { width: 370px; }
+}
+
+/* ===== TABLET + MOBILE: BOTTOM SHEET (< 1024px) ===== */
+@media (max-width: 1023px) {
+  #app-layout { flex-direction: column; }
+
+  #right-panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    z-index: 150;
+    padding: 0;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    align-self: auto;
+  }
+  #right-panel.sheet-open { height: 65dvh; }
+
+  #live-preview-pane {
+    height: 100%;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    max-height: none;
+    box-shadow: 0 -6px 40px rgba(0,0,0,0.48), 0 -0.5px 0 rgba(255,255,255,0.06);
+  }
+  .preview-header {
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    padding: 6px 16px 12px;
+    cursor: pointer;
+    flex-direction: column;
+  }
+  .preview-header::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--fill2);
+    border-radius: 2px;
+    margin: 4px auto 10px;
+  }
+  .preview-header-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .preview-close-btn { display: flex; }
+  #preview-fab { display: flex; }
+
+  #app-footer { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  #bottom-section { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
+body.light #right-panel.sheet-open #live-preview-pane {
+  box-shadow: 0 -4px 36px rgba(0,0,0,0.15), 0 -0.5px 0 rgba(0,0,0,0.1);
+}
+
+/* ===== TABLET PORTRAIT (768px–1023px) ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+  #main { padding: 16px; }
+  #bottom-section { margin: 0 16px 16px; }
+  table.data-table td.label-cell { width: 140px; }
+}
+
+/* ===== MOBILE ALL (< 768px) ===== */
+@media (max-width: 767px) {
+  .lobe-tabs { display: flex; }
+  .nodule-col.mobile-hidden { display: none; }
+  .nodule-col-header { display: none; }
+
+  #top-bar {
+    height: auto;
+    padding: env(safe-area-inset-top, 0px) max(10px, env(safe-area-inset-right, 10px)) 8px max(10px, env(safe-area-inset-left, 10px));
+    flex-wrap: wrap; gap: 0;
+  }
+  .tab-btn { flex: 1; height: 44px; padding: 0 6px; font-size: 12px; border-bottom-width: 2px; min-width: 0; letter-spacing: -0.2px; }
+  .top-spacer { flex-basis: 100%; height: 0; flex-shrink: 0; }
+  .report-btn { flex: 1; margin: 6px 6px 0 0; padding: 10px 10px; font-size: 14px; min-height: 46px; }
+  .reset-all-btn { flex-shrink: 0; margin: 6px 0 0; padding: 10px 14px; font-size: 14px; }
+  .theme-toggle-btn { margin: 6px 0 0; }
+
+  #main { padding: 12px max(12px, env(safe-area-inset-left, 12px)); }
+  #bottom-section { margin: 0 max(12px, env(safe-area-inset-left, 12px)) 12px; }
+
+  .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .pink-btn, .blue-btn { padding: 11px 16px; font-size: 14px; min-height: 48px; }
+
+  table.data-table td.label-cell { width: 88px !important; font-size: 12px; padding: 10px 8px; }
+  table.data-table td { padding: 10px 10px; }
+  table.data-table th { padding: 10px 10px; font-size: 13px; }
+
+  .nodule-section { flex-direction: column; }
+  .nodule-col { width: 100%; }
+  .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 8px !important; }
+  .nodule-section-title { font-size: 14px; padding: 10px 14px; }
+
+  .radio-group { width: 100%; }
+  .radio-group label { flex: 1; padding: 10px 10px; min-height: 46px; font-size: 14px; }
+
+  input[type=text], select, textarea { font-size: 16px !important; }
+  input[type=text] { padding: 10px 11px; min-height: 44px; }
+  select { padding: 10px 11px; min-height: 44px; }
+
+  .inline-check-label { min-height: 48px; padding: 12px 13px; font-size: 15px; }
+  .check-group label { min-height: 46px; padding: 10px 12px; font-size: 14px; }
+  .check-group { gap: 3px; }
+
+  .add-nodule-btn { padding: 15px 10px; font-size: 16px; min-height: 56px; }
+  .del-nodule-btn { padding: 9px 13px; font-size: 13px; min-height: 40px; }
+
+  .dialog-box { padding: 8px 16px calc(40px + env(safe-area-inset-bottom, 0px)); max-height: 93dvh; }
+  .dialog-title { font-size: 16px; }
+  .dialog-body { font-size: 12px; padding: 12px; }
+  .dialog-actions { flex-wrap: wrap; gap: 8px; }
+  .dialog-actions .blue-btn, .dialog-actions .pink-btn, .dialog-actions button { flex: 1; min-width: 0; }
+  #confirmDialog .dialog-box { border-radius: var(--r-xl) var(--r-xl) 0 0; max-width: 100%; }
+
+  .ln-table-wrap { -webkit-overflow-scrolling: touch; }
+}
+
+/* ===== MOBILE STANDARD (< 430px) ===== */
+@media (max-width: 429px) {
+  .tab-btn { font-size: 11px; }
+  table.data-table td.label-cell { width: 82px !important; }
+  .nodule-label-cell { width: 90px !important; }
+}
+
+/* ===== MOBILE SMALL (< 375px) ===== */
+@media (max-width: 374px) {
+  .tab-btn { font-size: 10px; padding: 0 4px; }
+  table.data-table td.label-cell { width: 76px !important; }
+  .nodule-label-cell { width: 84px !important; }
+  #main { padding: 10px max(10px, env(safe-area-inset-left, 10px)); }
+  #bottom-section { margin: 0 10px 10px; }
+  .radio-group label { padding: 9px 8px; font-size: 13px; }
 }
 </style>
 </head>
@@ -894,6 +1129,12 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
 
     <!-- Section C: Thyroid Nodule -->
     <div class="nodule-section-title">Thyroid Nodule</div>
+    <!-- Lobe tabs: visible on mobile only (CSS controlled) -->
+    <div class="lobe-tabs" id="lobeTabs">
+      <button class="lobe-tab active" id="lobeTab-right" onclick="switchLobeTab('right')">Right <span class="lobe-tab-badge" id="lobe-badge-right"></span></button>
+      <button class="lobe-tab" id="lobeTab-left" onclick="switchLobeTab('left')">Left <span class="lobe-tab-badge" id="lobe-badge-left"></span></button>
+      <button class="lobe-tab" id="lobeTab-isthmus" onclick="switchLobeTab('isthmus')">Isthmus <span class="lobe-tab-badge" id="lobe-badge-isthmus"></span></button>
+    </div>
     <div class="nodule-section" id="noduleSection">
       <div class="nodule-col" id="col-right">
         <div class="nodule-col-header">Right Lobe</div>
@@ -985,8 +1226,11 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
 
 <div id="right-panel">
   <div id="live-preview-pane">
-    <div class="preview-header">
-      <span class="preview-title">Report Preview</span>
+    <div class="preview-header" id="previewHeader" onclick="handlePreviewHeaderClick(event)">
+      <div class="preview-header-row">
+        <span class="preview-title">Report Preview</span>
+        <button class="preview-close-btn" onclick="event.stopPropagation();closePreviewSheet()" aria-label="Close">✕</button>
+      </div>
     </div>
     <div id="preview-content"><span class="preview-placeholder">입력 내용이 자동으로 표시됩니다.</span></div>
     <div class="preview-actions">
@@ -996,6 +1240,15 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
   </div>
 </div><!-- end right-panel -->
 </div><!-- end app-layout -->
+
+<!-- Preview FAB (tablet + mobile) -->
+<button id="preview-fab" onclick="togglePreviewSheet()" aria-label="Report Preview">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+  <span id="preview-fab-label">Preview</span>
+</button>
+
+<!-- Backdrop for preview sheet -->
+<div id="preview-backdrop" onclick="closePreviewSheet()"></div>
 
 <!-- FOOTER -->
 <footer id="app-footer">
@@ -1239,6 +1492,10 @@ function renderAll() {
 
   // Apply normalThyroid disable LAST so it overrides any individual r.disabled assignments above
   applyNormalThyroidDisable();
+
+  // Initialize mobile lobe tab visibility
+  if (window.innerWidth < 768) switchLobeTab(activeLobeMobile);
+  updateLobeBadges();
 }
 
 // ==================== PARENCHYMA ====================
@@ -1323,6 +1580,12 @@ function renderNoduleCol(lobe) {
     container.appendChild(buildNoduleTable(lobe, idx, nod));
   });
   updateAddBtns();
+  updateLobeBadges();
+  // Re-apply mobile tab visibility after re-render
+  const col = document.getElementById('col-' + lobe);
+  if (col && window.innerWidth < 768) {
+    col.classList.toggle('mobile-hidden', lobe !== activeLobeMobile);
+  }
 }
 
 function updateAddBtns() {
@@ -1344,6 +1607,7 @@ function addNodule(lobe) {
   state.nodules[lobe].push(defaultNodule());
   saveState();
   renderNoduleCol(lobe);
+  if (window.innerWidth < 768) switchLobeTab(lobe);
 }
 
 function removeNodule(lobe, idx) {
@@ -2005,6 +2269,8 @@ function addPresetNodule(lobe, presetKey) {
   state.nodules[lobe].push(nod);
   saveState();
   renderNoduleCol(lobe);
+  // On mobile, switch to this lobe's tab
+  if (window.innerWidth < 768) switchLobeTab(lobe);
 }
 
 function buildPresetStrip(lobe) {
@@ -2591,6 +2857,66 @@ function closeDialog(id) {
   document.getElementById(id).classList.remove('show');
 }
 
+// ==================== PREVIEW SHEET (tablet + mobile) ====================
+let previewSheetOpen = false;
+
+function togglePreviewSheet() {
+  if (previewSheetOpen) { closePreviewSheet(); } else { openPreviewSheet(); }
+}
+
+function openPreviewSheet() {
+  previewSheetOpen = true;
+  const panel = document.getElementById('right-panel');
+  const backdrop = document.getElementById('preview-backdrop');
+  const fabLabel = document.getElementById('preview-fab-label');
+  if (panel) panel.classList.add('sheet-open');
+  if (backdrop) backdrop.classList.add('show');
+  if (fabLabel) fabLabel.textContent = '닫기';
+  updateLivePreview();
+}
+
+function closePreviewSheet() {
+  previewSheetOpen = false;
+  const panel = document.getElementById('right-panel');
+  const backdrop = document.getElementById('preview-backdrop');
+  const fabLabel = document.getElementById('preview-fab-label');
+  if (panel) panel.classList.remove('sheet-open');
+  if (backdrop) backdrop.classList.remove('show');
+  if (fabLabel) fabLabel.textContent = 'Preview';
+}
+
+function handlePreviewHeaderClick(e) {
+  if (window.innerWidth >= 1024) return;
+  closePreviewSheet();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && previewSheetOpen) closePreviewSheet();
+});
+
+// ==================== LOBE TABS (mobile) ====================
+let activeLobeMobile = 'right';
+
+function switchLobeTab(lobe) {
+  activeLobeMobile = lobe;
+  ['right','left','isthmus'].forEach(l => {
+    const tab = document.getElementById('lobeTab-' + l);
+    const col = document.getElementById('col-' + l);
+    if (tab) tab.classList.toggle('active', l === lobe);
+    if (col) col.classList.toggle('mobile-hidden', l !== lobe);
+  });
+}
+
+function updateLobeBadges() {
+  ['right','left','isthmus'].forEach(l => {
+    const badge = document.getElementById('lobe-badge-' + l);
+    if (!badge) return;
+    const count = (state.nodules[l] || []).length;
+    badge.textContent = count > 0 ? String(count) : '';
+    badge.classList.toggle('visible', count > 0);
+  });
+}
+
 // ==================== INIT ====================
 // Bind remaining inputs to saveState
 function bindInputSave(id, eventType) {
@@ -2672,15 +2998,25 @@ function toggleTheme() {
   }
 }());
 
-// Adjust layout margin-top to match actual top-bar height (important for mobile wrap)
+// Adjust layout margin-top to match actual top-bar height
 function adjustMainTop() {
   const bar = document.getElementById('top-bar');
   const layout = document.getElementById('app-layout');
-  if (bar && layout) {
-    const h = bar.offsetHeight;
-    layout.style.marginTop = h + 'px';
-    const rp = document.getElementById('right-panel');
-    if (rp) { rp.style.top = h + 'px'; rp.style.height = 'calc(100vh - ' + h + 'px)'; }
+  if (!bar || !layout) return;
+  const h = bar.offsetHeight;
+  layout.style.marginTop = h + 'px';
+  const rp = document.getElementById('right-panel');
+  if (!rp) return;
+  if (window.innerWidth >= 1024) {
+    // Desktop: sticky right panel
+    rp.style.top = h + 'px';
+    rp.style.height = 'calc(100dvh - ' + h + 'px)';
+    // Auto-close sheet if we expand to desktop width
+    if (previewSheetOpen) closePreviewSheet();
+  } else {
+    // Tablet/mobile: bottom sheet; clear inline positioning
+    rp.style.top = '';
+    rp.style.height = '';
   }
 }
 window.addEventListener('resize', adjustMainTop);
