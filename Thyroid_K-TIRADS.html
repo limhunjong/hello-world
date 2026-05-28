@@ -461,6 +461,51 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 }
 .date-select:focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
 
+/* ===== DYNAMICALLY-RENDERED CELLS (nodule / LN tables) ===== */
+/* These replace inline style.cssText so CSS variables work in light mode */
+.nodule-data-cell {
+  padding: 8px 12px;
+  border-bottom: 0.5px solid var(--sep);
+  background: var(--bg1);
+  color: var(--label1);
+}
+.nodule-data-cell.required { background: var(--orange-bg); }
+.nodule-section-hdr {
+  background: var(--fill4);
+  color: var(--label3);
+  font-weight: 600; text-align: left;
+  font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 8px 12px 6px;
+  border-bottom: 0.5px solid var(--sep);
+}
+.nodule-table-el {
+  border-collapse: collapse; width: 100%;
+  background: var(--bg1);
+  border-radius: 0 0 16px 16px; overflow: hidden;
+}
+.nodule-th-el {
+  background: var(--bg1); color: var(--label1);
+  padding: 0; border: none;
+  border-bottom: 0.5px solid var(--sep);
+}
+.nodule-reset-cell {
+  padding: 10px; text-align: center;
+  border-bottom: none; background: var(--bg1);
+}
+.ln-check-label {
+  display: flex; align-items: center; gap: 4px;
+  white-space: nowrap; cursor: pointer;
+  padding: 6px 10px; border-radius: 8px;
+  transition: background 0.15s;
+  color: var(--label2); font-size: 14px; letter-spacing: -0.1px;
+}
+.ln-section-hdr {
+  background: var(--fill4); color: var(--label3);
+  font-weight: 600; text-align: left;
+  padding: 7px 12px; font-size: 11px;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+
 /* ===== NODULE LABEL COLUMN ===== */
 .nodule-label-cell {
   width: 130px; font-weight: 500; font-size: 13px;
@@ -781,7 +826,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 <div class="dialog-overlay" id="confirmDialog">
   <div class="dialog-box">
     <div class="dialog-title">전체 초기화</div>
-    <div class="dialog-body" style="font-family:inherit;font-size:15px;background:transparent;padding:0 0 4px;color:rgba(235,235,245,0.6);line-height:1.55;white-space:normal;">모든 입력 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</div>
+    <div class="dialog-body" style="font-family:inherit;font-size:15px;background:transparent;padding:0 0 4px;color:var(--label2);line-height:1.55;white-space:normal;">모든 입력 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</div>
     <div class="dialog-actions">
       <button class="blue-btn" onclick="closeDialog('confirmDialog')">취소</button>
       <button class="pink-btn" onclick="doResetAll()">초기화</button>
@@ -1095,7 +1140,7 @@ function buildNoduleTable(lobe, idx, nod) {
     tdL.className = isRequired ? 'nodule-label-cell required' : 'nodule-label-cell';
     tdL.textContent = labelText;
     const tdR = document.createElement('td');
-    tdR.style.cssText = `padding:8px 12px;border-bottom:0.5px solid rgba(84,84,88,0.3);background:${isRequired?'rgba(255,159,10,0.055)':'#1C1C1E'};color:#fff;`;
+    tdR.className = isRequired ? 'nodule-data-cell required' : 'nodule-data-cell';
     if (typeof cellContent === 'string') tdR.innerHTML = cellContent;
     else tdR.appendChild(cellContent);
     tr.appendChild(tdL);
@@ -1107,21 +1152,21 @@ function buildNoduleTable(lobe, idx, nod) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = 2;
-    td.style.cssText = 'background:rgba(0,0,0,0.25);color:rgba(235,235,245,0.3);font-weight:600;text-align:left;font-size:11px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 12px 6px;border-bottom:0.5px solid rgba(84,84,88,0.3);';
+    td.className = 'nodule-section-hdr';
     td.textContent = text.replace(/---\s*/g,'').replace(/\s*---/g,'').trim();
     tr.appendChild(td);
     return tr;
   }
 
   const tbl = document.createElement('table');
-  tbl.style.cssText = 'border-collapse:collapse;width:100%;background:#1C1C1E;border-radius:0 0 16px 16px;overflow:hidden;';
+  tbl.className = 'nodule-table-el';
 
   // Header row
   const thead = document.createElement('thead');
   const htr = document.createElement('tr');
   const hth = document.createElement('th');
   hth.colSpan = 2;
-  hth.style.cssText = 'background:#1C1C1E;color:#fff;padding:0;border:none;border-bottom:0.5px solid rgba(84,84,88,0.45);';
+  hth.className = 'nodule-th-el';
 
   // Inner div for flex layout (needed so colspan works correctly)
   const hthInner = document.createElement('div');
@@ -1574,7 +1619,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const resetTr = document.createElement('tr');
   const resetTd = document.createElement('td');
   resetTd.colSpan = 2;
-  resetTd.style.cssText = 'padding:10px;text-align:center;border-bottom:none;background:#1C1C1E;';
+  resetTd.className = 'nodule-reset-cell';
   const resetBtn = document.createElement('button');
   resetBtn.className = 'pink-btn';
   resetBtn.textContent = 'Reset this nodule';
@@ -1693,7 +1738,7 @@ function renderLymphTable() {
     const td = document.createElement('td'); td.style.verticalAlign='top';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
-      const lbl = document.createElement('label'); lbl.style.cssText='display:flex;align-items:center;gap:4px;white-space:nowrap;cursor:pointer;padding:6px 10px;border-radius:8px;transition:background 0.15s;color:rgba(235,235,245,0.6);font-size:14px;letter-spacing:-0.1px;';
+      const lbl = document.createElement('label'); lbl.className='ln-check-label';
       const chk = document.createElement('input'); chk.type='checkbox';
       const key = 'level_'+lvl;
       chk.checked = !!(ln[key]);
@@ -1746,7 +1791,7 @@ function renderLymphTable() {
 
   // Biopsy header
   const trBxH = document.createElement('tr');
-  const tdBxH = document.createElement('td'); tdBxH.colSpan=9; tdBxH.style.background='rgba(0,0,0,0.2)';tdBxH.style.color='rgba(235,235,245,0.3)';tdBxH.style.fontWeight='600';tdBxH.style.textAlign='left';tdBxH.style.padding='7px 12px';tdBxH.style.fontSize='11px';tdBxH.style.letterSpacing='0.5px';tdBxH.style.textTransform='uppercase';
+  const tdBxH = document.createElement('td'); tdBxH.colSpan=9; tdBxH.className='ln-section-hdr';
   tdBxH.textContent='--- Biopsy ---'; trBxH.appendChild(tdBxH);
   tbody.appendChild(trBxH);
 
@@ -1772,7 +1817,7 @@ function renderLymphTable() {
     const td = document.createElement('td');
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
-      const lbl = document.createElement('label'); lbl.style.cssText='display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:8px;transition:background 0.15s;color:rgba(235,235,245,0.6);font-size:14px;letter-spacing:-0.1px;';
+      const lbl = document.createElement('label'); lbl.className='ln-check-label';
       const chk = document.createElement('input'); chk.type='checkbox';
       chk.disabled = !ln.biopsy;
       chk.checked = !!(ln['fna_'+lvl]);
@@ -1792,7 +1837,7 @@ function renderLymphTable() {
     const td = document.createElement('td');
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
-      const lbl = document.createElement('label'); lbl.style.cssText='display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:8px;transition:background 0.15s;color:rgba(235,235,245,0.6);font-size:14px;letter-spacing:-0.1px;';
+      const lbl = document.createElement('label'); lbl.className='ln-check-label';
       const chk = document.createElement('input'); chk.type='checkbox';
       chk.disabled = !ln.biopsy;
       chk.checked = !!(ln['cnb_'+lvl]);
