@@ -111,12 +111,12 @@ label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .theme-toggle-btn {
   background: var(--fill3); border: none;
   width: 34px; height: 34px; border-radius: 50%;
-  cursor: pointer; font-size: 17px;
+  cursor: pointer; color: var(--label2);
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s; margin-left: 4px; flex-shrink: 0;
-  font-family: inherit; line-height: 1;
+  transition: background 0.15s, color 0.15s; margin-left: 4px; flex-shrink: 0;
 }
 .theme-toggle-btn:active { background: var(--fill2); }
+.theme-toggle-btn svg { display: block; }
 
 /* ===== LIGHT MODE ===== */
 body.light {
@@ -517,7 +517,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   <div class="top-spacer"></div>
   <button class="report-btn" onclick="generateReport()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
-  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환">🌙</button>
+  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -2244,17 +2244,19 @@ document.querySelectorAll('table.data-table').forEach(t => {
 });
 
 // ==================== THEME TOGGLE ====================
+const ICON_MOON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const ICON_SUN  = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('thyroidTool_theme', isLight ? 'light' : 'dark');
-  document.getElementById('themeToggleBtn').textContent = isLight ? '☀️' : '🌙';
+  document.getElementById('themeToggleBtn').innerHTML = isLight ? ICON_SUN : ICON_MOON;
 }
 (function() {
   const saved = localStorage.getItem('thyroidTool_theme');
   if (saved === 'light') {
     document.body.classList.add('light');
     const btn = document.getElementById('themeToggleBtn');
-    if (btn) btn.textContent = '☀️';
+    if (btn) btn.innerHTML = ICON_SUN;
   }
 }());
 
