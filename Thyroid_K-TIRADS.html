@@ -190,7 +190,8 @@ table.data-table td.section-header {
   white-space: nowrap; user-select: none; min-height: 42px;
   letter-spacing: -0.1px;
 }
-.radio-group input[type=radio] {
+.radio-group input[type=radio],
+.radio-group input[type=checkbox] {
   position: absolute; opacity: 0;
   width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);
 }
@@ -775,8 +776,8 @@ function defaultNodule() {
     sizeChangeInitial: false, sizeChangeFU: false, sizeChangeType: '',
     orientation: '',
     margin: '',
-    calcification: '',
-    vascularity: '',
+    calcification_micro: false, calcification_rim: false, calcification_macro: false, calcification_entire: false,
+    vascularity_none: false, vascularity_peri: false, vascularity_mild: false, vascularity_marked: false,
     spongiform: '',
     cometTailArtifact: '',
     diffuseLesion: '',
@@ -798,22 +799,24 @@ function loadState() {
     if (s) {
       const parsed = JSON.parse(s);
       state = deepMerge(JSON.parse(JSON.stringify(defaultState)), parsed);
-      // Migrate old calcification/vascularity booleans to single-key format
+      // Migrate old single-string calcification/vascularity format to booleans
       ['right','left','isthmus'].forEach(lobe => {
         (state.nodules[lobe] || []).forEach(nod => {
-          if (nod.calcification === undefined) {
-            if (nod.calcification_entire === 'entire') nod.calcification = 'entire';
-            else if (nod.calcification_macro) nod.calcification = 'macro';
-            else if (nod.calcification_rim) nod.calcification = 'rim';
-            else if (nod.calcification_micro) nod.calcification = 'micro';
-            else nod.calcification = '';
+          if (typeof nod.calcification === 'string') {
+            const v = nod.calcification;
+            nod.calcification_micro  = (v === 'micro');
+            nod.calcification_rim    = (v === 'rim');
+            nod.calcification_macro  = (v === 'macro');
+            nod.calcification_entire = (v === 'entire');
+            delete nod.calcification;
           }
-          if (nod.vascularity === undefined) {
-            if (nod.vascularity_marked) nod.vascularity = 'marked';
-            else if (nod.vascularity_mild) nod.vascularity = 'mild';
-            else if (nod.vascularity_peri) nod.vascularity = 'peripheral';
-            else if (nod.vascularity_none) nod.vascularity = 'none';
-            else nod.vascularity = '';
+          if (typeof nod.vascularity === 'string') {
+            const v = nod.vascularity;
+            nod.vascularity_none   = (v === 'none');
+            nod.vascularity_peri   = (v === 'peripheral');
+            nod.vascularity_mild   = (v === 'mild');
+            nod.vascularity_marked = (v === 'marked');
+            delete nod.vascularity;
           }
         });
       });
@@ -1157,7 +1160,7 @@ function buildNoduleTable(lobe, idx, nod) {
   tbody.appendChild(row('Diameter *', diamDiv, true));
 
   // --- Composition ---
-  const isEntireCalc = nod.calcification === 'entire';
+  const isEntireCalc = nod.calcification_entire === true;
   const isSpong = nod.spongiform === 'Yes';
   const compDiv = document.createElement('div');
   compDiv.className = 'radio-group';
@@ -1257,19 +1260,16 @@ function buildNoduleTable(lobe, idx, nod) {
   const calcDiv = document.createElement('div');
   calcDiv.className = 'radio-group';
   [
-    ['Punctate echogenic foci (microcalcification)', 'micro'],
-    ['Rim', 'rim'],
-    ['Macro', 'macro'],
-    ['Entirely calcified', 'entire']
-  ].forEach(([labelT, val]) => {
+    ['Punctate echogenic foci (microcalcification)', 'calcification_micro'],
+    ['Rim', 'calcification_rim'],
+    ['Macro', 'calcification_macro'],
+    ['Entirely calcified', 'calcification_entire']
+  ].forEach(([labelT, key]) => {
     const lbl = document.createElement('label');
-    const r = document.createElement('input'); r.type='radio'; r.name=`calc_${lobe}_${idx}`; r.value=val;
-    r.checked = (nod.calcification === val);
-    lbl.addEventListener('click', (e) => {
-      if (nod.calcification === val) { e.preventDefault(); nod.calcification = ''; updateNodule(lobe, idx, nod); }
-    });
-    r.addEventListener('change', () => { nod.calcification = val; updateNodule(lobe, idx, nod); });
-    lbl.appendChild(r); lbl.append(' ' + labelT);
+    const chk = document.createElement('input'); chk.type='checkbox';
+    chk.checked = (nod[key] === true);
+    chk.addEventListener('change', () => { nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(chk); lbl.append(' ' + labelT);
     calcDiv.appendChild(lbl);
   });
   tbody.appendChild(row('Echogenic foci\n(calcification)', calcDiv, false));
@@ -1277,15 +1277,12 @@ function buildNoduleTable(lobe, idx, nod) {
   // --- Vascularity ---
   const vascDiv = document.createElement('div');
   vascDiv.className = 'radio-group';
-  [['None','none'],['Peripheral','peripheral'],['Mild intranodular','mild'],['Marked intranodular','marked']].forEach(([labelT, val]) => {
+  [['None','vascularity_none'],['Peripheral','vascularity_peri'],['Mild intranodular','vascularity_mild'],['Marked intranodular','vascularity_marked']].forEach(([labelT, key]) => {
     const lbl = document.createElement('label');
-    const r = document.createElement('input'); r.type='radio'; r.name=`vasc_${lobe}_${idx}`; r.value=val;
-    r.checked = (nod.vascularity === val);
-    lbl.addEventListener('click', (e) => {
-      if (nod.vascularity === val) { e.preventDefault(); nod.vascularity = ''; updateNodule(lobe, idx, nod); }
-    });
-    r.addEventListener('change', () => { nod.vascularity = val; updateNodule(lobe, idx, nod); });
-    lbl.appendChild(r); lbl.append(' ' + labelT);
+    const chk = document.createElement('input'); chk.type='checkbox';
+    chk.checked = (nod[key] === true);
+    chk.addEventListener('change', () => { nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(chk); lbl.append(' ' + labelT);
     vascDiv.appendChild(lbl);
   });
   tbody.appendChild(row('Vascularity', vascDiv, false));
@@ -1536,7 +1533,7 @@ function rerenderNoduleTirads() {
 
 // ==================== K-TIRADS ====================
 function hasSuspiciousFeature(nod) {
-  return nod.calcification === 'micro' ||
+  return nod.calcification_micro === true ||
          nod.orientation === 'Nonparallel (taller-than-wide)' ||
          nod.margin === 'Irregular (spiculated/microlobulated)';
 }
@@ -1554,7 +1551,7 @@ function getKTIRADS(nod, normalThy) {
       (['P.Cystic','P.Solid'].includes(nod.composition) && s) ||
       (['Iso','Hyper'].includes(nod.echogenicity) && s) ||
       nod.diffuseLesion === 'extensive' || nod.diffuseLesion === 'infiltrative' ||
-      nod.calcification === 'entire')
+      nod.calcification_entire === true)
     return '[K-TIRADS 4, Intermediate suspicion]';
 
   // K-TIRADS 2 (spongiform)
@@ -1867,10 +1864,10 @@ function generateReport() {
         if (nod.echogenicity) parts.push(nod.echogenicity);
         if (nod.orientation === 'Nonparallel (taller-than-wide)') parts.push('nonparallel');
         if (nod.margin === 'Irregular (spiculated/microlobulated)') parts.push('irregular margin');
-        if (nod.calcification === 'micro') parts.push('PEF/microcalcification');
-        if (nod.calcification === 'rim') parts.push('rim calcification');
-        if (nod.calcification === 'macro') parts.push('macrocalcification');
-        if (nod.calcification === 'entire') parts.push('macrocalcification (entirely calcified)');
+        if (nod.calcification_micro) parts.push('PEF/microcalcification');
+        if (nod.calcification_rim) parts.push('rim calcification');
+        if (nod.calcification_macro) parts.push('macrocalcification');
+        if (nod.calcification_entire) parts.push('macrocalcification (entirely calcified)');
         if (nod.spongiform === 'Yes') parts.push('spongiform');
         if (nod.cometTailArtifact === 'Yes') parts.push('comet tail artifact');
         if (nod.diffuseLesion === 'extensive') parts.push('extensive parenchymal PEF');
