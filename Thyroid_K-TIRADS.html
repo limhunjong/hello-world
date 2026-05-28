@@ -501,6 +501,22 @@ table.ln-table td.required-cell { background: rgba(255,159,10,0.055); }
 }
 .dialog-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; align-items: center; }
 .copy-feedback { font-size: 13px; color: var(--green); align-self: center; margin-right: auto; font-weight: 600; }
+.add-biopsy-btn {
+  margin-top: 6px; padding: 7px 14px; border-radius: var(--r-sm);
+  background: var(--fill3); border: none; color: var(--blue);
+  font-size: 13px; font-weight: 600; cursor: pointer; min-height: 36px;
+}
+.add-biopsy-btn:hover { background: var(--fill2); }
+.prev-bx-card {
+  margin-bottom: 8px; padding: 10px 12px;
+  background: var(--fill4); border-radius: var(--r-md);
+}
+.prev-bx-del-btn {
+  background: none; border: none; color: var(--label3);
+  font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1;
+  margin-left: auto;
+}
+.prev-bx-del-btn:hover { color: var(--red); }
 
 /* Confirm dialog — centered alert */
 #confirmDialog.dialog-overlay { align-items: center; }
@@ -1307,51 +1323,8 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
         <tr>
           <td class="label-cell">Previous Biopsy</td>
           <td>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-              <span>Date:</span>
-              <select id="prevBxYear" class="date-select" onchange="state.prevBxYear=this.value;saveState()"><option value="">Year</option></select>
-              <span>.</span>
-              <select id="prevBxMonth" class="date-select" onchange="state.prevBxMonth=this.value;saveState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
-              <span>.</span>
-              <select id="prevBxDay" class="date-select" onchange="state.prevBxDay=this.value;saveState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
-              &nbsp;
-              <span style="font-size:13px;color:var(--label2);">Target:</span>
-              <input type="text" id="prevBxTarget" placeholder="Nodule" style="width:90px" oninput="saveState()">
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
-              <label class="inline-check-label"><input type="checkbox" id="prevBxFNA" onchange="onPrevBxChange()"> FNA</label>
-              <label class="inline-check-label"><input type="checkbox" id="prevBxCNB" onchange="onPrevBxChange()"> CNB</label>
-            </div>
-            <div id="prevBxFNAPanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--fill4);border-radius:var(--r-md);">
-              <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">FNA (Bethesda System)</div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <span style="font-size:13px;color:var(--label2);">Category:</span>
-                <select id="prevBxFNAPathDx" onchange="saveState();updateLivePreview();" style="flex:1;min-width:200px;">
-                  <option value="">— Select —</option>
-                  <option value="I (Nondiagnostic)">I (Nondiagnostic)</option>
-                  <option value="II (Benign)">II (Benign)</option>
-                  <option value="III (AUS)">III (AUS)</option>
-                  <option value="IV (Follicular neoplasm)">IV (Follicular neoplasm)</option>
-                  <option value="V (Suspicious for malignancy)">V (Suspicious for malignancy)</option>
-                  <option value="VI (Malignant)">VI (Malignant)</option>
-                </select>
-              </div>
-            </div>
-            <div id="prevBxCNBPanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--fill4);border-radius:var(--r-md);">
-              <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">CNB</div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <span style="font-size:13px;color:var(--label2);">Category:</span>
-                <select id="prevBxCNBPathDx" onchange="saveState();updateLivePreview();" style="flex:1;min-width:200px;">
-                  <option value="">— Select —</option>
-                  <option value="I (Nondiagnostic or unsatisfactory)">I (Nondiagnostic or unsatisfactory)</option>
-                  <option value="II (Benign lesion)">II (Benign lesion)</option>
-                  <option value="III (Indeterminate lesion)">III (Indeterminate lesion)</option>
-                  <option value="IV (Follicular neoplasm or suspicious for follicular neoplasm)">IV (Follicular neoplasm or suspicious for follicular neoplasm)</option>
-                  <option value="V (Suspicious for malignancy)">V (Suspicious for malignancy)</option>
-                  <option value="VI (Malignant)">VI (Malignant)</option>
-                </select>
-              </div>
-            </div>
+            <div id="prevBiopsyList"></div>
+            <button type="button" class="add-biopsy-btn" onclick="addPrevBiopsy()">+ Add biopsy</button>
           </td>
         </tr>
         <tr>
@@ -1385,33 +1358,27 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
                 <label><input type="radio" name="thySize" value="Normal" onchange="saveState()" checked> Normal</label>
                 <label><input type="radio" name="thySize" value="Increased" onchange="saveState()"> Increased</label>
               </div>
-              <div id="sizeInputsWrap" style="display:flex;flex-wrap:wrap;gap:8px;">
-                <label style="display:flex;align-items:center;gap:4px;">
-                  <input type="checkbox" id="sizeRight" onchange="toggleSizeInputs()"> Right
-                  <span id="sizeRightInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
-                    <input type="text" id="sizeRightAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeRightT" inputmode="decimal" placeholder="T" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeRightL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
-                    <select id="sizeRightUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
-                  </span>
-                </label>
-                <label style="display:flex;align-items:center;gap:4px;">
-                  <input type="checkbox" id="sizeIsthmus" onchange="toggleSizeInputs()"> Isthmus
-                  <span id="sizeIsthmusInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
-                    <input type="text" id="sizeIsthmusAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeIsthmusL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
-                    <select id="sizeIsthmusUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
-                  </span>
-                </label>
-                <label style="display:flex;align-items:center;gap:4px;">
-                  <input type="checkbox" id="sizeLeft" onchange="toggleSizeInputs()"> Left
-                  <span id="sizeLeftInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
-                    <input type="text" id="sizeLeftAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeLeftT" inputmode="decimal" placeholder="T" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeLeftL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
-                    <select id="sizeLeftUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
-                  </span>
-                </label>
+              <div id="sizeInputsWrap" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                <span style="font-size:13px;color:var(--label2);font-weight:500;">Right</span>
+                <span class="size-inputs" style="display:flex;gap:3px;align-items:center;">
+                  <input type="text" id="sizeRightAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                  <input type="text" id="sizeRightT" inputmode="decimal" placeholder="T" style="width:42px" oninput="saveState()"> ×
+                  <input type="text" id="sizeRightL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
+                  <select id="sizeRightUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
+                </span>
+                <span style="font-size:13px;color:var(--label2);font-weight:500;">Isthmus</span>
+                <span class="size-inputs" style="display:flex;gap:3px;align-items:center;">
+                  <input type="text" id="sizeIsthmusAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                  <input type="text" id="sizeIsthmusL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
+                  <select id="sizeIsthmusUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
+                </span>
+                <span style="font-size:13px;color:var(--label2);font-weight:500;">Left</span>
+                <span class="size-inputs" style="display:flex;gap:3px;align-items:center;">
+                  <input type="text" id="sizeLeftAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                  <input type="text" id="sizeLeftT" inputmode="decimal" placeholder="T" style="width:42px" oninput="saveState()"> ×
+                  <input type="text" id="sizeLeftL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
+                  <select id="sizeLeftUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
+                </span>
               </div>
             </div>
           </td>
@@ -1631,9 +1598,7 @@ const defaultState = {
   normalThyroid: false,
   clinInd: 'Thyroid nodule',
   clinIndCustom: '',
-  prevBxYear: '', prevBxMonth: '', prevBxDay: '',
-  prevBxTarget: '', prevBxFNA: false, prevBxFNAPathDx: '',
-  prevBxCNB: false, prevBxCNBPathDx: '',
+  prevBiopsies: [],
   compYear: '', compMonth: '', compDay: '',
   thySize: 'Normal',
   sizeRight: false, sizeRightAP: '', sizeRightT: '', sizeRightL: '', sizeRightUnit: 'cm',
@@ -1770,26 +1735,20 @@ function renderAll() {
   const cinds = document.querySelectorAll('input[name="clinInd"]');
   cinds.forEach(r => r.checked = (r.value === state.clinInd));
   document.getElementById('clinIndCustom').value = state.clinIndCustom;
-  document.getElementById('prevBxYear').value = state.prevBxYear;
-  document.getElementById('prevBxMonth').value = state.prevBxMonth;
-  document.getElementById('prevBxDay').value = state.prevBxDay;
-  document.getElementById('prevBxTarget').value = state.prevBxTarget;
-  document.getElementById('prevBxFNA').checked = !!state.prevBxFNA;
-  document.getElementById('prevBxCNB').checked = !!state.prevBxCNB;
-  document.getElementById('prevBxFNAPathDx').value = state.prevBxFNAPathDx || '';
-  document.getElementById('prevBxCNBPathDx').value = state.prevBxCNBPathDx || '';
-  document.getElementById('prevBxFNAPanel').style.display = state.prevBxFNA ? 'block' : 'none';
-  document.getElementById('prevBxCNBPanel').style.display = state.prevBxCNB ? 'block' : 'none';
+  // Migrate old single-biopsy format to new array format
+  if (!state.prevBiopsies || !Array.isArray(state.prevBiopsies)) state.prevBiopsies = [];
+  if (state.prevBiopsies.length === 0 && (state.prevBxFNA || state.prevBxCNB)) {
+    state.prevBiopsies = [{ year: state.prevBxYear||'', month: state.prevBxMonth||'', day: state.prevBxDay||'',
+      target: state.prevBxTarget||'', fna: !!state.prevBxFNA, fnaPathDx: state.prevBxFNAPathDx||'',
+      cnb: !!state.prevBxCNB, cnbPathDx: state.prevBxCNBPathDx||'' }];
+  }
+  renderPrevBiopsies();
   document.getElementById('compYear').value = state.compYear;
   document.getElementById('compMonth').value = state.compMonth;
   document.getElementById('compDay').value = state.compDay;
 
   // Thyroid size
   document.querySelectorAll('input[name="thySize"]').forEach(r => r.checked = (r.value === state.thySize));
-  document.getElementById('sizeRight').checked = state.sizeRight;
-  document.getElementById('sizeIsthmus').checked = state.sizeIsthmus;
-  document.getElementById('sizeLeft').checked = state.sizeLeft;
-  toggleSizeInputs(true);
   document.getElementById('sizeRightAP').value = state.sizeRightAP;
   document.getElementById('sizeRightT').value = state.sizeRightT;
   document.getElementById('sizeRightL').value = state.sizeRightL;
@@ -1889,25 +1848,131 @@ function onClinIndCustomChange() {
   saveState();
 }
 
-function onPrevBxChange() {
-  state.prevBxFNA = document.getElementById('prevBxFNA').checked;
-  state.prevBxCNB = document.getElementById('prevBxCNB').checked;
-  document.getElementById('prevBxFNAPanel').style.display = state.prevBxFNA ? 'block' : 'none';
-  document.getElementById('prevBxCNBPanel').style.display = state.prevBxCNB ? 'block' : 'none';
+
+function toggleSizeInputs(noSave) { if (!noSave) saveState(); } // checkboxes removed; kept for compat
+
+// ==================== PREVIOUS BIOPSY (MULTI) ====================
+const FNA_OPTIONS = ['I (Nondiagnostic)','II (Benign)','III (AUS)','IV (Follicular neoplasm)','V (Suspicious for malignancy)','VI (Malignant)'];
+const CNB_OPTIONS = ['I (Nondiagnostic or unsatisfactory)','II (Benign lesion)','III (Indeterminate lesion)','IV (Follicular neoplasm or suspicious for follicular neoplasm)','V (Suspicious for malignancy)','VI (Malignant)'];
+
+function defaultBiopsy() {
+  return { year:'', month:'', day:'', target:'', fna:false, fnaPathDx:'', cnb:false, cnbPathDx:'' };
+}
+
+function addPrevBiopsy() {
+  if (!state.prevBiopsies) state.prevBiopsies = [];
+  state.prevBiopsies.push(defaultBiopsy());
   saveState();
+  renderPrevBiopsies();
+}
+
+function deletePrevBiopsy(i) {
+  state.prevBiopsies.splice(i, 1);
+  saveState();
+  renderPrevBiopsies();
   updateLivePreview();
 }
 
-function toggleSizeInputs(noSave) {
-  ['Right','Isthmus','Left'].forEach(side => {
-    const chk = document.getElementById('size'+side);
-    const wrap = document.getElementById('size'+side+'Inputs');
-    if (chk && wrap) {
-      wrap.style.display = chk.checked ? 'flex' : 'none';
-      state['size'+side] = chk.checked;
-    }
-  });
-  if (!noSave) saveState();
+function makeDateSel(placeholder, options, val, onChange) {
+  const sel = document.createElement('select');
+  sel.className = 'date-select';
+  const def = document.createElement('option'); def.value = ''; def.textContent = placeholder; sel.appendChild(def);
+  options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; if (o === val) opt.selected = true; sel.appendChild(opt); });
+  sel.onchange = () => onChange(sel.value);
+  return sel;
+}
+
+function makePathDxSel(options, val, onChange) {
+  const sel = document.createElement('select');
+  sel.style.cssText = 'flex:1;min-width:180px;';
+  const def = document.createElement('option'); def.value = ''; def.textContent = '— Select —'; sel.appendChild(def);
+  options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; if (o === val) opt.selected = true; sel.appendChild(opt); });
+  sel.onchange = () => onChange(sel.value);
+  return sel;
+}
+
+function buildPrevBiopsyCard(bx, i) {
+  const card = document.createElement('div');
+  card.className = 'prev-bx-card';
+
+  // Header row
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;margin-bottom:8px;gap:6px;';
+  const ttl = document.createElement('span');
+  ttl.style.cssText = 'font-size:12px;font-weight:600;color:var(--label2);letter-spacing:0.2px;';
+  ttl.textContent = 'Biopsy ' + (i + 1);
+  const del = document.createElement('button');
+  del.type = 'button'; del.className = 'prev-bx-del-btn'; del.textContent = '×';
+  del.onclick = () => deletePrevBiopsy(i);
+  hdr.appendChild(ttl); hdr.appendChild(del);
+  card.appendChild(hdr);
+
+  // Date + Target row
+  const r1 = document.createElement('div');
+  r1.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;';
+  const dl = document.createElement('span'); dl.style.cssText = 'font-size:13px;color:var(--label2);'; dl.textContent = 'Date:';
+  const YEARS = []; for (let y = new Date().getFullYear(); y >= 2000; y--) YEARS.push(String(y));
+  const MONTHS = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+  const DAYS = []; for (let d = 1; d <= 31; d++) DAYS.push(String(d).padStart(2,'0'));
+  const ySel = makeDateSel('Year', YEARS, bx.year, v => { state.prevBiopsies[i].year = v; saveState(); });
+  const mSel = makeDateSel('MM', MONTHS, bx.month, v => { state.prevBiopsies[i].month = v; saveState(); });
+  const dSel = makeDateSel('DD', DAYS, bx.day, v => { state.prevBiopsies[i].day = v; saveState(); });
+  const tl = document.createElement('span'); tl.style.cssText = 'font-size:13px;color:var(--label2);margin-left:4px;'; tl.textContent = 'Target:';
+  const ti = document.createElement('input'); ti.type = 'text'; ti.placeholder = 'Nodule'; ti.value = bx.target || ''; ti.style.width = '90px';
+  ti.oninput = () => { state.prevBiopsies[i].target = ti.value; saveState(); };
+  [dl, ySel, document.createTextNode(' . '), mSel, document.createTextNode(' . '), dSel, tl, ti].forEach(n => r1.appendChild(n));
+  card.appendChild(r1);
+
+  // FNA / CNB checkboxes
+  const r2 = document.createElement('div');
+  r2.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px;';
+
+  const fnaLbl = document.createElement('label'); fnaLbl.className = 'inline-check-label';
+  const fnaChk = document.createElement('input'); fnaChk.type = 'checkbox'; fnaChk.checked = !!bx.fna;
+  fnaLbl.appendChild(fnaChk); fnaLbl.appendChild(document.createTextNode(' FNA'));
+
+  const cnbLbl = document.createElement('label'); cnbLbl.className = 'inline-check-label';
+  const cnbChk = document.createElement('input'); cnbChk.type = 'checkbox'; cnbChk.checked = !!bx.cnb;
+  cnbLbl.appendChild(cnbChk); cnbLbl.appendChild(document.createTextNode(' CNB'));
+
+  r2.appendChild(fnaLbl); r2.appendChild(cnbLbl);
+  card.appendChild(r2);
+
+  // FNA panel
+  const fnaPanel = document.createElement('div');
+  fnaPanel.style.cssText = 'display:' + (bx.fna ? 'block' : 'none') + ';margin-top:6px;padding:8px 10px;background:var(--fill3);border-radius:var(--r-sm);';
+  const fnaTitle = document.createElement('div'); fnaTitle.style.cssText = 'font-size:11px;font-weight:600;color:var(--label3);margin-bottom:4px;letter-spacing:0.3px;text-transform:uppercase;'; fnaTitle.textContent = 'FNA (Bethesda)';
+  const fnaRow = document.createElement('div'); fnaRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;align-items:center;';
+  const fnaCl = document.createElement('span'); fnaCl.style.cssText = 'font-size:13px;color:var(--label2);'; fnaCl.textContent = 'Category:';
+  const fnaSel = makePathDxSel(FNA_OPTIONS, bx.fnaPathDx, v => { state.prevBiopsies[i].fnaPathDx = v; saveState(); updateLivePreview(); });
+  fnaRow.appendChild(fnaCl); fnaRow.appendChild(fnaSel);
+  fnaPanel.appendChild(fnaTitle); fnaPanel.appendChild(fnaRow);
+  card.appendChild(fnaPanel);
+
+  // CNB panel
+  const cnbPanel = document.createElement('div');
+  cnbPanel.style.cssText = 'display:' + (bx.cnb ? 'block' : 'none') + ';margin-top:6px;padding:8px 10px;background:var(--fill3);border-radius:var(--r-sm);';
+  const cnbTitle = document.createElement('div'); cnbTitle.style.cssText = 'font-size:11px;font-weight:600;color:var(--label3);margin-bottom:4px;letter-spacing:0.3px;text-transform:uppercase;'; cnbTitle.textContent = 'CNB';
+  const cnbRow = document.createElement('div'); cnbRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;align-items:center;';
+  const cnbCl = document.createElement('span'); cnbCl.style.cssText = 'font-size:13px;color:var(--label2);'; cnbCl.textContent = 'Category:';
+  const cnbSel = makePathDxSel(CNB_OPTIONS, bx.cnbPathDx, v => { state.prevBiopsies[i].cnbPathDx = v; saveState(); updateLivePreview(); });
+  cnbRow.appendChild(cnbCl); cnbRow.appendChild(cnbSel);
+  cnbPanel.appendChild(cnbTitle); cnbPanel.appendChild(cnbRow);
+  card.appendChild(cnbPanel);
+
+  // Checkbox handlers
+  fnaChk.onchange = () => { state.prevBiopsies[i].fna = fnaChk.checked; fnaPanel.style.display = fnaChk.checked ? 'block' : 'none'; saveState(); updateLivePreview(); };
+  cnbChk.onchange = () => { state.prevBiopsies[i].cnb = cnbChk.checked; cnbPanel.style.display = cnbChk.checked ? 'block' : 'none'; saveState(); updateLivePreview(); };
+
+  return card;
+}
+
+function renderPrevBiopsies() {
+  const list = document.getElementById('prevBiopsyList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!state.prevBiopsies) state.prevBiopsies = [];
+  state.prevBiopsies.forEach((bx, i) => list.appendChild(buildPrevBiopsyCard(bx, i)));
 }
 
 // ==================== NODULE RENDERING ====================
@@ -2815,15 +2880,11 @@ function renderLymphTable() {
 
 // ==================== RESET FUNCTIONS ====================
 function resetThyroid() {
-  const keys = ['normalThyroid','clinInd','clinIndCustom','prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNA','prevBxFNAPathDx','prevBxCNB','prevBxCNBPathDx','compYear','compMonth','compDay','thySize','sizeRight','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmus','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeft','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
+  const keys = ['normalThyroid','clinInd','clinIndCustom','compYear','compMonth','compDay','thySize','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
   const def = JSON.parse(JSON.stringify(defaultState));
   keys.forEach(k => state[k] = def[k]);
+  state.prevBiopsies = [];
   state.nodules = { right: [], left: [], isthmus: [] };
-  // Reset new biopsy panel fields
-  document.getElementById('prevBxFNAPathDx').value = '';
-  document.getElementById('prevBxCNBPathDx').value = '';
-  document.getElementById('prevBxFNAPanel').style.display = 'none';
-  document.getElementById('prevBxCNBPanel').style.display = 'none';
   saveState();
   renderAll();
 }
@@ -2875,20 +2936,13 @@ function buildReportText() {
     lines.push('Comparison: not available');
   }
 
-  // Previous biopsy
+  // Previous biopsy (multi-entry)
   const prevBxLines = [];
-  if (state.prevBxFNA && state.prevBxFNAPathDx && state.prevBxFNAPathDx.trim()) {
-    let line = 'Previous FNA';
-    if (state.prevBxTarget && state.prevBxTarget.trim()) line += ' (target: ' + state.prevBxTarget.trim() + ')';
-    line += ': ' + state.prevBxFNAPathDx.trim() + '.';
-    prevBxLines.push(line);
-  }
-  if (state.prevBxCNB && state.prevBxCNBPathDx && state.prevBxCNBPathDx.trim()) {
-    let line = 'Previous CNB';
-    if (state.prevBxTarget && state.prevBxTarget.trim()) line += ' (target: ' + state.prevBxTarget.trim() + ')';
-    line += ': ' + state.prevBxCNBPathDx.trim() + '.';
-    prevBxLines.push(line);
-  }
+  (state.prevBiopsies || []).forEach(bx => {
+    const tgt = bx.target && bx.target.trim() ? ' (target: ' + bx.target.trim() + ')' : '';
+    if (bx.fna && bx.fnaPathDx && bx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + ': ' + bx.fnaPathDx.trim() + '.');
+    if (bx.cnb && bx.cnbPathDx && bx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + ': ' + bx.cnbPathDx.trim() + '.');
+  });
   if (prevBxLines.length > 0) lines.push(prevBxLines.join('\n'));
 
   lines.push('');
@@ -3291,9 +3345,8 @@ function bindInputSave(id, eventType) {
     const stateKey = id.replace(/-([a-z])/g, (m,p1)=>p1.toUpperCase());
     state[id] = el.type==='checkbox' ? el.checked : el.value;
     // handle specific IDs
-    const simpleIds = ['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','compYear','compMonth','compDay','extraLesion'];
+    const simpleIds = ['compYear','compMonth','compDay','extraLesion'];
     if (simpleIds.includes(id)) { state[id] = el.value; saveState(); }
-    else if (id==='prevBxFNA'||id==='prevBxCNB') { onPrevBxChange(); }
     else if (id==='multinodular') { state[id]=el.checked; saveState(); }
     else if (id==='normalLymph') { state[id]=el.checked; saveState(); }
     else if (id==='addToReport') { state[id]=el.checked; saveState(); }
@@ -3329,12 +3382,13 @@ setupStaticRadioToggle('clinInd', 'clinInd');
 
 // Bind text inputs in clinical/parenchyma sections
 // Text-only fields use 'input' event
-['prevBxTarget'].forEach(id => {
+// (prevBxTarget removed — biopsy target now handled per-entry in prevBiopsies)
+[].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
 });
-// Date selects use 'change' event (handled by inline onchange, but add listener for robustness)
-['prevBxYear','prevBxMonth','prevBxDay','compYear','compMonth','compDay'].forEach(id => {
+// Date selects use 'change' event
+['compYear','compMonth','compDay'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { state[id]=el.value; saveState(); });
 });
@@ -3409,7 +3463,7 @@ window.addEventListener('orientationchange', () => setTimeout(adjustMainTop, 180
 // Populate year selects up to current year (no future dates)
 (function() {
   const curYear = new Date().getFullYear();
-  ['prevBxYear', 'compYear'].forEach(function(id) {
+  ['compYear'].forEach(function(id) {
     const sel = document.getElementById(id);
     if (!sel) return;
     while (sel.options.length > 1) sel.remove(1);
