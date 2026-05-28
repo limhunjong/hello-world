@@ -51,6 +51,30 @@
   --shadow-seg:  0 2px 6px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.2);
   /* Dynamic: updated by JS on every resize/orientation change */
   --nav-h: 52px;
+  /* Semantic aliases */
+  --surface: var(--bg1);
+  --surface-elevated: var(--bg2);
+  --surface-muted: var(--fill4);
+  --text-primary: var(--label1);
+  --text-secondary: var(--label2);
+  --text-muted: var(--label3);
+  --border-subtle: var(--sep);
+  --accent: var(--blue);
+  --accent-soft: var(--blue-bg);
+  --control-bg: var(--fill3);
+  --control-active-bg: var(--blue);
+  --danger: var(--red);
+  --success: var(--green);
+}
+
+/* ===== ACCESSIBILITY ===== */
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 /* ===== BASE ===== */
@@ -153,6 +177,10 @@ body.light #bottom-section {
   border: 0.5px solid rgba(0,0,0,0.08);
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
 }
+/* Light mode: nodule label cell tint */
+body.light .nodule-label-cell {
+  background: rgba(60, 60, 90, 0.06);
+}
 /* Light mode: table section headers distinct from page bg */
 body.light table.data-table th,
 body.light table.ln-table th:not(.sub-header) {
@@ -164,13 +192,37 @@ body.light table.ln-table th.sub-header {
 
 /* ===== FOOTER ===== */
 #app-footer {
-  text-align: center; padding: 36px 16px 52px;
-  color: var(--label3); font-size: 12px; line-height: 1.8;
-  letter-spacing: -0.1px;
-  border-top: 0.5px solid var(--sep); margin-top: 32px;
+  border-top: 1px solid var(--sep);
+  padding: 24px 16px calc(32px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
 }
-#app-footer .footer-name { color: var(--label2); font-weight: 600; font-size: 13px; }
-#app-footer .footer-sub { color: var(--label3); font-size: 11px; margin-top: 2px; }
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.footer-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--label1);
+  margin-bottom: 2px;
+}
+.footer-email {
+  font-size: 13px;
+  color: var(--blue);
+  text-decoration: none;
+}
+.footer-email:hover { text-decoration: underline; }
+.footer-product {
+  font-size: 12px;
+  color: var(--label3);
+  margin-top: 4px;
+}
+.footer-copy {
+  font-size: 11px;
+  color: var(--label4);
+}
 
 /* ===== MAIN ===== */
 #main { padding: 16px; }
@@ -535,7 +587,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   padding: 10px 12px; border-bottom: 0.5px solid rgba(84,84,88,0.25);
   border-right: 0.5px solid rgba(84,84,88,0.2);
   color: var(--label2); white-space: pre-line; vertical-align: top;
-  background: var(--bg1); line-height: 1.3;
+  background: rgba(99, 99, 115, 0.12); line-height: 1.3;
 }
 .nodule-label-cell.required { background: rgba(255,159,10,0.055); }
 
@@ -628,14 +680,15 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 #preview-content {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 16px;
+  padding: 16px 18px;
   font-family: 'SF Mono', Menlo, 'Courier New', monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.75;
   color: var(--label1);
   background: var(--bg0);
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .preview-placeholder {
   color: var(--label4);
@@ -1150,7 +1203,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   /* Fix inline-width inputs — let them grow/shrink with available space */
   #clinIndCustom  { width: auto !important; flex: 1 1 60px; min-width: 60px; max-width: 100%; }
   #prevBxTarget   { width: 80px !important; min-width: 60px; }
-  #prevBxPathDx   { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
+  #prevBxFNAPathDx, #prevBxCNBPathDx { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
 }
 
 /* --- Landscape compact: also allow label wrapping --- */
@@ -1169,7 +1222,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   /* Fix inline inputs in landscape too */
   #clinIndCustom  { width: auto !important; flex: 1 1 60px; min-width: 60px; max-width: 100%; }
   #prevBxTarget   { width: 80px !important; min-width: 60px; }
-  #prevBxPathDx   { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
+  #prevBxFNAPathDx, #prevBxCNBPathDx { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
 
   /* Compact dialog — 90dvh so it fits in ~375px tall screens */
   .dialog-box { max-height: 90dvh; }
@@ -1504,9 +1557,12 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
 
 <!-- FOOTER -->
 <footer id="app-footer">
-  <div class="footer-name">Hunjong Lim, MD</div>
-  <div class="footer-sub">Thyroid Ultrasound Report Tool · K-TIRADS 2021</div>
-  <div class="footer-sub" style="margin-top:6px;">© 2025 All rights reserved</div>
+  <div class="footer-inner">
+    <div class="footer-name">Hunjong Lim, MD</div>
+    <a class="footer-email" href="mailto:limhunjong@naver.com">limhunjong@naver.com</a>
+    <div class="footer-product">Thyroid Ultrasound Report Tool · K-TIRADS 2021</div>
+    <div class="footer-copy">© 2026 All rights reserved</div>
+  </div>
 </footer>
 
 <!-- REPORT DIALOG -->
@@ -1546,6 +1602,14 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
 </div>
 
 <script>
+// ==================== HELPERS ====================
+function formatVolumeMl(ap, t, l) {
+  if (!ap || !t || !l) return '';
+  const vol = ap * t * l * 0.523 / 1000;
+  return vol.toFixed(1) + ' mL';
+}
+function hasValue(v) { return v !== null && v !== undefined && String(v).trim() !== ''; }
+
 // ==================== STATE ====================
 const defaultState = {
   activeTab: 'thyroid',
@@ -1553,7 +1617,8 @@ const defaultState = {
   clinInd: 'Thyroid nodule',
   clinIndCustom: '',
   prevBxYear: '', prevBxMonth: '', prevBxDay: '',
-  prevBxTarget: '', prevBxFNA: false, prevBxCNB: false, prevBxPathDx: '',
+  prevBxTarget: '', prevBxFNA: false, prevBxFNAPathDx: '', prevBxFNAGauge: '',
+  prevBxCNB: false, prevBxCNBPathDx: '', prevBxCNBSize: '',
   compYear: '', compMonth: '', compDay: '',
   thySize: 'Normal',
   sizeRight: false, sizeRightAP: '', sizeRightT: '', sizeRightL: '', sizeRightUnit: 'cm',
@@ -1694,9 +1759,14 @@ function renderAll() {
   document.getElementById('prevBxMonth').value = state.prevBxMonth;
   document.getElementById('prevBxDay').value = state.prevBxDay;
   document.getElementById('prevBxTarget').value = state.prevBxTarget;
-  document.getElementById('prevBxFNA').checked = state.prevBxFNA;
-  document.getElementById('prevBxCNB').checked = state.prevBxCNB;
-  document.getElementById('prevBxPathDx').value = state.prevBxPathDx;
+  document.getElementById('prevBxFNA').checked = !!state.prevBxFNA;
+  document.getElementById('prevBxCNB').checked = !!state.prevBxCNB;
+  document.getElementById('prevBxFNAPathDx').value = state.prevBxFNAPathDx || '';
+  document.getElementById('prevBxFNAGauge').value = state.prevBxFNAGauge || '';
+  document.getElementById('prevBxCNBPathDx').value = state.prevBxCNBPathDx || '';
+  document.getElementById('prevBxCNBSize').value = state.prevBxCNBSize || '';
+  document.getElementById('prevBxFNAPanel').style.display = state.prevBxFNA ? 'block' : 'none';
+  document.getElementById('prevBxCNBPanel').style.display = state.prevBxCNB ? 'block' : 'none';
   document.getElementById('compYear').value = state.compYear;
   document.getElementById('compMonth').value = state.compMonth;
   document.getElementById('compDay').value = state.compDay;
@@ -1804,6 +1874,15 @@ function onClinIndCustomChange() {
   if (customRadio) customRadio.checked = true;
   state.clinInd = 'custom';
   saveState();
+}
+
+function onPrevBxChange() {
+  state.prevBxFNA = document.getElementById('prevBxFNA').checked;
+  state.prevBxCNB = document.getElementById('prevBxCNB').checked;
+  document.getElementById('prevBxFNAPanel').style.display = state.prevBxFNA ? 'block' : 'none';
+  document.getElementById('prevBxCNBPanel').style.display = state.prevBxCNB ? 'block' : 'none';
+  saveState();
+  updateLivePreview();
 }
 
 function toggleSizeInputs(noSave) {
@@ -1982,10 +2061,11 @@ function buildNoduleTable(lobe, idx, nod) {
       saveState();
       // Update size/vol display without re-rendering the column
       const newMs = calcMaxSize(nod);
-      const newVol = (parseFloat(nod.diamAP)||0)*(parseFloat(nod.diamT)||0)*(parseFloat(nod.diamL)||0)*0.5233;
+      const newAP = parseFloat(nod.diamAP)||0; const newT2 = parseFloat(nod.diamT)||0; const newL2 = parseFloat(nod.diamL)||0;
+      const newVolStr = formatVolumeMl(newAP, newT2, newL2);
       let t = '';
       if (newMs > 0) t += `Max: ${newMs} ${nod.diamUnit}`;
-      if (newVol > 0) t += `  Vol: ${newVol.toFixed(2)} mL`;
+      if (newVolStr) t += `  Vol: ${newVolStr}`;
       diamInfo.textContent = t;
     });
     inp.addEventListener('blur', (e) => {
@@ -2013,10 +2093,10 @@ function buildNoduleTable(lobe, idx, nod) {
   const diamInfo = document.createElement('div');
   diamInfo.className = 'size-auto';
   const ms = maxSizeCalc;
-  const volCalc = (parseFloat(nod.diamAP)||0) * (parseFloat(nod.diamT)||0) * (parseFloat(nod.diamL)||0) * 0.5233;
+  const volStr = formatVolumeMl(parseFloat(nod.diamAP)||0, parseFloat(nod.diamT)||0, parseFloat(nod.diamL)||0);
   let infoText = '';
   if (ms > 0) infoText += `Max: ${ms} ${nod.diamUnit}`;
-  if (volCalc > 0) infoText += `  Vol: ${volCalc.toFixed(2)} mL`;
+  if (volStr) infoText += `  Vol: ${volStr}`;
   diamInfo.textContent = infoText;
 
   diamDiv.appendChild(diamRow1);
@@ -2722,10 +2802,17 @@ function renderLymphTable() {
 
 // ==================== RESET FUNCTIONS ====================
 function resetThyroid() {
-  const keys = ['normalThyroid','clinInd','clinIndCustom','prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNA','prevBxCNB','prevBxPathDx','compYear','compMonth','compDay','thySize','sizeRight','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmus','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeft','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
+  const keys = ['normalThyroid','clinInd','clinIndCustom','prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNA','prevBxFNAPathDx','prevBxFNAGauge','prevBxCNB','prevBxCNBPathDx','prevBxCNBSize','compYear','compMonth','compDay','thySize','sizeRight','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmus','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeft','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
   const def = JSON.parse(JSON.stringify(defaultState));
   keys.forEach(k => state[k] = def[k]);
   state.nodules = { right: [], left: [], isthmus: [] };
+  // Reset new biopsy panel fields
+  document.getElementById('prevBxFNAPathDx').value = '';
+  document.getElementById('prevBxFNAGauge').value = '';
+  document.getElementById('prevBxCNBPathDx').value = '';
+  document.getElementById('prevBxCNBSize').value = '';
+  document.getElementById('prevBxFNAPanel').style.display = 'none';
+  document.getElementById('prevBxCNBPanel').style.display = 'none';
   saveState();
   renderAll();
 }
@@ -2776,6 +2863,22 @@ function buildReportText() {
   } else {
     lines.push('Comparison: not available');
   }
+
+  // Previous biopsy
+  const prevBxLines = [];
+  if (state.prevBxFNA && state.prevBxFNAPathDx && state.prevBxFNAPathDx.trim()) {
+    let line = 'Previous FNA';
+    if (state.prevBxTarget && state.prevBxTarget.trim()) line += ' (target: ' + state.prevBxTarget.trim() + ')';
+    line += ': ' + state.prevBxFNAPathDx.trim() + '.';
+    prevBxLines.push(line);
+  }
+  if (state.prevBxCNB && state.prevBxCNBPathDx && state.prevBxCNBPathDx.trim()) {
+    let line = 'Previous CNB';
+    if (state.prevBxTarget && state.prevBxTarget.trim()) line += ' (target: ' + state.prevBxTarget.trim() + ')';
+    line += ': ' + state.prevBxCNBPathDx.trim() + '.';
+    prevBxLines.push(line);
+  }
+  if (prevBxLines.length > 0) lines.push(prevBxLines.join('\n'));
 
   lines.push('');
   lines.push('Findings:');
@@ -3177,9 +3280,9 @@ function bindInputSave(id, eventType) {
     const stateKey = id.replace(/-([a-z])/g, (m,p1)=>p1.toUpperCase());
     state[id] = el.type==='checkbox' ? el.checked : el.value;
     // handle specific IDs
-    const simpleIds = ['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxPathDx','compYear','compMonth','compDay','extraLesion'];
+    const simpleIds = ['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNAPathDx','prevBxFNAGauge','prevBxCNBPathDx','prevBxCNBSize','compYear','compMonth','compDay','extraLesion'];
     if (simpleIds.includes(id)) { state[id] = el.value; saveState(); }
-    else if (id==='prevBxFNA'||id==='prevBxCNB') { state[id]=el.checked; saveState(); }
+    else if (id==='prevBxFNA'||id==='prevBxCNB') { onPrevBxChange(); }
     else if (id==='multinodular') { state[id]=el.checked; saveState(); }
     else if (id==='normalLymph') { state[id]=el.checked; saveState(); }
     else if (id==='addToReport') { state[id]=el.checked; saveState(); }
@@ -3215,7 +3318,7 @@ setupStaticRadioToggle('clinInd', 'clinInd');
 
 // Bind text inputs in clinical/parenchyma sections
 // Text-only fields use 'input' event
-['prevBxTarget','prevBxPathDx'].forEach(id => {
+['prevBxTarget','prevBxFNAPathDx','prevBxFNAGauge','prevBxCNBPathDx','prevBxCNBSize'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
 });
