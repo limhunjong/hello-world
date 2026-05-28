@@ -1256,10 +1256,33 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
               <select id="prevBxMonth" class="date-select" onchange="state.prevBxMonth=this.value;saveState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
               <span>.</span>
               <select id="prevBxDay" class="date-select" onchange="state.prevBxDay=this.value;saveState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
-              &nbsp; Target: <input type="text" id="prevBxTarget" placeholder="Target nodule" style="width:100px">
-              &nbsp; <label class="inline-check-label"><input type="checkbox" id="prevBxFNA" onchange="saveState()"> FNA</label>
-              <label class="inline-check-label"><input type="checkbox" id="prevBxCNB" onchange="saveState()"> CNB</label>
-              &nbsp; Path Dx: <input type="text" id="prevBxPathDx" placeholder="Pathologic diagnosis" style="width:160px" oninput="saveState()">
+              &nbsp;
+              <span style="font-size:13px;color:var(--label2);">Target:</span>
+              <input type="text" id="prevBxTarget" placeholder="Nodule" style="width:90px" oninput="saveState()">
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+              <label class="inline-check-label"><input type="checkbox" id="prevBxFNA" onchange="onPrevBxChange()"> FNA</label>
+              <label class="inline-check-label"><input type="checkbox" id="prevBxCNB" onchange="onPrevBxChange()"> CNB</label>
+            </div>
+            <div id="prevBxFNAPanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--fill4);border-radius:var(--r-md);">
+              <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">FNA</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <span style="font-size:13px;color:var(--label2);">Path Dx:</span>
+                <input type="text" id="prevBxFNAPathDx" placeholder="Pathologic diagnosis" style="flex:1;min-width:140px;" oninput="saveState()">
+                <span style="font-size:13px;color:var(--label2);">Gauge:</span>
+                <input type="number" id="prevBxFNAGauge" placeholder="e.g. 22" style="width:70px;" oninput="saveState()">
+                <span style="font-size:13px;color:var(--label3);">G</span>
+              </div>
+            </div>
+            <div id="prevBxCNBPanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--fill4);border-radius:var(--r-md);">
+              <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">CNB</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <span style="font-size:13px;color:var(--label2);">Path Dx:</span>
+                <input type="text" id="prevBxCNBPathDx" placeholder="Pathologic diagnosis" style="flex:1;min-width:140px;" oninput="saveState()">
+                <span style="font-size:13px;color:var(--label2);">Size:</span>
+                <input type="text" id="prevBxCNBSize" placeholder="e.g. 1.2" style="width:70px;" oninput="saveState()">
+                <span style="font-size:13px;color:var(--label3);">cm</span>
+              </div>
             </div>
           </td>
         </tr>
