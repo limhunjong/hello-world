@@ -61,6 +61,7 @@ body {
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s;
 }
 label { cursor: pointer; }
 button, [role="button"] {
@@ -139,6 +140,23 @@ body.light .dialog-body { color: #000000; }
 body.light #top-bar {
   background: rgba(255,255,255,0.85);
   border-bottom-color: rgba(60,60,67,0.2);
+}
+/* Light mode: card definition via border */
+body.light .table-card,
+body.light .card,
+body.light .nodule-item,
+body.light .ln-table-wrap,
+body.light #bottom-section {
+  border: 0.5px solid rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+/* Light mode: table section headers distinct from page bg */
+body.light table.data-table th,
+body.light table.ln-table th:not(.sub-header) {
+  background: var(--bg3);
+}
+body.light table.ln-table th.sub-header {
+  background: var(--bg2);
 }
 
 /* ===== FOOTER ===== */
@@ -377,11 +395,11 @@ table.ln-table td.required-cell { background: rgba(255,159,10,0.055); }
 
 /* ===== BOTTOM INFO ===== */
 #bottom-section {
-  margin-top: 16px; padding: 20px;
+  margin: 0 12px 12px; padding: 20px;
   background: var(--bg1); border-radius: var(--r-lg);
   box-shadow: var(--shadow-card);
 }
-#bottom-section .info-text { font-size: 13px; line-height: 1.9; color: var(--label3); }
+#bottom-section .info-text { font-size: 13px; line-height: 1.9; color: var(--label2); }
 #bottom-section .info-text strong { color: var(--blue); font-weight: 600; }
 
 /* ===== SHEET DIALOGS ===== */
@@ -585,6 +603,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
     </div>
 
     <!-- Section A: Clinical Information -->
+    <div class="table-card">
     <table class="data-table" id="clinicalTable">
       <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
       <tbody>
@@ -630,8 +649,10 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
         </tr>
       </tbody>
     </table>
+    </div>
 
     <!-- Section B: Thyroid Parenchyma -->
+    <div class="table-card">
     <table class="data-table" id="parenchymaTable">
       <thead><tr><th colspan="2">Thyroid Parenchyma</th></tr></thead>
       <tbody>
@@ -704,6 +725,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
         </tr>
       </tbody>
     </table>
+    </div>
 
     <!-- Section C: Thyroid Nodule -->
     <div class="nodule-section-title">Thyroid Nodule</div>
@@ -730,7 +752,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   <div class="tab-content" id="tab-content-lymph">
     <div class="action-bar">
       <button class="pink-btn" onclick="resetLymph()">경부 림프 초기화</button>
-      <label><input type="checkbox" id="normalLymph" onchange="saveState()"> Normal Lymph Node</label>
+      <div class="radio-group" style="display:inline-flex;"><label><input type="checkbox" id="normalLymph" onchange="saveState()"> Normal Lymph Node</label></div>
     </div>
     <div class="ln-table-wrap">
       <table class="ln-table" id="lnTable">
@@ -768,21 +790,22 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
     <div class="action-bar">
       <button class="pink-btn" onclick="resetExtra()">갑상선외 병변 초기화</button>
     </div>
+    <div class="table-card">
     <table class="data-table">
       <thead><tr><th>Extrathyroidal Lesion</th></tr></thead>
       <tbody>
         <tr><td><textarea id="extraLesion" rows="8" style="width:100%" oninput="saveState()"></textarea></td></tr>
       </tbody>
     </table>
+    </div>
   </div>
 
 </div><!-- end main -->
 
 <!-- BOTTOM SECTION -->
-<div id="bottom-section" style="margin:12px;">
-  <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-    <input type="checkbox" id="addToReport" onchange="saveState()">
-    <span style="font-weight:600;">아래 판독문에 추가하기</span>
+<div id="bottom-section">
+  <label class="inline-check-label" style="margin-bottom:8px;font-weight:600;padding-left:0;">
+    <input type="checkbox" id="addToReport" onchange="saveState()">아래 판독문에 추가하기
   </label>
   <div class="info-text">
     <strong>K-TIRADS 2021 Guidelines:</strong><br>
