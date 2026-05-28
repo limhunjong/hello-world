@@ -2007,10 +2007,15 @@ function setupStaticRadioToggle(name, stateKey) {
     const lbl = radio.closest('label');
     if (!lbl) return;
     lbl.addEventListener('click', (e) => {
-      if (radio.checked) {
+      // Skip synthesized click that bubbles up from the radio itself,
+      // and skip clicks on text inputs inside the label (e.g. custom clinInd)
+      if (e.target.tagName === 'INPUT') return;
+      // Compare against state (not radio.checked) — state is the previous value,
+      // which is reliable even if the browser pre-checks the radio before the event
+      if (state[stateKey] === radio.value) {
         e.preventDefault();
-        radio.checked = false;
         state[stateKey] = '';
+        radio.checked = false;
         saveState();
       }
     });
