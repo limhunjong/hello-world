@@ -275,7 +275,7 @@ body.light table.ln-table th.sub-header {
 /* ===== DATA TABLE ===== */
 table.data-table { border-collapse: collapse; width: 100%; background: var(--bg1); }
 table.data-table th, table.data-table td {
-  padding: 13px 16px; vertical-align: middle;
+  padding: 9px 16px; vertical-align: middle;
   border-bottom: 0.5px solid var(--sep);
 }
 table.data-table tbody tr:last-child td { border-bottom: none; }
@@ -637,18 +637,21 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 #app-layout {
   display: flex;
   margin-top: 52px;
-  min-height: calc(100vh - 52px);
+  min-height: calc(100dvh - 52px);
   align-items: flex-start;
+  padding-right: 416px; /* reserve space for fixed right panel (400px + 16px padding) */
 }
 #left-panel { flex: 1; min-width: 0; }
 #right-panel {
   width: 400px;
   flex-shrink: 0;
   padding: 16px 16px 16px 0;
-  position: sticky;
-  top: 52px;
-  height: calc(100vh - 52px);
-  align-self: flex-start;
+  /* Fixed on desktop so it stays visible regardless of overflow-x:hidden on ancestors */
+  position: fixed;
+  top: var(--nav-h, 52px);
+  right: 0;
+  height: calc(100dvh - var(--nav-h, 52px));
+  z-index: 10;
 }
 
 /* ===== LIVE PREVIEW PANE ===== */
@@ -892,18 +895,20 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
 @media (min-width: 1440px) {
   #main { padding: 20px; }
   #bottom-section { margin: 0 20px 20px; }
-  table.data-table th, table.data-table td { padding: 14px 18px; }
+  table.data-table th, table.data-table td { padding: 10px 18px; }
   #right-panel { width: 420px; }
+  #app-layout { padding-right: 436px; }
 }
 
 /* ===== LAPTOP (1024px–1439px) ===== */
 @media (min-width: 1024px) and (max-width: 1439px) {
   #right-panel { width: 370px; }
+  #app-layout { padding-right: 386px; } /* 370px + 16px */
 }
 
 /* ===== TABLET + MOBILE: BOTTOM SHEET (< 1024px) ===== */
 @media (max-width: 1023px) {
-  #app-layout { flex-direction: column; }
+  #app-layout { flex-direction: column; padding-right: 0; }
 
   #right-panel {
     position: fixed;
