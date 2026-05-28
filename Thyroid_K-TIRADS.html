@@ -380,7 +380,7 @@ html { -webkit-text-size-adjust: 100%; }
           <td>
             <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
               <span>Date:</span>
-              <select id="prevBxYear" class="date-select" onchange="state.prevBxYear=this.value;saveState()"><option value="">Year</option><option>2028</option><option>2027</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option><option>2009</option><option>2008</option><option>2007</option><option>2006</option></select>
+              <select id="prevBxYear" class="date-select" onchange="state.prevBxYear=this.value;saveState()"><option value="">Year</option></select>
               <span>.</span>
               <select id="prevBxMonth" class="date-select" onchange="state.prevBxMonth=this.value;saveState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
               <span>.</span>
@@ -397,7 +397,7 @@ html { -webkit-text-size-adjust: 100%; }
           <td>
             <div style="display:flex;gap:8px;align-items:center;">
               <span>Date:</span>
-              <select id="compYear" class="date-select" onchange="state.compYear=this.value;saveState()"><option value="">Year</option><option>2028</option><option>2027</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option><option>2009</option><option>2008</option><option>2007</option><option>2006</option></select>
+              <select id="compYear" class="date-select" onchange="state.compYear=this.value;saveState()"><option value="">Year</option></select>
               <span>.</span>
               <select id="compMonth" class="date-select" onchange="state.compMonth=this.value;saveState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
               <span>.</span>
@@ -980,7 +980,12 @@ function buildNoduleTable(lobe, idx, nod) {
       if (newVol > 0) t += `  Vol: ${newVol.toFixed(2)} mL`;
       diamInfo.textContent = t;
     });
-    inp.addEventListener('blur', () => { updateNodule(lobe, idx, nod); });
+    inp.addEventListener('blur', (e) => {
+      // If focus is moving to another diam input in the same group, skip re-render
+      // so Tab key doesn't destroy the input being moved into
+      if (e.relatedTarget === apI || e.relatedTarget === tI || e.relatedTarget === lI) return;
+      updateNodule(lobe, idx, nod);
+    });
     return inp;
   }
 
@@ -2051,6 +2056,22 @@ function adjustMainTop() {
   if (bar && main) main.style.marginTop = bar.offsetHeight + 'px';
 }
 window.addEventListener('resize', adjustMainTop);
+
+// Populate year selects up to current year (no future dates)
+(function() {
+  const curYear = new Date().getFullYear();
+  ['prevBxYear', 'compYear'].forEach(function(id) {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    for (let y = curYear; y >= 2006; y--) {
+      const opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = String(y);
+      sel.appendChild(opt);
+    }
+  });
+}());
 
 // Init sequence
 loadState();   // 1. restore saved state
