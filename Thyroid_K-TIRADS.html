@@ -946,6 +946,7 @@ function buildNoduleTable(lobe, idx, nod) {
     const inp = document.createElement('input');
     inp.type = 'radio'; inp.name = `loc_${lobe}_${idx}`; inp.value = v;
     inp.checked = (nod.location === v);
+    lbl.addEventListener('click', (e) => { if (nod.location === v) { e.preventDefault(); nod.location = ''; updateNodule(lobe, idx, nod); } });
     inp.addEventListener('change', () => { nod.location = v; updateNodule(lobe, idx, nod); });
     lbl.appendChild(inp); lbl.append(' ' + v);
     locDiv.appendChild(lbl);
@@ -1020,6 +1021,7 @@ function buildNoduleTable(lobe, idx, nod) {
     inp.type = 'radio'; inp.name = `comp_${lobe}_${idx}`; inp.value = v;
     inp.checked = (nod.composition === v);
     inp.disabled = isEntireCalc;
+    lbl.addEventListener('click', (e) => { if (nod.composition === v) { e.preventDefault(); nod.composition = ''; updateNodule(lobe, idx, nod); } });
     inp.addEventListener('change', () => { nod.composition = v; updateNodule(lobe, idx, nod); });
     lbl.appendChild(inp); lbl.append(' ' + v);
     compDiv.appendChild(lbl);
@@ -1035,6 +1037,7 @@ function buildNoduleTable(lobe, idx, nod) {
     inp.type = 'radio'; inp.name = `echo_${lobe}_${idx}`; inp.value = v;
     inp.checked = (nod.echogenicity === v);
     inp.disabled = isEntireCalc;
+    lbl.addEventListener('click', (e) => { if (nod.echogenicity === v) { e.preventDefault(); nod.echogenicity = ''; updateNodule(lobe, idx, nod); } });
     inp.addEventListener('change', () => { nod.echogenicity = v; updateNodule(lobe, idx, nod); });
     lbl.appendChild(inp); lbl.append(' ' + v);
     echoDiv.appendChild(lbl);
@@ -1064,6 +1067,7 @@ function buildNoduleTable(lobe, idx, nod) {
     const l2 = document.createElement('label');
     const r2 = document.createElement('input'); r2.type='radio'; r2.name=`sc_${lobe}_${idx}`; r2.value=v;
     r2.checked = (nod.sizeChangeType === v);
+    l2.addEventListener('click', (e) => { if (nod.sizeChangeType === v) { e.preventDefault(); nod.sizeChangeType = ''; updateNodule(lobe, idx, nod); } });
     r2.addEventListener('change', () => { nod.sizeChangeType = v; updateNodule(lobe, idx, nod); });
     l2.appendChild(r2); l2.append(' '+v);
     scRow2.appendChild(l2);
@@ -1080,6 +1084,7 @@ function buildNoduleTable(lobe, idx, nod) {
     inp.type = 'radio'; inp.name = `or_${lobe}_${idx}`; inp.value = v;
     inp.checked = (nod.orientation === v);
     inp.disabled = isEntireCalc;
+    lbl.addEventListener('click', (e) => { if (nod.orientation === v) { e.preventDefault(); nod.orientation = ''; updateNodule(lobe, idx, nod); } });
     inp.addEventListener('change', () => { nod.orientation = v; updateNodule(lobe, idx, nod); });
     lbl.appendChild(inp); lbl.append(' ' + v);
     orDiv.appendChild(lbl);
@@ -1095,6 +1100,7 @@ function buildNoduleTable(lobe, idx, nod) {
     inp.type = 'radio'; inp.name = `margin_${lobe}_${idx}`; inp.value = v;
     inp.checked = (nod.margin === v);
     inp.disabled = isEntireCalc;
+    lbl.addEventListener('click', (e) => { if (nod.margin === v) { e.preventDefault(); nod.margin = ''; updateNodule(lobe, idx, nod); } });
     inp.addEventListener('change', () => { nod.margin = v; updateNodule(lobe, idx, nod); });
     lbl.appendChild(inp); lbl.append(' ' + v);
     marginDiv.appendChild(lbl);
@@ -1124,6 +1130,7 @@ function buildNoduleTable(lobe, idx, nod) {
     const entireLbl = document.createElement('label'); entireLbl.className='inline-check-label';
     const entireR = document.createElement('input'); entireR.type='radio'; entireR.name=`calcentire_${lobe}_${idx}`; entireR.value='entire';
     entireR.checked = (nod.calcification_entire === 'entire');
+    entireLbl.addEventListener('click', (e) => { if (nod.calcification_entire === 'entire') { e.preventDefault(); nod.calcification_entire = ''; updateNodule(lobe, idx, nod); } });
     entireR.addEventListener('change', () => { nod.calcification_entire = 'entire'; updateNodule(lobe, idx, nod); });
     entireLbl.appendChild(entireR); entireLbl.append(' Entirely calcified nodule');
     calcRow2.appendChild(entireLbl);
@@ -1201,6 +1208,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const eteNoLbl = document.createElement('label'); eteNoLbl.className='inline-check-label';
   const eteNoR = document.createElement('input'); eteNoR.type='radio'; eteNoR.name=`ete_${lobe}_${idx}`; eteNoR.value='none';
   eteNoR.checked = (nod.eteType === 'none');
+  eteNoLbl.addEventListener('click', (e) => { if (nod.eteType === 'none') { e.preventDefault(); nod.eteType = ''; updateNodule(lobe,idx,nod); } });
   eteNoR.addEventListener('change', () => { nod.eteType='none'; updateNodule(lobe,idx,nod); });
   eteNoLbl.appendChild(eteNoR); eteNoLbl.append(' No ETE');
   eteRow1.appendChild(eteNoLbl);
@@ -1208,6 +1216,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const eteMinorLbl = document.createElement('label'); eteMinorLbl.className='inline-check-label';
   const eteMinorR = document.createElement('input'); eteMinorR.type='radio'; eteMinorR.name=`ete_${lobe}_${idx}`; eteMinorR.value='minor';
   eteMinorR.checked = (nod.eteType === 'minor');
+  eteMinorLbl.addEventListener('click', (e) => { if (nod.eteType === 'minor') { e.preventDefault(); nod.eteType = ''; updateNodule(lobe,idx,nod); } });
   eteMinorR.addEventListener('change', () => { nod.eteType='minor'; updateNodule(lobe,idx,nod); });
   eteMinorLbl.appendChild(eteMinorR); eteMinorLbl.append(' Minor ETE');
   eteRow1.appendChild(eteMinorLbl);
@@ -1225,6 +1234,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const eteGrossLbl = document.createElement('label'); eteGrossLbl.className='inline-check-label';
   const eteGrossR = document.createElement('input'); eteGrossR.type='radio'; eteGrossR.name=`ete_${lobe}_${idx}`; eteGrossR.value='gross';
   eteGrossR.checked = (nod.eteType === 'gross');
+  eteGrossLbl.addEventListener('click', (e) => { if (nod.eteType === 'gross') { e.preventDefault(); nod.eteType = ''; updateNodule(lobe,idx,nod); } });
   eteGrossR.addEventListener('change', () => { nod.eteType='gross'; updateNodule(lobe,idx,nod); });
   eteGrossLbl.appendChild(eteGrossR); eteGrossLbl.append(' Gross ETE');
   eteRow1.appendChild(eteGrossLbl);
@@ -1277,6 +1287,7 @@ function buildNoduleTable(lobe, idx, nod) {
     const fnaLbl = document.createElement('label');
     const fnaR = document.createElement('input'); fnaR.type='radio'; fnaR.name=`bxtype_${lobe}_${idx}`; fnaR.value='FNA';
     fnaR.checked = (nod.biopsyType==='FNA');
+    fnaLbl.addEventListener('click', (e) => { if (nod.biopsyType === 'FNA') { e.preventDefault(); nod.biopsyType = ''; updateNodule(lobe,idx,nod); } });
     fnaR.addEventListener('change', () => { nod.biopsyType='FNA'; updateNodule(lobe,idx,nod); });
     fnaLbl.appendChild(fnaR); fnaLbl.append(' FNA');
     bxRow2.appendChild(fnaLbl);
@@ -1289,6 +1300,9 @@ function buildNoduleTable(lobe, idx, nod) {
     const cnbLbl = document.createElement('label');
     const cnbR = document.createElement('input'); cnbR.type='radio'; cnbR.name=`bxtype_${lobe}_${idx}`; cnbR.value='CNB';
     cnbR.checked = (nod.biopsyType==='CNB');
+    cnbLbl.addEventListener('click', (e) => {
+      if (nod.biopsyType === 'CNB') { e.preventDefault(); nod.biopsyType = ''; updateNodule(lobe, idx, nod); }
+    });
     cnbR.addEventListener('change', () => { nod.biopsyType='CNB'; updateNodule(lobe,idx,nod); });
     cnbLbl.appendChild(cnbR); cnbLbl.append(' CNB');
     bxRow2.appendChild(cnbLbl);
@@ -1981,6 +1995,26 @@ function bindInputSave(id, eventType) {
 document.querySelectorAll('input[name="thySize"]').forEach(r => r.addEventListener('change', () => { state.thySize=r.value; saveState(); }));
 document.querySelectorAll('input[name="echotexture"]').forEach(r => r.addEventListener('change', () => { state.echotexture=r.value; saveState(); }));
 document.querySelectorAll('input[name="parVasc"]').forEach(r => r.addEventListener('change', () => { state.parVasc=r.value; saveState(); }));
+
+// Deselect toggle for static radios
+function setupStaticRadioToggle(name, stateKey) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+    const lbl = radio.closest('label');
+    if (!lbl) return;
+    lbl.addEventListener('click', (e) => {
+      if (radio.checked) {
+        e.preventDefault();
+        radio.checked = false;
+        state[stateKey] = '';
+        saveState();
+      }
+    });
+  });
+}
+setupStaticRadioToggle('thySize', 'thySize');
+setupStaticRadioToggle('echotexture', 'echotexture');
+setupStaticRadioToggle('parVasc', 'parVasc');
+setupStaticRadioToggle('clinInd', 'clinInd');
 
 // Bind text inputs in clinical/parenchyma sections
 // Text-only fields use 'input' event
