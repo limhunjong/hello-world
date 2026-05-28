@@ -425,26 +425,26 @@ html { -webkit-text-size-adjust: 100%; }
                 <label style="display:flex;align-items:center;gap:4px;">
                   <input type="checkbox" id="sizeRight" onchange="toggleSizeInputs()"> Right
                   <span id="sizeRightInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
-                    <input type="text" id="sizeRightAP" placeholder="AP" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeRightT" placeholder="T" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeRightL" placeholder="L" style="width:42px" oninput="saveState()">
+                    <input type="text" id="sizeRightAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeRightT" inputmode="decimal" placeholder="T" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeRightL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
                     <select id="sizeRightUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
                   </span>
                 </label>
                 <label style="display:flex;align-items:center;gap:4px;">
                   <input type="checkbox" id="sizeIsthmus" onchange="toggleSizeInputs()"> Isthmus
                   <span id="sizeIsthmusInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
-                    <input type="text" id="sizeIsthmusAP" placeholder="AP" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeIsthmusL" placeholder="L" style="width:42px" oninput="saveState()">
+                    <input type="text" id="sizeIsthmusAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeIsthmusL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
                     <select id="sizeIsthmusUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
                   </span>
                 </label>
                 <label style="display:flex;align-items:center;gap:4px;">
                   <input type="checkbox" id="sizeLeft" onchange="toggleSizeInputs()"> Left
                   <span id="sizeLeftInputs" style="display:none;gap:3px;align-items:center;" class="size-inputs">
-                    <input type="text" id="sizeLeftAP" placeholder="AP" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeLeftT" placeholder="T" style="width:42px" oninput="saveState()"> ×
-                    <input type="text" id="sizeLeftL" placeholder="L" style="width:42px" oninput="saveState()">
+                    <input type="text" id="sizeLeftAP" inputmode="decimal" placeholder="AP" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeLeftT" inputmode="decimal" placeholder="T" style="width:42px" oninput="saveState()"> ×
+                    <input type="text" id="sizeLeftL" inputmode="decimal" placeholder="L" style="width:42px" oninput="saveState()">
                     <select id="sizeLeftUnit" onchange="saveState()"><option>cm</option><option>mm</option></select>
                   </span>
                 </label>
@@ -965,9 +965,21 @@ function buildNoduleTable(lobe, idx, nod) {
 
   function mkDiamInput(placeholder, stateKey) {
     const inp = document.createElement('input');
-    inp.type = 'text'; inp.placeholder = placeholder; inp.style.width = '46px';
+    inp.type = 'text'; inp.inputMode = 'decimal'; inp.placeholder = placeholder; inp.style.width = '52px';
     inp.value = nod[stateKey] || '';
-    inp.addEventListener('input', () => { nod[stateKey] = inp.value; updateNodule(lobe, idx, nod); });
+    inp.addEventListener('input', () => {
+      nod[stateKey] = inp.value;
+      state.nodules[lobe][idx] = nod;
+      saveState();
+      // Update size/vol display without re-rendering the column
+      const newMs = calcMaxSize(nod);
+      const newVol = (parseFloat(nod.diamAP)||0)*(parseFloat(nod.diamT)||0)*(parseFloat(nod.diamL)||0)*0.5233;
+      let t = '';
+      if (newMs > 0) t += `Max: ${newMs} ${nod.diamUnit}`;
+      if (newVol > 0) t += `  Vol: ${newVol.toFixed(2)} mL`;
+      diamInfo.textContent = t;
+    });
+    inp.addEventListener('blur', () => { updateNodule(lobe, idx, nod); });
     return inp;
   }
 
@@ -1220,7 +1232,7 @@ function buildNoduleTable(lobe, idx, nod) {
     });
     if (nod.eteGrossOthers) {
       const othTxt = document.createElement('input'); othTxt.type='text'; othTxt.placeholder='specify'; othTxt.value=nod.eteGrossOthersText||'';
-      othTxt.addEventListener('input', () => { nod.eteGrossOthersText=othTxt.value; updateNodule(lobe,idx,nod); });
+      othTxt.addEventListener('input', () => { nod.eteGrossOthersText=othTxt.value; state.nodules[lobe][idx]=nod; saveState(); });
       eteRow2.appendChild(othTxt);
     }
     eteDiv.appendChild(eteRow2);
@@ -1232,7 +1244,8 @@ function buildNoduleTable(lobe, idx, nod) {
   const commentTA = document.createElement('textarea');
   commentTA.rows = 4; commentTA.style.width = '100%';
   commentTA.value = nod.comment || '';
-  commentTA.addEventListener('input', () => { nod.comment = commentTA.value; updateNodule(lobe, idx, nod); });
+  commentTA.addEventListener('input', () => { nod.comment = commentTA.value; state.nodules[lobe][idx]=nod; saveState(); });
+  commentTA.addEventListener('blur', () => { updateNodule(lobe, idx, nod); });
   tbody.appendChild(row('Comment', commentTA, false));
 
   // Biopsy section
@@ -1259,8 +1272,8 @@ function buildNoduleTable(lobe, idx, nod) {
     fnaLbl.appendChild(fnaR); fnaLbl.append(' FNA');
     bxRow2.appendChild(fnaLbl);
     if (nod.biopsyType==='FNA') {
-      const gaugeTxt = document.createElement('input'); gaugeTxt.type='text'; gaugeTxt.placeholder='gauge'; gaugeTxt.style.width='52px'; gaugeTxt.value=nod.fnaGauge||'';
-      gaugeTxt.addEventListener('input',()=>{nod.fnaGauge=gaugeTxt.value;updateNodule(lobe,idx,nod);});
+      const gaugeTxt = document.createElement('input'); gaugeTxt.type='text'; gaugeTxt.inputMode='numeric'; gaugeTxt.placeholder='gauge'; gaugeTxt.style.width='52px'; gaugeTxt.value=nod.fnaGauge||'';
+      gaugeTxt.addEventListener('input',()=>{nod.fnaGauge=gaugeTxt.value;state.nodules[lobe][idx]=nod;saveState();});
       bxRow2.append(' G '); bxRow2.appendChild(gaugeTxt);
     }
 
@@ -1271,8 +1284,8 @@ function buildNoduleTable(lobe, idx, nod) {
     cnbLbl.appendChild(cnbR); cnbLbl.append(' CNB');
     bxRow2.appendChild(cnbLbl);
     if (nod.biopsyType==='CNB') {
-      const sizeTxt = document.createElement('input'); sizeTxt.type='text'; sizeTxt.placeholder='size'; sizeTxt.style.width='52px'; sizeTxt.value=nod.cnbSize||'';
-      sizeTxt.addEventListener('input',()=>{nod.cnbSize=sizeTxt.value;updateNodule(lobe,idx,nod);});
+      const sizeTxt = document.createElement('input'); sizeTxt.type='text'; sizeTxt.inputMode='decimal'; sizeTxt.placeholder='size'; sizeTxt.style.width='52px'; sizeTxt.value=nod.cnbSize||'';
+      sizeTxt.addEventListener('input',()=>{nod.cnbSize=sizeTxt.value;state.nodules[lobe][idx]=nod;saveState();});
       bxRow2.append(' cm '); bxRow2.appendChild(sizeTxt);
     }
 
@@ -1302,7 +1315,7 @@ function buildNoduleTable(lobe, idx, nod) {
       });
       if (nod.compOthers) {
         const othTxt = document.createElement('input'); othTxt.type='text'; othTxt.placeholder='specify'; othTxt.value=nod.compOthersText||'';
-        othTxt.addEventListener('input',()=>{nod.compOthersText=othTxt.value;updateNodule(lobe,idx,nod);});
+        othTxt.addEventListener('input',()=>{nod.compOthersText=othTxt.value;state.nodules[lobe][idx]=nod;saveState();});
         compDiv2.appendChild(othTxt);
       }
     }
@@ -1320,7 +1333,7 @@ function buildNoduleTable(lobe, idx, nod) {
   const recTA = document.createElement('textarea');
   recTA.rows = 4; recTA.style.width='100%';
   recTA.value = nod.recommendation || '';
-  recTA.addEventListener('input', () => { nod.recommendation = recTA.value; updateNodule(lobe, idx, nod); });
+  recTA.addEventListener('input', () => { nod.recommendation = recTA.value; state.nodules[lobe][idx]=nod; saveState(); });
   tbody.appendChild(row('Recommendation', recTA, false));
 
   // Reset button
