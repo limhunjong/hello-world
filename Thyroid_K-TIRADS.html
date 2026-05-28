@@ -1323,23 +1323,33 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
               <label class="inline-check-label"><input type="checkbox" id="prevBxCNB" onchange="onPrevBxChange()"> CNB</label>
             </div>
             <div id="prevBxFNAPanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--fill4);border-radius:var(--r-md);">
-              <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">FNA</div>
+              <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">FNA (Bethesda System)</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <span style="font-size:13px;color:var(--label2);">Path Dx:</span>
-                <input type="text" id="prevBxFNAPathDx" placeholder="Pathologic diagnosis" style="flex:1;min-width:140px;" oninput="saveState()">
-                <span style="font-size:13px;color:var(--label2);">Gauge:</span>
-                <input type="number" id="prevBxFNAGauge" placeholder="e.g. 22" style="width:70px;" oninput="saveState()">
-                <span style="font-size:13px;color:var(--label3);">G</span>
+                <span style="font-size:13px;color:var(--label2);">Category:</span>
+                <select id="prevBxFNAPathDx" onchange="saveState();updateLivePreview();" style="flex:1;min-width:200px;">
+                  <option value="">— Select —</option>
+                  <option value="I (Nondiagnostic)">I (Nondiagnostic)</option>
+                  <option value="II (Benign)">II (Benign)</option>
+                  <option value="III (AUS)">III (AUS)</option>
+                  <option value="IV (Follicular neoplasm)">IV (Follicular neoplasm)</option>
+                  <option value="V (Suspicious for malignancy)">V (Suspicious for malignancy)</option>
+                  <option value="VI (Malignant)">VI (Malignant)</option>
+                </select>
               </div>
             </div>
             <div id="prevBxCNBPanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--fill4);border-radius:var(--r-md);">
               <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:6px;letter-spacing:0.2px;">CNB</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <span style="font-size:13px;color:var(--label2);">Path Dx:</span>
-                <input type="text" id="prevBxCNBPathDx" placeholder="Pathologic diagnosis" style="flex:1;min-width:140px;" oninput="saveState()">
-                <span style="font-size:13px;color:var(--label2);">Size:</span>
-                <input type="text" id="prevBxCNBSize" placeholder="e.g. 1.2" style="width:70px;" oninput="saveState()">
-                <span style="font-size:13px;color:var(--label3);">cm</span>
+                <span style="font-size:13px;color:var(--label2);">Category:</span>
+                <select id="prevBxCNBPathDx" onchange="saveState();updateLivePreview();" style="flex:1;min-width:200px;">
+                  <option value="">— Select —</option>
+                  <option value="I (Nondiagnostic or unsatisfactory)">I (Nondiagnostic or unsatisfactory)</option>
+                  <option value="II (Benign lesion)">II (Benign lesion)</option>
+                  <option value="III (Indeterminate lesion)">III (Indeterminate lesion)</option>
+                  <option value="IV (Follicular neoplasm or suspicious for follicular neoplasm)">IV (Follicular neoplasm or suspicious for follicular neoplasm)</option>
+                  <option value="V (Suspicious for malignancy)">V (Suspicious for malignancy)</option>
+                  <option value="VI (Malignant)">VI (Malignant)</option>
+                </select>
               </div>
             </div>
           </td>
@@ -1622,8 +1632,8 @@ const defaultState = {
   clinInd: 'Thyroid nodule',
   clinIndCustom: '',
   prevBxYear: '', prevBxMonth: '', prevBxDay: '',
-  prevBxTarget: '', prevBxFNA: false, prevBxFNAPathDx: '', prevBxFNAGauge: '',
-  prevBxCNB: false, prevBxCNBPathDx: '', prevBxCNBSize: '',
+  prevBxTarget: '', prevBxFNA: false, prevBxFNAPathDx: '',
+  prevBxCNB: false, prevBxCNBPathDx: '',
   compYear: '', compMonth: '', compDay: '',
   thySize: 'Normal',
   sizeRight: false, sizeRightAP: '', sizeRightT: '', sizeRightL: '', sizeRightUnit: 'cm',
@@ -1767,9 +1777,7 @@ function renderAll() {
   document.getElementById('prevBxFNA').checked = !!state.prevBxFNA;
   document.getElementById('prevBxCNB').checked = !!state.prevBxCNB;
   document.getElementById('prevBxFNAPathDx').value = state.prevBxFNAPathDx || '';
-  document.getElementById('prevBxFNAGauge').value = state.prevBxFNAGauge || '';
   document.getElementById('prevBxCNBPathDx').value = state.prevBxCNBPathDx || '';
-  document.getElementById('prevBxCNBSize').value = state.prevBxCNBSize || '';
   document.getElementById('prevBxFNAPanel').style.display = state.prevBxFNA ? 'block' : 'none';
   document.getElementById('prevBxCNBPanel').style.display = state.prevBxCNB ? 'block' : 'none';
   document.getElementById('compYear').value = state.compYear;
@@ -2807,15 +2815,13 @@ function renderLymphTable() {
 
 // ==================== RESET FUNCTIONS ====================
 function resetThyroid() {
-  const keys = ['normalThyroid','clinInd','clinIndCustom','prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNA','prevBxFNAPathDx','prevBxFNAGauge','prevBxCNB','prevBxCNBPathDx','prevBxCNBSize','compYear','compMonth','compDay','thySize','sizeRight','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmus','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeft','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
+  const keys = ['normalThyroid','clinInd','clinIndCustom','prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNA','prevBxFNAPathDx','prevBxCNB','prevBxCNBPathDx','compYear','compMonth','compDay','thySize','sizeRight','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmus','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeft','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
   const def = JSON.parse(JSON.stringify(defaultState));
   keys.forEach(k => state[k] = def[k]);
   state.nodules = { right: [], left: [], isthmus: [] };
   // Reset new biopsy panel fields
   document.getElementById('prevBxFNAPathDx').value = '';
-  document.getElementById('prevBxFNAGauge').value = '';
   document.getElementById('prevBxCNBPathDx').value = '';
-  document.getElementById('prevBxCNBSize').value = '';
   document.getElementById('prevBxFNAPanel').style.display = 'none';
   document.getElementById('prevBxCNBPanel').style.display = 'none';
   saveState();
@@ -3285,7 +3291,7 @@ function bindInputSave(id, eventType) {
     const stateKey = id.replace(/-([a-z])/g, (m,p1)=>p1.toUpperCase());
     state[id] = el.type==='checkbox' ? el.checked : el.value;
     // handle specific IDs
-    const simpleIds = ['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','prevBxFNAPathDx','prevBxFNAGauge','prevBxCNBPathDx','prevBxCNBSize','compYear','compMonth','compDay','extraLesion'];
+    const simpleIds = ['prevBxYear','prevBxMonth','prevBxDay','prevBxTarget','compYear','compMonth','compDay','extraLesion'];
     if (simpleIds.includes(id)) { state[id] = el.value; saveState(); }
     else if (id==='prevBxFNA'||id==='prevBxCNB') { onPrevBxChange(); }
     else if (id==='multinodular') { state[id]=el.checked; saveState(); }
@@ -3323,7 +3329,7 @@ setupStaticRadioToggle('clinInd', 'clinInd');
 
 // Bind text inputs in clinical/parenchyma sections
 // Text-only fields use 'input' event
-['prevBxTarget','prevBxFNAPathDx','prevBxFNAGauge','prevBxCNBPathDx','prevBxCNBSize'].forEach(id => {
+['prevBxTarget'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', () => { state[id]=el.value; saveState(); });
 });
