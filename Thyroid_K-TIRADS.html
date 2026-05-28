@@ -664,6 +664,69 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 body.light #live-preview-pane { border-color: rgba(0,0,0,0.08); }
 body.light #preview-content { color: #000000; }
 
+/* ===== PRESET STRIP ===== */
+.preset-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 10px 6px;
+  border-bottom: 0.5px solid var(--sep);
+}
+.preset-strip-label {
+  font-size: 10px;
+  color: var(--label4);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+.preset-chip {
+  background: var(--fill3);
+  color: var(--label2);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  letter-spacing: -0.1px;
+  min-height: 32px;
+  -webkit-appearance: none;
+}
+.preset-chip:active { background: var(--blue-bg); color: var(--blue); }
+body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue); }
+
+/* ===== TIRADS RISK INFO ===== */
+.tirads-risk-info {
+  font-size: 11px;
+  color: var(--label3);
+  font-weight: 400;
+  letter-spacing: -0.1px;
+  padding-bottom: 1px;
+}
+.tirads-risk-info strong { font-weight: 600; }
+.tirads-5-text { color: var(--red); }
+.tirads-4-text { color: var(--orange); }
+.tirads-3-text { color: var(--green); }
+.tirads-2-text { color: var(--blue); }
+
+/* ===== COLLAPSIBLE SECTION ===== */
+.nodule-section-hdr.collapsible { cursor: pointer; user-select: none; }
+.nodule-section-hdr.collapsible:active { background: var(--fill3); }
+.section-caret {
+  float: right;
+  font-size: 10px;
+  color: var(--label4);
+  font-weight: 600;
+  margin-top: 1px;
+  transition: transform 0.18s;
+}
+
 /* On narrow screens: right panel stacks below */
 @media (max-width: 1024px) {
   #app-layout { flex-direction: column; }
@@ -1031,7 +1094,8 @@ function defaultNodule() {
     biopsyDone: false, biopsyFNA: false, biopsyCNB: false,
     fnaGauge: '', cnbSize: '',
     compNo: true, compYes: false, compIntra: false, compPeri: false, compOthers: false, compOthersText: '',
-    recommendation: ''
+    recommendation: '',
+    biopsyExpanded: false
   };
 }
 
@@ -1252,6 +1316,9 @@ function renderNoduleCol(lobe) {
   const container = document.getElementById('nodules-' + lobe);
   const nodules = state.nodules[lobe] || [];
   container.innerHTML = '';
+  if (!state.normalThyroid && nodules.length < 3) {
+    container.appendChild(buildPresetStrip(lobe));
+  }
   nodules.forEach((nod, idx) => {
     container.appendChild(buildNoduleTable(lobe, idx, nod));
   });
@@ -1289,7 +1356,8 @@ function buildNoduleTable(lobe, idx, nod) {
   const wrap = document.createElement('div');
   wrap.className = 'nodule-item';
   const label = LOBE_LABELS[lobe] + (idx + 1);
-  const tirads = getKTIRADS(nod, state.normalThyroid);
+  const info = getKTIRADSInfo(nod, state.normalThyroid);
+  const tirads = info.tirads;
   const maxSizeCalc = calcMaxSize(nod);
 
   // Helper: make a row
@@ -1329,16 +1397,26 @@ function buildNoduleTable(lobe, idx, nod) {
 
   // Inner div for flex layout (needed so colspan works correctly)
   const hthInner = document.createElement('div');
-  hthInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:11px 14px;';
+  hthInner.style.cssText = 'display:flex;align-items:flex-start;justify-content:space-between;padding:11px 14px;gap:8px;';
 
-  const titleSpan = document.createElement('span');
-  titleSpan.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:-0.2px;';
   let tiradsClass = 'tirads-none';
   if (tirads.includes('5')) tiradsClass = 'tirads-5';
   else if (tirads.includes('4')) tiradsClass = 'tirads-4';
   else if (tirads.includes('3')) tiradsClass = 'tirads-3';
   else if (tirads.includes('2')) tiradsClass = 'tirads-2';
-  titleSpan.innerHTML = `Nodule ${label} &nbsp; <span class="tirads-display ${tiradsClass}">${tirads}</span>`;
+
+  const titleSpan = document.createElement('div');
+  titleSpan.style.cssText = 'display:flex;flex-direction:column;gap:3px;min-width:0;';
+  const titleRow = document.createElement('div');
+  titleRow.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:-0.2px;';
+  titleRow.innerHTML = `Nodule ${label} &nbsp;<span class="tirads-display ${tiradsClass}">${tirads || '—'}</span>`;
+  titleSpan.appendChild(titleRow);
+  if (info.risk) {
+    const riskRow = document.createElement('div');
+    riskRow.className = 'tirads-risk-info';
+    riskRow.innerHTML = `<span class="${info.riskClass}">${info.risk} malignancy</span> · ${info.threshold}`;
+    titleSpan.appendChild(riskRow);
+  }
 
   const delBtn = document.createElement('button');
   delBtn.textContent = '✕ 삭제';
@@ -1689,16 +1767,33 @@ function buildNoduleTable(lobe, idx, nod) {
   commentTA.addEventListener('blur', () => { updateNodule(lobe, idx, nod); });
   tbody.appendChild(row('Comment', commentTA, false));
 
-  // Biopsy section
-  tbody.appendChild(sectionRow('--- Biopsy ---'));
+  // Collapsible biopsy section
+  // Auto-expand if biopsyDone was already set (legacy saved data or explicit user action)
+  const bxExpanded = nod.biopsyExpanded === true || (nod.biopsyExpanded == null && nod.biopsyDone);
+  {
+    const bxHdrTr = sectionRow('Biopsy');
+    bxHdrTr.querySelector('td').classList.add('collapsible');
+    const caret = document.createElement('span');
+    caret.className = 'section-caret';
+    caret.textContent = bxExpanded ? '▲' : '▼';
+    bxHdrTr.querySelector('td').appendChild(caret);
+    bxHdrTr.onclick = () => {
+      nod.biopsyExpanded = !bxExpanded;
+      state.nodules[lobe][idx] = nod;
+      saveState();
+      renderNoduleCol(lobe);
+    };
+    tbody.appendChild(bxHdrTr);
+  }
 
-  // --- Biopsy ---
+  if (bxExpanded) {
+  // --- Biopsy content ---
   const bxDiv = document.createElement('div');
   bxDiv.style.display='flex'; bxDiv.style.flexDirection='column'; bxDiv.style.gap='4px';
   const bxRow1 = document.createElement('div'); bxRow1.className='check-group';
   const bxChkLbl = document.createElement('label'); bxChkLbl.className='inline-check-label';
   const bxChk = document.createElement('input'); bxChk.type='checkbox'; bxChk.checked=nod.biopsyDone;
-  bxChk.addEventListener('change', () => { nod.biopsyDone=bxChk.checked; updateNodule(lobe,idx,nod); });
+  bxChk.addEventListener('change', () => { nod.biopsyDone=bxChk.checked; if(bxChk.checked) nod.biopsyExpanded=true; updateNodule(lobe,idx,nod); });
   bxChkLbl.appendChild(bxChk); bxChkLbl.append(' Yes');
   bxRow1.appendChild(bxChkLbl);
   bxDiv.appendChild(bxRow1);
@@ -1775,6 +1870,7 @@ function buildNoduleTable(lobe, idx, nod) {
     bxDiv.appendChild(compWrap);
   }
   tbody.appendChild(row('Biopsy', bxDiv, false));
+  } // end if (bxExpanded)
 
   // Note section
   tbody.appendChild(sectionRow('--- Note ---'));
@@ -1872,6 +1968,60 @@ function getKTIRADS(nod, normalThy) {
     return '[K-TIRADS 3, Low suspicion]';
 
   return '';
+}
+
+// K-TIRADS with risk % and biopsy threshold
+function getKTIRADSInfo(nod, normalThy) {
+  const t = getKTIRADS(nod, normalThy);
+  let risk = '', riskClass = '', threshold = '';
+  if (t.includes('5'))      { risk = '>60%';   riskClass = 'tirads-5-text'; threshold = 'Biopsy ≥ 10mm'; }
+  else if (t.includes('4')) { risk = '10–40%'; riskClass = 'tirads-4-text'; threshold = 'Biopsy ≥ 10–15mm'; }
+  else if (t.includes('3')) { risk = '3–10%';  riskClass = 'tirads-3-text'; threshold = 'Biopsy ≥ 20mm'; }
+  else if (t.includes('2')) { risk = '<3%';    riskClass = 'tirads-2-text'; threshold = 'No biopsy indicated'; }
+  return { tirads: t, risk, riskClass, threshold };
+}
+
+// Nodule quick presets
+const NODULE_PRESETS = [
+  { key: 'spongiform', label: 'Spongiform',
+    patch: { composition: 'P.Cystic', spongiform: 'Yes' } },
+  { key: 'ptc', label: 'PTC-like',
+    patch: { composition: 'Solid', echogenicity: 'Mild hypo',
+             orientation: 'Nonparallel (taller-than-wide)',
+             margin: 'Irregular (spiculated/microlobulated)',
+             calcification_micro: true } },
+  { key: 'follicular', label: 'Follicular neoplasm',
+    patch: { composition: 'Solid', echogenicity: 'Iso' } },
+  { key: 'cyst', label: 'Pure cyst',
+    patch: { composition: 'Cystic' } },
+];
+
+function addPresetNodule(lobe, presetKey) {
+  if (state.nodules[lobe].length >= 3) return;
+  const preset = NODULE_PRESETS.find(p => p.key === presetKey);
+  if (!preset) return;
+  const nod = defaultNodule();
+  Object.assign(nod, preset.patch);
+  state.nodules[lobe].push(nod);
+  saveState();
+  renderNoduleCol(lobe);
+}
+
+function buildPresetStrip(lobe) {
+  const strip = document.createElement('div');
+  strip.className = 'preset-strip';
+  const lbl = document.createElement('span');
+  lbl.className = 'preset-strip-label';
+  lbl.textContent = 'Quick add:';
+  strip.appendChild(lbl);
+  NODULE_PRESETS.forEach(preset => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-chip';
+    btn.textContent = preset.label;
+    btn.onclick = () => addPresetNodule(lobe, preset.key);
+    strip.appendChild(btn);
+  });
+  return strip;
 }
 
 // ==================== LYMPH NODE ====================
