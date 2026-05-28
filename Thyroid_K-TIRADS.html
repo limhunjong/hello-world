@@ -201,7 +201,7 @@ body.light #top-bar {
 /* ===== DATA TABLE ===== */
 table.data-table { border-collapse: collapse; width: 100%; background: var(--bg1); }
 table.data-table th, table.data-table td {
-  padding: 12px 16px; vertical-align: middle;
+  padding: 13px 16px; vertical-align: middle;
   border-bottom: 0.5px solid var(--sep);
 }
 table.data-table tbody tr:last-child td { border-bottom: none; }
@@ -218,23 +218,23 @@ table.data-table td.label-cell {
 }
 table.data-table td.required-cell { background: rgba(255,159,10,0.055); }
 table.data-table td.section-header {
-  background: rgba(0,0,0,0.25); color: var(--label3);
+  background: var(--fill4); color: var(--label3);
   font-weight: 600; text-align: left; font-size: 11px;
-  letter-spacing: 0.5px; text-transform: uppercase; padding: 8px 16px 6px;
+  letter-spacing: 0.6px; text-transform: uppercase; padding: 9px 16px 7px;
 }
 
 /* ===== SEGMENTED CONTROL ===== */
 .radio-group {
   display: inline-flex; flex-wrap: wrap;
   background: var(--fill3);
-  border-radius: var(--r-md); padding: 2px; gap: 2px;
+  border-radius: var(--r-md); padding: 3px; gap: 2px;
 }
 .radio-group label {
   position: relative; display: flex; align-items: center; justify-content: center;
-  padding: 8px 16px; border-radius: 10px; cursor: pointer;
+  padding: 9px 18px; border-radius: 10px; cursor: pointer;
   font-size: 14px; font-weight: 500; color: var(--label2);
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  white-space: nowrap; user-select: none; min-height: 42px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  white-space: nowrap; user-select: none; min-height: 44px;
   letter-spacing: -0.1px;
 }
 .radio-group input[type=radio],
@@ -535,6 +535,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 8px !important; }
   .nodule-section-title { font-size: 14px; padding: 10px 14px; }
   .radio-group { width: 100%; }
+  .radio-group label { flex: 1; }
   .radio-group label { padding: 10px 12px; min-height: 46px; font-size: 14px; }
   input[type=text], select, textarea { font-size: 16px !important; }
   input[type=text] { padding: 10px 11px; min-height: 44px; }
@@ -578,7 +579,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   <div class="tab-content active" id="tab-content-thyroid">
     <div class="action-bar">
       <button class="pink-btn" onclick="resetThyroid()">갑상선 초기화</button>
-      <label><input type="checkbox" id="normalThyroid" onchange="onNormalThyroidChange()"> Normal Thyroid</label>
+      <div class="radio-group" style="display:inline-flex;"><label><input type="checkbox" id="normalThyroid" onchange="onNormalThyroidChange()"> Normal Thyroid</label></div>
     </div>
 
     <!-- Section A: Clinical Information -->
@@ -870,8 +871,8 @@ function defaultLN() {
 
 function defaultNodule() {
   return {
-    location: '',
-    diamAP: '', diamT: '', diamL: '', diamUnit: 'cm', maxSize: '',
+    locationUpper: false, locationMiddle: false, locationLower: false,
+    diamAP: '', diamT: '', diamL: '', diamUnit: 'mm', maxSize: '',
     composition: '',
     echogenicity: '',
     sizeChangeInitial: false, sizeChangeFU: false, sizeChangeType: '',
@@ -885,7 +886,7 @@ function defaultNodule() {
     eteType: '', eteMinorAnt: false, eteMinorPost: false,
     eteGrossTrachea: false, eteGrossRLN: false, eteGrossStrap: false, eteGrossOthers: false, eteGrossOthersText: '',
     comment: '',
-    biopsyDone: false, biopsyType: '',
+    biopsyDone: false, biopsyFNA: false, biopsyCNB: false,
     fnaGauge: '', cnbSize: '',
     compNo: true, compYes: false, compIntra: false, compPeri: false, compOthers: false, compOthersText: '',
     recommendation: ''
@@ -918,6 +919,20 @@ function loadState() {
             nod.vascularity_mild   = (v === 'mild');
             nod.vascularity_marked = (v === 'marked');
             delete nod.vascularity;
+          }
+          // Migrate single-string location → booleans
+          if (typeof nod.location === 'string') {
+            const v = nod.location;
+            nod.locationUpper  = (v === 'Upper');
+            nod.locationMiddle = (v === 'Middle');
+            nod.locationLower  = (v === 'Lower');
+            delete nod.location;
+          }
+          // Migrate biopsyType string → booleans
+          if (typeof nod.biopsyType === 'string') {
+            nod.biopsyFNA = (nod.biopsyType === 'FNA');
+            nod.biopsyCNB = (nod.biopsyType === 'CNB');
+            delete nod.biopsyType;
           }
         });
       });
@@ -1195,17 +1210,15 @@ function buildNoduleTable(lobe, idx, nod) {
 
   const tbody = document.createElement('tbody');
 
-  // --- Location (required) ---
+  // --- Location (required, multi-select) ---
   const locDiv = document.createElement('div');
   locDiv.className = 'radio-group';
-  ['Upper','Middle','Lower'].forEach(v => {
+  [['Upper','locationUpper'],['Middle','locationMiddle'],['Lower','locationLower']].forEach(([labelT, key]) => {
     const lbl = document.createElement('label');
-    const inp = document.createElement('input');
-    inp.type = 'radio'; inp.name = `loc_${lobe}_${idx}`; inp.value = v;
-    inp.checked = (nod.location === v);
-    lbl.addEventListener('click', (e) => { if (nod.location === v) { e.preventDefault(); nod.location = ''; updateNodule(lobe, idx, nod); } });
-    inp.addEventListener('change', () => { nod.location = v; updateNodule(lobe, idx, nod); });
-    lbl.appendChild(inp); lbl.append(' ' + v);
+    const chk = document.createElement('input'); chk.type='checkbox';
+    chk.checked = (nod[key] === true);
+    chk.addEventListener('change', () => { nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(chk); lbl.append(' ' + labelT);
     locDiv.appendChild(lbl);
   });
   tbody.appendChild(row('Location *', locDiv, true));
@@ -1250,8 +1263,8 @@ function buildNoduleTable(lobe, idx, nod) {
   const tI  = mkDiamInput('T','diamT');
   const lI  = mkDiamInput('L','diamL');
   const unitSel = document.createElement('select');
-  unitSel.innerHTML = '<option>cm</option><option>mm</option>';
-  unitSel.value = nod.diamUnit || 'cm';
+  unitSel.innerHTML = '<option>mm</option><option>cm</option>';
+  unitSel.value = nod.diamUnit || 'mm';
   unitSel.addEventListener('change', () => { nod.diamUnit = unitSel.value; updateNodule(lobe, idx, nod); });
 
   diamRow1.append('AP:'); diamRow1.appendChild(apI);
@@ -1411,6 +1424,8 @@ function buildNoduleTable(lobe, idx, nod) {
           nod.vascularity_peri = false; nod.vascularity_mild = false; nod.vascularity_marked = false;
         } else {
           nod.vascularity_none = false;
+          if (key === 'vascularity_mild')   nod.vascularity_marked = false;
+          if (key === 'vascularity_marked') nod.vascularity_mild   = false;
         }
       }
       updateNodule(lobe, idx, nod);
@@ -1422,22 +1437,29 @@ function buildNoduleTable(lobe, idx, nod) {
 
   // --- Spongiform ---
   const spongDisabled = (nod.composition === 'Solid' || nod.composition === 'Cystic');
-  const spongLbl = document.createElement('label'); spongLbl.className = 'inline-check-label';
+  const spongDiv = document.createElement('div'); spongDiv.className = 'radio-group';
+  const spongLbl = document.createElement('label');
   const spongChk = document.createElement('input'); spongChk.type='checkbox';
   spongChk.checked = (nod.spongiform === 'Yes');
   spongChk.disabled = spongDisabled;
   spongChk.addEventListener('change', () => { nod.spongiform = spongChk.checked ? 'Yes' : ''; updateNodule(lobe, idx, nod); });
   spongLbl.appendChild(spongChk); spongLbl.append(' Yes');
-  tbody.appendChild(row('Spongiform', spongLbl, false));
+  spongDiv.appendChild(spongLbl);
+  if (spongDisabled) spongDiv.style.opacity = '0.38';
+  tbody.appendChild(row('Spongiform', spongDiv, false));
 
   // --- Comet Tail Artifact ---
-  const cometLbl = document.createElement('label'); cometLbl.className = 'inline-check-label';
+  const cometDisabled = (nod.composition === 'Solid');
+  const cometDiv = document.createElement('div'); cometDiv.className = 'radio-group';
+  const cometLbl = document.createElement('label');
   const cometChk = document.createElement('input'); cometChk.type='checkbox';
   cometChk.checked = (nod.cometTailArtifact === 'Yes');
-  cometChk.disabled = (nod.composition === 'Solid');
+  cometChk.disabled = cometDisabled;
   cometChk.addEventListener('change', () => { nod.cometTailArtifact = cometChk.checked ? 'Yes' : ''; updateNodule(lobe, idx, nod); });
   cometLbl.appendChild(cometChk); cometLbl.append(' Yes');
-  tbody.appendChild(row('Intracystic echogenic\nfoci with comet tail\nartifact', cometLbl, false));
+  cometDiv.appendChild(cometLbl);
+  if (cometDisabled) cometDiv.style.opacity = '0.38';
+  tbody.appendChild(row('Intracystic echogenic\nfoci with comet tail\nartifact', cometDiv, false));
 
   // --- Diffuse Lesion ---
   const diffDiv = document.createElement('div');
@@ -1538,37 +1560,37 @@ function buildNoduleTable(lobe, idx, nod) {
   bxDiv.appendChild(bxRow1);
 
   if (nod.biopsyDone) {
-    const bxRow2 = document.createElement('div'); bxRow2.className='radio-group';
-
+    // FNA row
+    const fnaRow = document.createElement('div'); fnaRow.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+    const fnaDiv = document.createElement('div'); fnaDiv.className='radio-group'; fnaDiv.style.display='inline-flex';
     const fnaLbl = document.createElement('label');
-    const fnaR = document.createElement('input'); fnaR.type='radio'; fnaR.name=`bxtype_${lobe}_${idx}`; fnaR.value='FNA';
-    fnaR.checked = (nod.biopsyType==='FNA');
-    fnaLbl.addEventListener('click', (e) => { if (nod.biopsyType === 'FNA') { e.preventDefault(); nod.biopsyType = ''; updateNodule(lobe,idx,nod); } });
-    fnaR.addEventListener('change', () => { nod.biopsyType='FNA'; updateNodule(lobe,idx,nod); });
-    fnaLbl.appendChild(fnaR); fnaLbl.append(' FNA');
-    bxRow2.appendChild(fnaLbl);
-    if (nod.biopsyType==='FNA') {
-      const gaugeTxt = document.createElement('input'); gaugeTxt.type='text'; gaugeTxt.inputMode='numeric'; gaugeTxt.placeholder='gauge'; gaugeTxt.style.width='52px'; gaugeTxt.value=nod.fnaGauge||'';
+    const fnaChk = document.createElement('input'); fnaChk.type='checkbox'; fnaChk.checked=nod.biopsyFNA;
+    fnaChk.addEventListener('change', () => { nod.biopsyFNA=fnaChk.checked; updateNodule(lobe,idx,nod); });
+    fnaLbl.appendChild(fnaChk); fnaLbl.append(' FNA');
+    fnaDiv.appendChild(fnaLbl); fnaRow.appendChild(fnaDiv);
+    if (nod.biopsyFNA) {
+      const gaugeTxt = document.createElement('input'); gaugeTxt.type='text'; gaugeTxt.inputMode='numeric'; gaugeTxt.placeholder='gauge'; gaugeTxt.style.width='60px'; gaugeTxt.value=nod.fnaGauge||'';
       gaugeTxt.addEventListener('input',()=>{nod.fnaGauge=gaugeTxt.value;state.nodules[lobe][idx]=nod;saveState();});
-      bxRow2.append(' G '); bxRow2.appendChild(gaugeTxt);
+      const gUnit = document.createElement('span'); gUnit.textContent='G'; gUnit.style.cssText='font-size:13px;color:var(--label2);font-weight:500;';
+      fnaRow.appendChild(gaugeTxt); fnaRow.appendChild(gUnit);
     }
+    bxDiv.appendChild(fnaRow);
 
+    // CNB row
+    const cnbRow = document.createElement('div'); cnbRow.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+    const cnbDiv = document.createElement('div'); cnbDiv.className='radio-group'; cnbDiv.style.display='inline-flex';
     const cnbLbl = document.createElement('label');
-    const cnbR = document.createElement('input'); cnbR.type='radio'; cnbR.name=`bxtype_${lobe}_${idx}`; cnbR.value='CNB';
-    cnbR.checked = (nod.biopsyType==='CNB');
-    cnbLbl.addEventListener('click', (e) => {
-      if (nod.biopsyType === 'CNB') { e.preventDefault(); nod.biopsyType = ''; updateNodule(lobe, idx, nod); }
-    });
-    cnbR.addEventListener('change', () => { nod.biopsyType='CNB'; updateNodule(lobe,idx,nod); });
-    cnbLbl.appendChild(cnbR); cnbLbl.append(' CNB');
-    bxRow2.appendChild(cnbLbl);
-    if (nod.biopsyType==='CNB') {
-      const sizeTxt = document.createElement('input'); sizeTxt.type='text'; sizeTxt.inputMode='decimal'; sizeTxt.placeholder='size'; sizeTxt.style.width='52px'; sizeTxt.value=nod.cnbSize||'';
+    const cnbChk = document.createElement('input'); cnbChk.type='checkbox'; cnbChk.checked=nod.biopsyCNB;
+    cnbChk.addEventListener('change', () => { nod.biopsyCNB=cnbChk.checked; updateNodule(lobe,idx,nod); });
+    cnbLbl.appendChild(cnbChk); cnbLbl.append(' CNB');
+    cnbDiv.appendChild(cnbLbl); cnbRow.appendChild(cnbDiv);
+    if (nod.biopsyCNB) {
+      const sizeTxt = document.createElement('input'); sizeTxt.type='text'; sizeTxt.inputMode='decimal'; sizeTxt.placeholder='size'; sizeTxt.style.width='60px'; sizeTxt.value=nod.cnbSize||'';
       sizeTxt.addEventListener('input',()=>{nod.cnbSize=sizeTxt.value;state.nodules[lobe][idx]=nod;saveState();});
-      bxRow2.append(' cm '); bxRow2.appendChild(sizeTxt);
+      const cUnit = document.createElement('span'); cUnit.textContent='cm'; cUnit.style.cssText='font-size:13px;color:var(--label2);font-weight:500;';
+      cnbRow.appendChild(sizeTxt); cnbRow.appendChild(cUnit);
     }
-
-    bxDiv.appendChild(bxRow2);
+    bxDiv.appendChild(cnbRow);
 
     // Complications
     const compDiv2 = document.createElement('div'); compDiv2.className='check-group';
@@ -1987,7 +2009,8 @@ function generateReport() {
       nods.forEach((nod, idx) => {
         const label = LOBE_LABELS[lobe] + (idx+1);
         const parts = [label + ':'];
-        if (nod.location) parts.push(nod.location);
+        const locText = getLocationText(nod);
+        if (locText) parts.push(locText);
         const ms = calcMaxSize(nod);
         if (nod.diamAP || nod.diamT || nod.diamL) {
           const dimStr = [nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×') + ' ' + (nod.diamUnit||'cm');
@@ -2080,7 +2103,7 @@ function generateReport() {
       const ms = calcMaxSize(nod);
       const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
       let line = nodNum++ + ') ' + label;
-      if (nod.location) line += ', ' + nod.location;
+      const locT = getLocationText(nod); if (locT) line += ', ' + locT;
       if (msStr) line += ', ' + msStr;
       if (tirads) line += ', ' + tirads;
       if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
@@ -2159,17 +2182,33 @@ function buildLNConclusionLines() {
   return buildLNFindingLines();
 }
 
+function getLocationText(nod) {
+  const u = nod.locationUpper, m = nod.locationMiddle, l = nod.locationLower;
+  if (u && m && !l) return 'Upper to middle';
+  if (!u && m && l) return 'Middle to lower';
+  if (u && !m && l) return 'Upper to lower';
+  if (u && m && l)  return 'Upper to lower';
+  if (u) return 'Upper';
+  if (m) return 'Middle';
+  if (l) return 'Lower';
+  return '';
+}
+
 function buildBiopsyLines() {
   const lines = [];
   ['right','left','isthmus'].forEach(lobe => {
     (state.nodules[lobe]||[]).forEach((nod,idx) => {
-      if (nod.biopsyDone && nod.biopsyType) {
-        const label = LOBE_LABELS[lobe]+(idx+1);
-        let line = label + ': ' + nod.biopsyType;
-        if (nod.biopsyType==='FNA' && nod.fnaGauge) line += ' (' + nod.fnaGauge + 'G)';
-        if (nod.biopsyType==='CNB' && nod.cnbSize) line += ' (' + nod.cnbSize + 'cm)';
-        lines.push(line);
+      if (!nod.biopsyDone) return;
+      if (!nod.biopsyFNA && !nod.biopsyCNB) return;
+      const label = LOBE_LABELS[lobe]+(idx+1);
+      const parts = [];
+      if (nod.biopsyFNA) {
+        let s = 'FNA'; if (nod.fnaGauge) s += ' (' + nod.fnaGauge + 'G)'; parts.push(s);
       }
+      if (nod.biopsyCNB) {
+        let s = 'CNB'; if (nod.cnbSize) s += ' (' + nod.cnbSize + 'cm)'; parts.push(s);
+      }
+      lines.push(label + ': ' + parts.join(', '));
     });
   });
   // LN biopsy
@@ -2194,7 +2233,7 @@ function validateReport() {
       const label = LOBE_LABELS[lobe]+(idx+1);
       const hasContent = nod.composition || nod.echogenicity || nod.comment || nod.diamAP || nod.diamT || nod.diamL;
       if (!hasContent) return; // skip empty nodules
-      if (!nod.location) errors.push('Nodule '+label+': Location is required');
+      if (!nod.locationUpper && !nod.locationMiddle && !nod.locationLower) errors.push('Nodule '+label+': Location is required');
       if (!nod.diamAP && !nod.diamT && !nod.diamL && !nod.comment)
         errors.push('Nodule '+label+': Diameter or Comment is required');
     });
