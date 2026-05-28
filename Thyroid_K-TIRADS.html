@@ -422,7 +422,7 @@ table.ln-table td.required-cell { background: rgba(255,159,10,0.055); }
   background: var(--bg0);
   white-space: pre-wrap;
   font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
-  color: rgba(235,235,245,0.78);
+  color: var(--label1);
 }
 .dialog-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; align-items: center; }
 .copy-feedback { font-size: 13px; color: var(--green); align-self: center; margin-right: auto; font-weight: 600; }
@@ -1593,36 +1593,41 @@ function buildNoduleTable(lobe, idx, nod) {
     bxDiv.appendChild(cnbRow);
 
     // Complications
-    const compDiv2 = document.createElement('div'); compDiv2.className='check-group';
-    const noLbl = document.createElement('label'); noLbl.className='inline-check-label';
+    const compWrap = document.createElement('div'); compWrap.style.cssText='display:flex;flex-direction:column;gap:6px;';
+    const compLabelSpan = document.createElement('span'); compLabelSpan.style.cssText='font-size:11px;color:var(--label3);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;';
+    compLabelSpan.textContent='Complications';
+    compWrap.appendChild(compLabelSpan);
+
+    // No / Yes row
+    const compTopDiv = document.createElement('div'); compTopDiv.className='radio-group';
+    const noLbl = document.createElement('label');
     const noChk = document.createElement('input'); noChk.type='checkbox'; noChk.checked=nod.compNo;
     noChk.addEventListener('change',()=>{nod.compNo=noChk.checked;if(noChk.checked){nod.compYes=false;nod.compIntra=false;nod.compPeri=false;nod.compOthers=false;}updateNodule(lobe,idx,nod);});
     noLbl.appendChild(noChk); noLbl.append(' No');
-    compDiv2.appendChild(noLbl);
-
-    const yesLbl = document.createElement('label'); yesLbl.className='inline-check-label';
+    compTopDiv.appendChild(noLbl);
+    const yesLbl = document.createElement('label');
     const yesChk = document.createElement('input'); yesChk.type='checkbox'; yesChk.checked=nod.compYes;
     yesChk.addEventListener('change',()=>{nod.compYes=yesChk.checked;if(yesChk.checked){nod.compNo=false;}updateNodule(lobe,idx,nod);});
     yesLbl.appendChild(yesChk); yesLbl.append(' Yes');
-    compDiv2.appendChild(yesLbl);
+    compTopDiv.appendChild(yesLbl);
+    compWrap.appendChild(compTopDiv);
 
     if (nod.compYes) {
+      const compSubDiv = document.createElement('div'); compSubDiv.className='radio-group';
       [['intrathyroidal hematoma','compIntra'],['perithyroidal hematoma','compPeri'],['others','compOthers']].forEach(([labelT,sk])=>{
-        const l = document.createElement('label'); l.className='inline-check-label';
+        const l = document.createElement('label');
         const c = document.createElement('input'); c.type='checkbox'; c.checked=nod[sk];
         c.addEventListener('change',()=>{nod[sk]=c.checked;updateNodule(lobe,idx,nod);});
         l.appendChild(c); l.append(' '+labelT);
-        compDiv2.appendChild(l);
+        compSubDiv.appendChild(l);
       });
+      compWrap.appendChild(compSubDiv);
       if (nod.compOthers) {
         const othTxt = document.createElement('input'); othTxt.type='text'; othTxt.placeholder='specify'; othTxt.value=nod.compOthersText||'';
         othTxt.addEventListener('input',()=>{nod.compOthersText=othTxt.value;state.nodules[lobe][idx]=nod;saveState();});
-        compDiv2.appendChild(othTxt);
+        compWrap.appendChild(othTxt);
       }
     }
-    const compWrap = document.createElement('div');
-    const compLabelSpan = document.createElement('span'); compLabelSpan.style.fontSize='11px';compLabelSpan.style.marginRight='6px';compLabelSpan.textContent='Complications:';
-    compWrap.appendChild(compLabelSpan); compWrap.appendChild(compDiv2);
     bxDiv.appendChild(compWrap);
   }
   tbody.appendChild(row('Biopsy', bxDiv, false));
