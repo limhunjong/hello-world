@@ -154,6 +154,12 @@ body.light #top-bar {
 #main { margin-top: 52px; padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+/* Normal Thyroid active: gray out clinical/parenchyma sections */
+#clinicalTable:has(input:disabled),
+#parenchymaTable:has(input:disabled) {
+  opacity: 0.38;
+  pointer-events: none;
+}
 
 /* ===== ACTION BAR ===== */
 .action-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-top: 2px; }
@@ -905,9 +911,8 @@ function renderAll() {
   // Active tab
   switchTab(state.activeTab || 'thyroid');
 
-  // Normal thyroid checkbox
+  // Normal thyroid checkbox (visual only — disable applied at end)
   document.getElementById('normalThyroid').checked = state.normalThyroid;
-  applyNormalThyroidDisable();
 
   // Clinical info
   const cinds = document.querySelectorAll('input[name="clinInd"]');
@@ -945,9 +950,9 @@ function renderAll() {
   // Parenchyma
   document.getElementById('diffuseDis').checked = state.diffuseDis;
   const echoInputs = document.querySelectorAll('input[name="echotexture"]');
-  echoInputs.forEach(r => { r.checked = (r.value === state.echotexture); r.disabled = false; });
+  echoInputs.forEach(r => { r.checked = (r.value === state.echotexture); });
   const pvInputs = document.querySelectorAll('input[name="parVasc"]');
-  pvInputs.forEach(r => { r.checked = (r.value === state.parVasc); r.disabled = false; });
+  pvInputs.forEach(r => { r.checked = (r.value === state.parVasc); });
   document.getElementById('multinodular').checked = state.multinodular;
 
   // Nodules
@@ -964,6 +969,9 @@ function renderAll() {
 
   // Bottom
   document.getElementById('addToReport').checked = state.addToReport;
+
+  // Apply normalThyroid disable LAST so it overrides any individual r.disabled assignments above
+  applyNormalThyroidDisable();
 }
 
 // ==================== PARENCHYMA ====================
@@ -976,16 +984,26 @@ function onNormalThyroidChange() {
 
 function applyNormalThyroidDisable() {
   const dis = state.normalThyroid;
-  const sections = ['clinicalTable', 'parenchymaTable', 'addRight', 'addLeft', 'addIsthmus'];
-  sections.forEach(id => {
+  ['clinicalTable', 'parenchymaTable'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      el.querySelectorAll('input,select,textarea,button').forEach(i => { if (id !== 'addRight' && id !== 'addLeft' && id !== 'addIsthmus') i.disabled = dis; });
-    }
+    if (!el) return;
+    el.querySelectorAll('input,select,textarea,button').forEach(i => {
+      i.disabled = dis;
+      // When activating Normal Thyroid: visually clear radio/checkbox selections
+      // so disabled-but-selected items don't confusingly show as blue
+      if (dis && (i.type === 'radio' || i.type === 'checkbox')) i.checked = false;
+    });
   });
   if (dis) {
     ['addRight','addLeft','addIsthmus'].forEach(id => { const el=document.getElementById(id); if(el) el.disabled=true; });
   } else {
+    // Restore visual state from saved state when re-enabling
+    document.querySelectorAll('input[name="thySize"]').forEach(r => r.checked = (r.value === state.thySize));
+    document.querySelectorAll('input[name="clinInd"]').forEach(r => r.checked = (r.value === state.clinInd));
+    document.querySelectorAll('input[name="echotexture"]').forEach(r => r.checked = (r.value === state.echotexture));
+    document.querySelectorAll('input[name="parVasc"]').forEach(r => r.checked = (r.value === state.parVasc));
+    const dd = document.getElementById('diffuseDis'); if (dd) dd.checked = state.diffuseDis;
+    const mn = document.getElementById('multinodular'); if (mn) mn.checked = state.multinodular;
     updateAddBtns();
   }
   rerenderNoduleTirads();
@@ -2196,11 +2214,8 @@ function setupStaticRadioToggle(name, stateKey) {
     const lbl = radio.closest('label');
     if (!lbl) return;
     lbl.addEventListener('click', (e) => {
-      // Skip synthesized click that bubbles up from the radio itself,
-      // and skip clicks on text inputs inside the label (e.g. custom clinInd)
       if (e.target.tagName === 'INPUT') return;
-      // Compare against state (not radio.checked) — state is the previous value,
-      // which is reliable even if the browser pre-checks the radio before the event
+      if (radio.disabled) return; // ignore clicks when Normal Thyroid is active
       if (state[stateKey] === radio.value) {
         e.preventDefault();
         state[stateKey] = '';
