@@ -1153,6 +1153,9 @@ function buildNoduleTable(lobe, idx, nod) {
   spongR.checked = (nod.spongiform === 'Yes');
   const spongDisabled = (nod.composition === 'Solid' || nod.composition === 'Cystic');
   spongR.disabled = spongDisabled;
+  spongLbl.addEventListener('click', (e) => {
+    if (nod.spongiform === 'Yes') { e.preventDefault(); nod.spongiform = ''; updateNodule(lobe, idx, nod); }
+  });
   spongR.addEventListener('change', () => { nod.spongiform = 'Yes'; updateNodule(lobe, idx, nod); });
   spongLbl.appendChild(spongR); spongLbl.append(' Yes');
   spongDiv.appendChild(spongLbl);
@@ -1165,6 +1168,9 @@ function buildNoduleTable(lobe, idx, nod) {
   const cometR = document.createElement('input'); cometR.type='radio'; cometR.name=`comet_${lobe}_${idx}`; cometR.value='Yes';
   cometR.checked = (nod.cometTailArtifact === 'Yes');
   cometR.disabled = (nod.composition === 'Solid');
+  cometLbl.addEventListener('click', (e) => {
+    if (nod.cometTailArtifact === 'Yes') { e.preventDefault(); nod.cometTailArtifact = ''; updateNodule(lobe, idx, nod); }
+  });
   cometR.addEventListener('change', () => { nod.cometTailArtifact = 'Yes'; updateNodule(lobe, idx, nod); });
   cometLbl.appendChild(cometR); cometLbl.append(' Yes');
   cometDiv.appendChild(cometLbl);
@@ -1177,6 +1183,9 @@ function buildNoduleTable(lobe, idx, nod) {
     const lbl = document.createElement('label');
     const r = document.createElement('input'); r.type='radio'; r.name=`diff_${lobe}_${idx}`; r.value=val;
     r.checked = (nod.diffuseLesion === val);
+    lbl.addEventListener('click', (e) => {
+      if (nod.diffuseLesion === val) { e.preventDefault(); nod.diffuseLesion = ''; updateNodule(lobe, idx, nod); }
+    });
     r.addEventListener('change', () => { nod.diffuseLesion = val; updateNodule(lobe, idx, nod); });
     lbl.appendChild(r); lbl.append(' '+labelT);
     diffDiv.appendChild(lbl);
