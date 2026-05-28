@@ -49,6 +49,8 @@
   --shadow-card: 0 1px 3px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.22);
   --shadow-btn:  0 2px 6px rgba(0,0,0,0.3);
   --shadow-seg:  0 2px 6px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.2);
+  /* Dynamic: updated by JS on every resize/orientation change */
+  --nav-h: 52px;
 }
 
 /* ===== BASE ===== */
@@ -976,6 +978,145 @@ body.light #right-panel.sheet-open #live-preview-pane {
   #bottom-section { margin: 0 10px 10px; }
   .radio-group label { padding: 9px 8px; font-size: 13px; }
 }
+
+/* ================================================================
+   ORIENTATION-SPECIFIC OPTIMIZATIONS
+   Portrait vs. Landscape — each treated as a distinct layout mode
+================================================================ */
+
+/* ===== iPHONE PORTRAIT (≤ 767px, portrait): guided sequential flow ===== */
+@media (max-width: 767px) and (orientation: portrait) {
+  /* More generous vertical breathing for the step-based scroll flow */
+  .table-card, .card { margin-bottom: 16px; }
+  table.data-table th { font-size: 14px; padding: 14px 12px; letter-spacing: -0.1px; }
+  table.data-table td { padding: 13px 10px; }
+  /* Nodule section title acts as a clear section divider */
+  .nodule-section-title { margin-top: 4px; border-radius: var(--r-lg); }
+  /* Lobe tabs slightly taller for easy tap */
+  .lobe-tab { min-height: 52px; font-size: 14px; }
+  /* Action bar more spacious */
+  .action-bar { padding-top: 4px; margin-bottom: 16px; }
+  /* Preview FAB slightly higher to avoid home indicator */
+  #preview-fab {
+    bottom: max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+/* ===== ALL LANDSCAPE COMPACT: < 500px tall (any phone landscape) ===== */
+/* Targets iPhone SE (667×375), iPhone 15 (844×390), iPhone 15 Max (932×430), etc. */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* --- Compact navbar --- */
+  #top-bar {
+    height: 40px;
+    padding: 0 max(12px, env(safe-area-inset-right, 12px)) 0 max(12px, env(safe-area-inset-left, 12px));
+    flex-wrap: nowrap;
+  }
+  /* Suppress the line-break spacer used in portrait mobile wrap */
+  #top-bar .top-spacer { flex: 1; flex-basis: auto !important; height: 0; }
+  .tab-btn { height: 40px; font-size: 11px; padding: 0 8px; border-bottom-width: 2px; }
+  .report-btn { margin: 0 0 0 6px; padding: 0 14px; height: 30px; font-size: 13px; min-height: 30px; border-radius: 15px; }
+  .reset-all-btn { padding: 0 10px; height: 30px; font-size: 13px; }
+  .theme-toggle-btn { width: 28px; height: 28px; margin-left: 4px; }
+
+  /* Layout top offset (JS also updates --nav-h) */
+  #app-layout { margin-top: 40px; min-height: calc(100dvh - 40px); }
+
+  /* Shorter preview sheet */
+  #right-panel.sheet-open { height: 45dvh; }
+
+  /* Compact table rows */
+  table.data-table th { padding: 8px 10px; font-size: 13px; }
+  table.data-table td { padding: 8px 10px; }
+  table.data-table td.label-cell { padding: 8px 8px; }
+
+  /* Compact controls — keep 40px min for thumb accuracy */
+  .radio-group label { min-height: 40px; padding: 8px 12px; font-size: 13px; }
+  .inline-check-label { min-height: 40px; padding: 8px 12px; font-size: 14px; }
+  .check-group label { min-height: 40px; padding: 8px 12px; font-size: 13px; }
+  input[type=text] { min-height: 38px; padding: 7px 10px; }
+  select { min-height: 38px; padding: 7px 10px; }
+
+  /* Compact section spacing */
+  #main { padding: 8px max(12px, env(safe-area-inset-left, 12px)); }
+  #bottom-section { margin: 0 max(12px, env(safe-area-inset-left, 12px)) 8px; }
+  .table-card, .card { margin-bottom: 8px; }
+  .action-bar { margin-bottom: 10px; }
+
+  /* Smaller FAB */
+  #preview-fab {
+    height: 44px;
+    padding: 0 16px;
+    font-size: 13px;
+    bottom: max(10px, calc(8px + env(safe-area-inset-bottom, 0px)));
+    right: max(12px, calc(8px + env(safe-area-inset-right, 0px)));
+  }
+
+  /* Footer + bottom section FAB clearance */
+  #app-footer { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  #bottom-section { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ===== iPHONE LANDSCAPE SPLIT: ≥ 700px wide AND ≤ 500px tall ===== */
+/* iPhone mini (812×375), iPhone 15 (844×390), iPhone 15 Max (932×430) */
+/* Shows compact two-pane: left=input, right=live preview */
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 700px) {
+  /* Two-column split layout */
+  #app-layout { flex-direction: row; align-items: flex-start; }
+  #left-panel  { flex: 1; min-width: 0; }
+
+  /* Right panel: sticky sidebar, not bottom sheet */
+  #right-panel {
+    position: sticky;
+    top: var(--nav-h, 40px);
+    height: calc(100dvh - var(--nav-h, 40px));
+    width: 36%;
+    flex-shrink: 0;
+    padding: 6px 8px 6px 0;
+    overflow: hidden;
+    align-self: flex-start;
+  }
+
+  /* Restore preview pane as inline panel */
+  #live-preview-pane {
+    height: 100%;
+    border-radius: var(--r-md);
+    max-height: none;
+    box-shadow: var(--shadow-card);
+  }
+  /* Compact preview header — no grabber, no close btn */
+  .preview-header {
+    flex-direction: row;
+    padding: 8px 12px;
+    cursor: default;
+    border-radius: var(--r-md) var(--r-md) 0 0;
+  }
+  .preview-header::before { display: none; }
+  .preview-close-btn { display: none !important; }
+  /* Hide FAB — preview is always visible */
+  #preview-fab { display: none !important; }
+
+  /* Show lobe tabs in the left panel (single-column nodule view) */
+  .lobe-tabs { display: flex; }
+  .nodule-col.mobile-hidden { display: none; }
+  .nodule-col-header { display: none; }
+  .nodule-section { flex-direction: column; }
+  .lobe-tab { min-height: 44px; font-size: 12px; }
+
+  /* No FAB clearance needed */
+  #app-footer { padding-bottom: 20px; }
+  #bottom-section { padding-bottom: 20px; margin-bottom: 0; }
+}
+
+/* ===== iPAD PORTRAIT (768px–1023px, portrait): full-width + drawer ===== */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+  #right-panel.sheet-open { height: 62dvh; }
+  table.data-table th { font-size: 14px; }
+  .lobe-tab { min-height: 52px; }
+}
+
+/* ===== iPAD LANDSCAPE (≥ 1024px): full two-column (handled by base breakpoint) ===== */
+/* iPad mini landscape = 1024px → hits xl breakpoint automatically */
+/* No extra rules needed */
 </style>
 </head>
 <body>
@@ -2998,28 +3139,47 @@ function toggleTheme() {
   }
 }());
 
-// Adjust layout margin-top to match actual top-bar height
+// Determines if the current viewport is in "landscape split" mode:
+// phone in landscape with enough width for two-pane layout
+function isLandscapeSplit() {
+  return window.matchMedia(
+    '(orientation: landscape) and (max-height: 500px) and (min-width: 700px)'
+  ).matches;
+}
+
+// Adjust layout margin-top + sticky panel positioning
 function adjustMainTop() {
   const bar = document.getElementById('top-bar');
   const layout = document.getElementById('app-layout');
   if (!bar || !layout) return;
+
   const h = bar.offsetHeight;
+  // Expose nav height as CSS variable so media query rules can use it
+  document.documentElement.style.setProperty('--nav-h', h + 'px');
   layout.style.marginTop = h + 'px';
+
   const rp = document.getElementById('right-panel');
   if (!rp) return;
-  if (window.innerWidth >= 1024) {
-    // Desktop: sticky right panel
-    rp.style.top = h + 'px';
+
+  const desktop = window.innerWidth >= 1024;
+  const lSplit  = isLandscapeSplit();
+
+  if (desktop || lSplit) {
+    // Sticky right panel for desktop or landscape split
+    rp.style.top    = h + 'px';
     rp.style.height = 'calc(100dvh - ' + h + 'px)';
-    // Auto-close sheet if we expand to desktop width
     if (previewSheetOpen) closePreviewSheet();
+    // In landscape split, ensure lobe tabs are in correct state
+    if (lSplit) switchLobeTab(activeLobeMobile);
   } else {
-    // Tablet/mobile: bottom sheet; clear inline positioning
-    rp.style.top = '';
+    // Bottom sheet mode — clear inline positioning
+    rp.style.top    = '';
     rp.style.height = '';
   }
 }
 window.addEventListener('resize', adjustMainTop);
+// Re-measure after orientation change (browser updates viewport with a brief delay)
+window.addEventListener('orientationchange', () => setTimeout(adjustMainTop, 180));
 
 // Populate year selects up to current year (no future dates)
 (function() {
