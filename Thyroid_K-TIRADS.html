@@ -285,7 +285,7 @@ table.data-table th {
   border-bottom: 0.5px solid var(--sep);
 }
 table.data-table td.label-cell {
-  background: var(--bg1); font-weight: 500; width: 155px;
+  background: var(--bg1); font-weight: 500; width: 120px;
   font-size: 13px; color: var(--label2);
   border-right: 0.5px solid rgba(84,84,88,0.3);
   line-height: 1.35;
@@ -962,7 +962,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 @media (min-width: 768px) and (max-width: 1023px) {
   #main { padding: 16px; }
   #bottom-section { margin: 0 16px 16px; }
-  table.data-table td.label-cell { width: 140px; }
+  table.data-table td.label-cell { width: 120px; }
 }
 
 /* ===== MOBILE ALL (< 768px) ===== */
@@ -1261,7 +1261,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 /* --- Universal: no child of a flex/grid container should overflow horizontally --- */
 #main > * { max-width: 100%; min-width: 0; }
 .card, .table-card { max-width: 100%; min-width: 0; overflow: hidden; }
-table.data-table { table-layout: fixed; }
+/* table-layout: auto (default) so label-cell width is respected, not forced 50/50 */
 table.data-table td, table.data-table th { overflow-wrap: break-word; word-break: break-word; }
 </style>
 </head>
