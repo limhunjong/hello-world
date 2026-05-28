@@ -1379,8 +1379,8 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
         <tr>
           <td class="label-cell">Thyroid Size</td>
           <td>
-            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;">
-              <div class="radio-group" style="align-self:center;">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+              <div class="radio-group">
                 <label><input type="radio" name="thySize" value="Decreased" onchange="saveState()"> Decreased</label>
                 <label><input type="radio" name="thySize" value="Normal" onchange="saveState()" checked> Normal</label>
                 <label><input type="radio" name="thySize" value="Increased" onchange="saveState()"> Increased</label>
@@ -1441,7 +1441,7 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
         </tr>
         <tr>
           <td class="label-cell">Multinodular Goiter</td>
-          <td><label class="inline-check-label"><input type="checkbox" id="multinodular" onchange="saveState()"> Yes</label></td>
+          <td><label class="inline-check-label"><input type="checkbox" id="multinodular" onchange="state.multinodular=this.checked;saveState()"> Yes</label></td>
         </tr>
       </tbody>
     </table>
