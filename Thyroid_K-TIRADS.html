@@ -54,7 +54,7 @@
 }
 
 /* ===== BASE ===== */
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   font-size: 15px;
@@ -64,6 +64,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.25s;
+  overflow-x: hidden;
 }
 label { cursor: pointer; }
 button, [role="button"] {
@@ -1117,6 +1118,93 @@ body.light #right-panel.sheet-open #live-preview-pane {
 /* ===== iPAD LANDSCAPE (≥ 1024px): full two-column (handled by base breakpoint) ===== */
 /* iPad mini landscape = 1024px → hits xl breakpoint automatically */
 /* No extra rules needed */
+
+/* ================================================================
+   ANTI-CLIPPING: prevent any element from overflowing horizontally
+   on phones of any size or orientation
+================================================================ */
+
+/* --- Radio group labels: allow wrapping on mobile --- */
+@media (max-width: 767px) {
+  .radio-group label {
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.35;
+  }
+  .inline-check-label {
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.35;
+  }
+  .check-group label {
+    white-space: normal;
+    word-break: break-word;
+  }
+  /* Flex children must not overflow their container */
+  .radio-group { max-width: 100%; }
+  .check-group { max-width: 100%; }
+  /* All flex children need min-width: 0 to allow shrinking */
+  .radio-group label { min-width: 0; }
+
+  /* Fix inline-width inputs — let them grow/shrink with available space */
+  #clinIndCustom  { width: auto !important; flex: 1 1 60px; min-width: 60px; max-width: 100%; }
+  #prevBxTarget   { width: 80px !important; min-width: 60px; }
+  #prevBxPathDx   { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
+}
+
+/* --- Landscape compact: also allow label wrapping --- */
+@media (orientation: landscape) and (max-height: 500px) {
+  .radio-group label {
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .inline-check-label { white-space: normal; word-break: break-word; line-height: 1.3; }
+  .check-group label  { white-space: normal; word-break: break-word; }
+  .radio-group        { max-width: 100%; }
+  .radio-group label  { min-width: 0; }
+
+  /* Fix inline inputs in landscape too */
+  #clinIndCustom  { width: auto !important; flex: 1 1 60px; min-width: 60px; max-width: 100%; }
+  #prevBxTarget   { width: 80px !important; min-width: 60px; }
+  #prevBxPathDx   { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
+
+  /* Compact dialog — 90dvh so it fits in ~375px tall screens */
+  .dialog-box { max-height: 90dvh; }
+
+  /* Navbar fallback: scroll horizontally if tabs somehow overflow */
+  #top-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* --- Landscape split: left panel must scroll, never overflow --- */
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 700px) {
+  #left-panel {
+    height: calc(100dvh - var(--nav-h, 40px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* --- Preview content: always wrap long text --- */
+#preview-content {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* --- Dialog body: wrap long text --- */
+.dialog-body {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* --- Universal: no child of a flex/grid container should overflow horizontally --- */
+#main > * { max-width: 100%; min-width: 0; }
+.card, .table-card { max-width: 100%; min-width: 0; overflow: hidden; }
+table.data-table { table-layout: fixed; }
+table.data-table td, table.data-table th { overflow-wrap: break-word; word-break: break-word; }
 </style>
 </head>
 <body>
