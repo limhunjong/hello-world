@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thyroid RFA Volumetric Tracker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface-muted: #fbfbfd;
+      --text: #1d1d1f;
+      --secondary: #86868b;
+      --tertiary: #a1a1a6;
+      --line: rgba(29, 29, 31, 0.11);
+      --blue: #0066cc;
+      --blue-deep: #0051a3;
+      --green: #248a3d;
+      --amber: #b26a00;
+      --red: #d70015;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.055);
+      --soft-shadow: 0 8px 24px rgba(0, 0, 0, 0.045);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+    }
+
+    .hero {
+      padding: 18px 0 34px;
+      text-align: center;
+    }
+
+    .kicker {
+      margin: 0 0 12px;
+      color: var(--blue);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 0 auto;
+      font-size: clamp(2.4rem, 9vw, 5.25rem);
+      font-weight: 700;
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 620px;
+      margin: 18px auto 0;
+      color: var(--secondary);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      line-height: 1.52;
+      font-weight: 400;
+    }
+
+    .shell {
+      display: grid;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+      backdrop-filter: saturate(160%) blur(18px);
+      -webkit-backdrop-filter: saturate(160%) blur(18px);
+    }
+
+    .input-card {
+      width: min(100%, 480px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .section-title span {
+      color: var(--tertiary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .measurements {
+      display: grid;
+      gap: 28px;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .floating-field {
+      position: relative;
+    }
+
+    .floating-field input {
+      width: 100%;
+      min-height: 62px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: var(--surface-muted);
+      color: var(--text);
+      padding: 25px 52px 10px 16px;
+      font-size: 1.12rem;
+      font-weight: 560;
+      line-height: 1.2;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(29, 29, 31, 0.08);
+      transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .floating-field label {
+      position: absolute;
+      left: 16px;
+      top: 11px;
+      color: var(--secondary);
+      font-size: 0.78rem;
+      font-weight: 620;
+      pointer-events: none;
+      transition: color 180ms ease;
+    }
+
+    .floating-field .unit {
+      position: absolute;
+      right: 16px;
+      top: 31px;
+      color: var(--tertiary);
+      font-size: 0.88rem;
+      font-weight: 650;
+      pointer-events: none;
+    }
+
+    .floating-field input:focus {
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1.5px var(--blue), 0 0 0 5px rgba(0, 102, 204, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .floating-field input:focus + label {
+      color: var(--blue);
+    }
+
+    .floating-field input[aria-invalid="true"] {
+      box-shadow: inset 0 0 0 1.5px var(--red), 0 0 0 5px rgba(215, 0, 21, 0.08);
+      background: #fffafa;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .button {
+      min-height: 52px;
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 20px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
+
+    .button-primary {
+      background: var(--blue);
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(0, 102, 204, 0.2);
+    }
+
+    .button-primary:hover {
+      background: var(--blue-deep);
+      transform: scale(1.015);
+      box-shadow: 0 16px 32px rgba(0, 102, 204, 0.24);
+    }
+
+    .button-secondary {
+      background: transparent;
+      color: var(--blue);
+    }
+
+    .button-secondary:hover {
+      background: rgba(0, 102, 204, 0.07);
+    }
+
+    .results-card {
+      min-height: 520px;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .result-topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .result-topline h2 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 650;
+    }
+
+    .status-pill {
+      min-height: 32px;
+      border-radius: 999px;
+      background: #f5f5f7;
+      color: var(--secondary);
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      font-weight: 650;
+      white-space: nowrap;
+      transition: background 260ms ease, color 260ms ease;
+    }
+
+    .status-pill.good {
+      background: rgba(36, 138, 61, 0.1);
+      color: var(--green);
+    }
+
+    .status-pill.suboptimal {
+      background: rgba(178, 106, 0, 0.1);
+      color: var(--amber);
+    }
+
+    .status-pill.increase,
+    .status-pill.warning {
+      background: rgba(215, 0, 21, 0.09);
+      color: var(--red);
+    }
+
+    .result-hero {
+      display: grid;
+      place-items: center;
+      min-height: 250px;
+      text-align: center;
+    }
+
+    .vrr-label {
+      margin: 0 0 8px;
+      color: var(--secondary);
+      font-size: 0.92rem;
+      font-weight: 650;
+    }
+
+    .vrr-value {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(4rem, 17vw, 7.5rem);
+      font-weight: 250;
+      line-height: 0.9;
+      letter-spacing: 0;
+      opacity: 0.34;
+      transition: opacity 420ms ease, transform 420ms ease, color 300ms ease;
+    }
+
+    .vrr-value.ready {
+      opacity: 1;
+      transform: translateY(-2px);
+      color: var(--blue);
+    }
+
+    .gauge-wrap {
+      width: min(100%, 430px);
+      margin: 6px auto 0;
+    }
+
+    .gauge-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--tertiary);
+      font-size: 0.76rem;
+      font-weight: 650;
+      margin-bottom: 10px;
+    }
+
+    .gauge {
+      height: 10px;
+      border-radius: 999px;
+      background: #e8e8ed;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+      transition: width 680ms cubic-bezier(0.2, 0.8, 0.2, 1), background 260ms ease;
+    }
+
+    .gauge-fill.good {
+      background: linear-gradient(90deg, var(--blue), #34c759);
+    }
+
+    .gauge-fill.suboptimal {
+      background: linear-gradient(90deg, var(--blue), #ff9f0a);
+    }
+
+    .gauge-fill.increase,
+    .gauge-fill.warning {
+      background: var(--red);
+    }
+
+    .result-panel {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 420ms ease, transform 420ms ease;
+    }
+
+    .result-panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .metrics {
+      display: grid;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 18px;
+      padding: 15px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .metric-name {
+      color: var(--secondary);
+      font-size: 0.94rem;
+      font-weight: 520;
+    }
+
+    .metric-value {
+      color: var(--text);
+      font-size: 1.18rem;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .message {
+      margin: 20px 0 0;
+      color: var(--secondary);
+      font-size: 0.94rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .formula-card {
+      margin-top: 18px;
+      padding: 22px 24px;
+    }
+
+    .formula-card h2 {
+      margin-bottom: 8px;
+      font-size: 1.02rem;
+      font-weight: 650;
+    }
+
+    .formula-card p {
+      margin-bottom: 14px;
+      color: var(--secondary);
+      line-height: 1.55;
+    }
+
+    .formula-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--secondary);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .formula-list strong {
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    @media (min-width: 620px) {
+      .page {
+        padding: 40px 28px 56px;
+      }
+
+      .field-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .floating-field input {
+        padding-right: 42px;
+      }
+
+      .floating-field .unit {
+        right: 13px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr auto;
+      }
+    }
+
+    @media (min-width: 940px) {
+      .hero {
+        padding-top: 36px;
+        padding-bottom: 54px;
+      }
+
+      .shell {
+        grid-template-columns: 480px minmax(0, 1fr);
+        gap: 22px;
+      }
+
+      .input-card {
+        position: sticky;
+        top: 28px;
+        margin: 0;
+      }
+
+      .results-card {
+        padding: 34px;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 520px) {
+      .page {
+        padding-top: 16px;
+      }
+
+      .hero {
+        text-align: left;
+        padding-bottom: 18px;
+      }
+
+      h1,
+      .subtitle {
+        margin-left: 0;
+      }
+
+      h1 {
+        font-size: 2.4rem;
+      }
+
+      .subtitle {
+        margin-top: 10px;
+      }
+
+      .results-card {
+        min-height: 430px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="kicker">Thyroid RFA Follow-up</p>
+      <h1>Thyroid RFA Volumetric Tracker</h1>
+      <p class="subtitle">A focused volumetric calculator for thyroid nodule follow-up, designed for quick review with clear, clinically familiar outputs.</p>
+    </header>
+
+    <section class="shell" aria-label="Thyroid nodule volume reduction calculator">
+      <form class="card input-card" id="calculatorForm" novalidate>
+        <div class="measurements">
+          <section aria-labelledby="initialHeading">
+            <div class="section-title">
+              <h2 id="initialHeading">Initial volume</h2>
+              <span>Baseline</span>
+            </div>
+            <div class="field-grid">
+              <div class="floating-field">
+                <input id="initialLength" name="initialLength" type="number" inputmode="decimal" min="0" step="0.1" autocomplete="off" placeholder=" ">
+                <label for="initialLength">Length</label>
+                <span class="unit">mm</span>
+              </div>
+              <div class="floating-field">
+                <input id="initialWidth" name="initialWidth" type="number" inputmode="decimal" min="0" step="0.1" autocomplete="off" placeholder=" ">
+                <label for="initialWidth">Width</label>
+                <span class="unit">mm</span>
+              </div>
+              <div class="floating-field">
+                <input id="initialHeight" name="initialHeight" type="number" inputmode="decimal" min="0" step="0.1" autocomplete="off" placeholder=" ">
+                <label for="initialHeight">Depth</label>
+                <span class="unit">mm</span>
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="followHeading">
+            <div class="section-title">
+              <h2 id="followHeading">Follow-up volume</h2>
+              <span>Current</span>
+            </div>
+            <div class="field-grid">
+              <div class="floating-field">
+                <input id="followLength" name="followLength" type="number" inputmode="decimal" min="0" step="0.1" autocomplete="off" placeholder=" ">
+                <label for="followLength">Length</label>
+                <span class="unit">mm</span>
+              </div>
+              <div class="floating-field">
+                <input id="followWidth" name="followWidth" type="number" inputmode="decimal" min="0" step="0.1" autocomplete="off" placeholder=" ">
+                <label for="followWidth">Width</label>
+                <span class="unit">mm</span>
+              </div>
+              <div class="floating-field">
+                <input id="followHeight" name="followHeight" type="number" inputmode="decimal" min="0" step="0.1" autocomplete="off" placeholder=" ">
+                <label for="followHeight">Depth</label>
+                <span class="unit">mm</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="controls">
+          <button class="button button-primary" type="button" id="calculateButton">Calculate VRR</button>
+          <button class="button button-secondary" type="reset">Reset</button>
+        </div>
+      </form>
+
+      <aside class="card results-card" aria-live="polite" aria-label="Calculation results">
+        <div class="result-topline">
+          <h2>Result</h2>
+          <span class="status-pill" id="status">Waiting for values</span>
+        </div>
+
+        <div class="result-panel" id="resultPanel">
+          <div class="result-hero">
+            <div>
+              <p class="vrr-label">Volume Reduction Ratio</p>
+              <p class="vrr-value" id="vrr">--%</p>
+            </div>
+          </div>
+
+          <div class="gauge-wrap" aria-label="VRR progress">
+            <div class="gauge-meta">
+              <span>0%</span>
+              <span>50% target</span>
+              <span>100%</span>
+            </div>
+            <div class="gauge">
+              <div class="gauge-fill" id="gaugeFill"></div>
+            </div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <span class="metric-name">Initial volume</span>
+              <span class="metric-value" id="initialVolume">-- mL</span>
+            </div>
+            <div class="metric">
+              <span class="metric-name">Follow-up volume</span>
+              <span class="metric-value" id="followVolume">-- mL</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="message" id="message">Enter all six measurements. Results will fade in automatically when the inputs are valid.</p>
+      </aside>
+    </section>
+
+    <section class="card formula-card" aria-labelledby="formulaHeading">
+      <h2 id="formulaHeading">Formula</h2>
+      <p>Volumes are estimated as ellipsoids from ultrasound diameters entered in millimeters.</p>
+      <ul class="formula-list">
+        <li><strong>Volume (mL):</strong> &pi; &times; length &times; width &times; depth / 6 / 1000</li>
+        <li><strong>VRR (%):</strong> (initial volume - follow-up volume) / initial volume &times; 100</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const fields = Array.from(document.querySelectorAll("input[type='number']"));
+    const form = document.getElementById("calculatorForm");
+    const calculateButton = document.getElementById("calculateButton");
+    const statusEl = document.getElementById("status");
+    const messageEl = document.getElementById("message");
+    const resultPanel = document.getElementById("resultPanel");
+    const initialVolumeEl = document.getElementById("initialVolume");
+    const followVolumeEl = document.getElementById("followVolume");
+    const vrrEl = document.getElementById("vrr");
+    const gaugeFill = document.getElementById("gaugeFill");
+
+    const fieldGroups = {
+      initial: ["initialLength", "initialWidth", "initialHeight"],
+      follow: ["followLength", "followWidth", "followHeight"]
+    };
+
+    function volume(length, width, depth) {
+      return Math.PI * length * width * depth / 6 / 1000;
+    }
+
+    function getValue(id) {
+      const input = document.getElementById(id);
+      const rawValue = input.value.trim();
+      const value = Number(rawValue);
+
+      if (rawValue === "" || !Number.isFinite(value) || value <= 0) {
+        return { input, valid: false, value: null };
+      }
+
+      return { input, valid: true, value };
+    }
+
+    function setStatus(text, tone = "") {
+      statusEl.textContent = text;
+      statusEl.className = `status-pill${tone ? ` ${tone}` : ""}`;
+    }
+
+    function resetOutputs() {
+      initialVolumeEl.textContent = "-- mL";
+      followVolumeEl.textContent = "-- mL";
+      vrrEl.textContent = "--%";
+      vrrEl.classList.remove("ready");
+      gaugeFill.style.width = "0%";
+      gaugeFill.className = "gauge-fill";
+      resultPanel.classList.remove("visible");
+    }
+
+    function markValidity(results) {
+      results.forEach(({ input, valid }) => {
+        const shouldFlag = input.value.trim() !== "" && !valid;
+        input.setAttribute("aria-invalid", shouldFlag ? "true" : "false");
+      });
+    }
+
+    function getTone(vrr) {
+      if (vrr < 0) return "increase";
+      if (vrr >= 50) return "good";
+      return "suboptimal";
+    }
+
+    function getInterpretation(vrr) {
+      if (vrr < 0) return "Volume increase";
+      if (vrr >= 50) return "Good volume reduction";
+      return "Suboptimal volume reduction";
+    }
+
+    function calculate({ force = false } = {}) {
+      const allResults = [...fieldGroups.initial, ...fieldGroups.follow].map(getValue);
+      markValidity(allResults);
+
+      const hasAnyValue = allResults.some(({ input }) => input.value.trim() !== "");
+      const hasMissing = allResults.some(({ input }) => input.value.trim() === "");
+      const hasInvalid = allResults.some(({ input, valid }) => input.value.trim() !== "" && !valid);
+
+      if (!hasAnyValue) {
+        resetOutputs();
+        setStatus("Waiting for values");
+        messageEl.textContent = "Enter all six measurements. Results will fade in automatically when the inputs are valid.";
+        return;
+      }
+
+      if (hasInvalid) {
+        resetOutputs();
+        setStatus("Invalid input", "warning");
+        messageEl.textContent = "Use positive numeric measurements greater than zero.";
+        return;
+      }
+
+      if (hasMissing) {
+        resetOutputs();
+        setStatus(force ? "Incomplete" : "In progress", "warning");
+        messageEl.textContent = "Some measurements are missing.";
+        return;
+      }
+
+      const initialValues = fieldGroups.initial.map((id) => getValue(id).value);
+      const followValues = fieldGroups.follow.map((id) => getValue(id).value);
+      const initialVolume = volume(...initialValues);
+      const followVolume = volume(...followValues);
+
+      if (initialVolume <= 0) {
+        resetOutputs();
+        setStatus("Invalid baseline", "warning");
+        messageEl.textContent = "Initial volume must be greater than zero.";
+        return;
+      }
+
+      const vrr = (initialVolume - followVolume) / initialVolume * 100;
+      const tone = getTone(vrr);
+      const progress = Math.max(0, Math.min(100, vrr));
+
+      initialVolumeEl.textContent = `${initialVolume.toFixed(2)} mL`;
+      followVolumeEl.textContent = `${followVolume.toFixed(2)} mL`;
+      vrrEl.textContent = `${vrr.toFixed(1)}%`;
+      vrrEl.classList.add("ready");
+      gaugeFill.style.width = `${progress}%`;
+      gaugeFill.className = `gauge-fill ${tone}`;
+      resultPanel.classList.add("visible");
+      setStatus(getInterpretation(vrr), tone);
+      messageEl.textContent = tone === "increase"
+        ? "Follow-up volume is larger than the initial measurement."
+        : "Progress bar shows VRR clipped to the 0-100% visual range.";
+    }
+
+    fields.forEach((field) => {
+      field.addEventListener("input", () => calculate());
+    });
+
+    calculateButton.addEventListener("click", () => calculate({ force: true }));
+
+    form.addEventListener("reset", () => {
+      window.setTimeout(() => {
+        fields.forEach((field) => field.setAttribute("aria-invalid", "false"));
+        resetOutputs();
+        setStatus("Waiting for values");
+        messageEl.textContent = "Enter all six measurements. Results will fade in automatically when the inputs are valid.";
+      }, 0);
+    });
+  </script>
+</body>
+</html>
