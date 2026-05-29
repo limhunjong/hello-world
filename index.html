@@ -618,7 +618,7 @@
           </div>
         </div>
 
-        <p class="message" id="message">Enter all six measurements. Results will fade in automatically when the inputs are valid.</p>
+        <p class="message" id="message">Enter any complete set of three measurements to calculate its volume. VRR appears when both volumes are available.</p>
       </aside>
     </section>
 
@@ -680,11 +680,36 @@
       resultPanel.classList.remove("visible");
     }
 
+    function resetVrrDisplay() {
+      vrrEl.textContent = "--%";
+      vrrEl.classList.remove("ready");
+      gaugeFill.style.width = "0%";
+      gaugeFill.className = "gauge-fill";
+    }
+
     function markValidity(results) {
       results.forEach(({ input, valid }) => {
         const shouldFlag = input.value.trim() !== "" && !valid;
         input.setAttribute("aria-invalid", shouldFlag ? "true" : "false");
       });
+    }
+
+    function readGroup(groupName) {
+      const results = fieldGroups[groupName].map(getValue);
+      const hasAnyValue = results.some(({ input }) => input.value.trim() !== "");
+      const hasMissing = results.some(({ input }) => input.value.trim() === "");
+      const hasInvalid = results.some(({ input, valid }) => input.value.trim() !== "" && !valid);
+      const isComplete = hasAnyValue && !hasMissing && !hasInvalid;
+      const calculatedVolume = isComplete ? volume(...results.map(({ value }) => value)) : null;
+
+      return {
+        results,
+        hasAnyValue,
+        hasMissing,
+        hasInvalid,
+        isComplete,
+        volume: calculatedVolume
+      };
     }
 
     function getTone(vrr) {
@@ -700,56 +725,53 @@
     }
 
     function calculate({ force = false } = {}) {
-      const allResults = [...fieldGroups.initial, ...fieldGroups.follow].map(getValue);
+      const initial = readGroup("initial");
+      const follow = readGroup("follow");
+      const allResults = [...initial.results, ...follow.results];
       markValidity(allResults);
 
-      const hasAnyValue = allResults.some(({ input }) => input.value.trim() !== "");
-      const hasMissing = allResults.some(({ input }) => input.value.trim() === "");
-      const hasInvalid = allResults.some(({ input, valid }) => input.value.trim() !== "" && !valid);
+      const hasAnyValue = initial.hasAnyValue || follow.hasAnyValue;
+      const hasInvalid = initial.hasInvalid || follow.hasInvalid;
+      const hasPartialGroup = (initial.hasAnyValue && !initial.isComplete) || (follow.hasAnyValue && !follow.isComplete);
 
       if (!hasAnyValue) {
         resetOutputs();
         setStatus("Waiting for values");
-        messageEl.textContent = "Enter all six measurements. Results will fade in automatically when the inputs are valid.";
+        messageEl.textContent = "Enter any complete set of three measurements to calculate its volume. VRR appears when both volumes are available.";
         return;
       }
 
       if (hasInvalid) {
-        resetOutputs();
+        initialVolumeEl.textContent = initial.isComplete ? initial.volume.toFixed(2) + " mL" : "-- mL";
+        followVolumeEl.textContent = follow.isComplete ? follow.volume.toFixed(2) + " mL" : "-- mL";
+        resetVrrDisplay();
+        resultPanel.classList.toggle("visible", initial.isComplete || follow.isComplete);
         setStatus("Invalid input", "warning");
         messageEl.textContent = "Use positive numeric measurements greater than zero.";
         return;
       }
 
-      if (hasMissing) {
-        resetOutputs();
-        setStatus(force ? "Incomplete" : "In progress", "warning");
-        messageEl.textContent = "Some measurements are missing.";
+      initialVolumeEl.textContent = initial.isComplete ? initial.volume.toFixed(2) + " mL" : "-- mL";
+      followVolumeEl.textContent = follow.isComplete ? follow.volume.toFixed(2) + " mL" : "-- mL";
+      resultPanel.classList.toggle("visible", initial.isComplete || follow.isComplete);
+
+      if (!initial.isComplete || !follow.isComplete) {
+        resetVrrDisplay();
+        setStatus(force || hasPartialGroup ? "Volume available" : "In progress", hasPartialGroup ? "warning" : "");
+        messageEl.textContent = hasPartialGroup
+          ? "Complete the remaining dimensions to calculate the missing volume and VRR."
+          : "Volume is calculated independently. Add the other timepoint to calculate VRR.";
         return;
       }
 
-      const initialValues = fieldGroups.initial.map((id) => getValue(id).value);
-      const followValues = fieldGroups.follow.map((id) => getValue(id).value);
-      const initialVolume = volume(...initialValues);
-      const followVolume = volume(...followValues);
-
-      if (initialVolume <= 0) {
-        resetOutputs();
-        setStatus("Invalid baseline", "warning");
-        messageEl.textContent = "Initial volume must be greater than zero.";
-        return;
-      }
-
-      const vrr = (initialVolume - followVolume) / initialVolume * 100;
+      const vrr = (initial.volume - follow.volume) / initial.volume * 100;
       const tone = getTone(vrr);
       const progress = Math.max(0, Math.min(100, vrr));
 
-      initialVolumeEl.textContent = `${initialVolume.toFixed(2)} mL`;
-      followVolumeEl.textContent = `${followVolume.toFixed(2)} mL`;
-      vrrEl.textContent = `${vrr.toFixed(1)}%`;
+      vrrEl.textContent = vrr.toFixed(1) + "%";
       vrrEl.classList.add("ready");
-      gaugeFill.style.width = `${progress}%`;
-      gaugeFill.className = `gauge-fill ${tone}`;
+      gaugeFill.style.width = progress + "%";
+      gaugeFill.className = "gauge-fill " + tone;
       resultPanel.classList.add("visible");
       setStatus(getInterpretation(vrr), tone);
       messageEl.textContent = tone === "increase"
@@ -768,7 +790,7 @@
         fields.forEach((field) => field.setAttribute("aria-invalid", "false"));
         resetOutputs();
         setStatus("Waiting for values");
-        messageEl.textContent = "Enter all six measurements. Results will fade in automatically when the inputs are valid.";
+        messageEl.textContent = "Enter any complete set of three measurements to calculate its volume. VRR appears when both volumes are available.";
       }, 0);
     });
   </script>
