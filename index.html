@@ -211,6 +211,53 @@ body{
 @keyframes fallDown{from{transform:translateY(-40px);}to{transform:translateY(380px);}}
 #mg-close{margin-top:10px;padding:10px 28px;background:linear-gradient(180deg,#FFAA3A,#D07010);border:none;border-radius:50px;color:#2A0E00;font-family:'Jua',sans-serif;font-size:14px;cursor:pointer;font-weight:900;}
 
+/* ══ LOGIN OVERLAY ══ */
+#login-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:radial-gradient(ellipse at 50% 40%,#C89060 0%,#7A4820 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+#login-overlay.hidden{display:none;}
+.login-box{
+  background:linear-gradient(160deg,#FFE8C0,#F0D090);
+  border-radius:20px;padding:28px 26px 24px;width:min(320px,90vw);
+  border:3px solid #A06820;box-shadow:0 12px 36px rgba(60,20,0,0.6);
+  text-align:center;
+}
+.login-logo{font-size:40px;margin-bottom:4px;}
+.login-title{
+  font-size:15px;font-weight:900;font-style:italic;color:#FFD700;
+  text-shadow:2px 2px 0 #7A4A00;margin-bottom:2px;
+  font-family:'Jua',sans-serif;
+}
+.login-sub{font-size:11px;color:#7A4010;margin-bottom:16px;font-family:'Jua',sans-serif;}
+.login-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.login-tab{
+  flex:1;padding:8px;border:2px solid #C08030;border-radius:10px;
+  background:#FFF8E0;color:#7A4010;font-family:'Jua',sans-serif;
+  font-size:13px;cursor:pointer;font-weight:900;transition:all 0.15s;
+}
+.login-tab.active{
+  background:linear-gradient(180deg,#FFAA3A,#D07010);
+  color:#2A0E00;border-color:#904000;
+  box-shadow:0 3px 0 #804000;
+}
+.login-input{
+  width:100%;padding:11px 14px;border-radius:10px;border:2px solid #C08030;
+  background:#FFF8E0;font-family:'Jua',sans-serif;font-size:15px;
+  color:#3A1800;margin-bottom:10px;outline:none;
+}
+.login-input:focus{border-color:#E07010;box-shadow:0 0 0 3px rgba(224,112,16,0.18);}
+.login-action-btn{
+  width:100%;padding:12px;background:linear-gradient(180deg,#FFAA3A,#D07010);
+  border:none;border-radius:50px;color:#2A0E00;font-size:15px;
+  font-family:'Jua',sans-serif;cursor:pointer;font-weight:900;
+  box-shadow:0 4px 0 #804000,0 5px 8px rgba(0,0,0,0.3);
+  transition:all 0.08s;
+}
+.login-action-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #804000;}
+.login-err{color:#C83030;font-size:12px;font-family:'Jua',sans-serif;margin-top:8px;min-height:18px;}
+
 /* ══ FX ══ */
 .fx{position:fixed;font-size:20px;pointer-events:none;z-index:300;animation:fxUp 1.1s ease-out forwards;}
 @keyframes fxUp{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-70px) scale(1.4);}}
@@ -231,6 +278,31 @@ body{
 </style>
 </head>
 <body>
+
+<!-- ══ LOGIN OVERLAY ══ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">🐯</div>
+    <div class="login-title">TIGERMARUTCHI</div>
+    <div class="login-sub">당신의 호랑이를 기르세요!</div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">로그인</button>
+      <button class="login-tab" id="tab-signup" onclick="switchLoginTab('signup')">회원가입</button>
+    </div>
+    <div id="login-form">
+      <input class="login-input" id="li-id" type="text" maxlength="16" placeholder="아이디" autocomplete="username">
+      <input class="login-input" id="li-pw" type="password" maxlength="32" placeholder="비밀번호" autocomplete="current-password">
+      <button class="login-action-btn" onclick="doLogin()">로그인 🐯</button>
+    </div>
+    <div id="signup-form" style="display:none">
+      <input class="login-input" id="su-id" type="text" maxlength="16" placeholder="아이디 (영문+숫자)" autocomplete="username">
+      <input class="login-input" id="su-pw" type="password" maxlength="32" placeholder="비밀번호" autocomplete="new-password">
+      <input class="login-input" id="su-pw2" type="password" maxlength="32" placeholder="비밀번호 확인" autocomplete="new-password">
+      <button class="login-action-btn" onclick="doSignup()">가입하기 🐣</button>
+    </div>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
 
 <div class="device" id="device">
   <!-- Tiger stripes -->
@@ -322,6 +394,10 @@ body{
           <div class="sstat-row"><span class="sstat-lbl">Clean</span><div class="sstat-bar"><div class="sstat-fill sf-clean" id="ss-clean"></div></div></div>
           <div class="sstat-apt" id="ss-apt"></div>
           <div class="sstat-branch" id="ss-branch"></div>
+          <div style="margin-top:4px;display:flex;align-items:center;justify-content:space-between;">
+            <span id="ss-userid" style="font-size:4px;color:#5A7030;font-family:'Press Start 2P',monospace;"></span>
+            <button onclick="doLogout()" style="font-size:4px;padding:2px 5px;background:#C83030;color:#FFF;border:none;border-radius:3px;cursor:pointer;font-family:'Press Start 2P',monospace;">LOGOUT</button>
+          </div>
         </div>
 
         <!-- Collection view -->
@@ -694,7 +770,10 @@ const Sound = {
 /* ══════════════════════════════════════════
    GAME STATE
 ══════════════════════════════════════════ */
-const SAVE_KEY = 'hrtama_v7';
+const ACCOUNTS_KEY = 'hrtama_accounts';
+const SESSION_KEY  = 'hrtama_session';
+let currentUserId  = null;
+function getSaveKey(){ return 'hrtama_v7_' + currentUserId; }
 function newGame(){
   return{
     stage:0,age:0,ticks:0,
@@ -712,10 +791,10 @@ let G=newGame(), ticker=null, statusView=0;
 /* ══════════════════════════════════════════
    SAVE / LOAD
 ══════════════════════════════════════════ */
-function save(){G.saved=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(G));}
+function save(){G.saved=Date.now();localStorage.setItem(getSaveKey(),JSON.stringify(G));}
 function load(){
   try{
-    const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+    const raw=localStorage.getItem(getSaveKey());if(!raw)return;
     G=Object.assign(newGame(),JSON.parse(raw));
     if(!G.feedLog)G.feedLog={meat:0,seafood:0,formula:0};
     const off=Math.min(Math.floor((Date.now()-G.saved)/1000),600);
@@ -1078,17 +1157,118 @@ document.getElementById('tiger-wrap').addEventListener('mousedown',()=>{lpTimer=
 document.getElementById('tiger-wrap').addEventListener('mouseup',()=>clearTimeout(lpTimer));
 
 /* ══════════════════════════════════════════
+   ACCOUNT / LOGIN SYSTEM
+══════════════════════════════════════════ */
+function loadAccounts(){
+  try{return JSON.parse(localStorage.getItem(ACCOUNTS_KEY))||{};}
+  catch(e){return{};}
+}
+function saveAccounts(a){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(a));}
+
+function switchLoginTab(tab){
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active',tab==='signup');
+  document.getElementById('login-err').textContent='';
+}
+
+function hashPw(pw){
+  // Simple but consistent hash — good enough for a local game save
+  let h=0;
+  for(let i=0;i<pw.length;i++){h=Math.imul(31,h)+pw.charCodeAt(i)|0;}
+  return(h>>>0).toString(36)+'_'+pw.length;
+}
+
+function doLogin(){
+  const id=document.getElementById('li-id').value.trim();
+  const pw=document.getElementById('li-pw').value;
+  const err=document.getElementById('login-err');
+  if(!id||!pw){err.textContent='아이디와 비밀번호를 입력해주세요.';return;}
+  const accounts=loadAccounts();
+  if(!accounts[id]){err.textContent='존재하지 않는 아이디예요.';return;}
+  if(accounts[id].pw!==hashPw(pw)){err.textContent='비밀번호가 틀렸어요.';return;}
+  err.textContent='';
+  startSession(id);
+}
+
+function doSignup(){
+  const id=document.getElementById('su-id').value.trim();
+  const pw=document.getElementById('su-pw').value;
+  const pw2=document.getElementById('su-pw2').value;
+  const err=document.getElementById('login-err');
+  if(!id||!pw){err.textContent='아이디와 비밀번호를 입력해주세요.';return;}
+  if(!/^[a-zA-Z0-9_]{2,16}$/.test(id)){err.textContent='아이디: 영문/숫자/_ 2-16자';return;}
+  if(pw.length<4){err.textContent='비밀번호는 4자 이상이어야 해요.';return;}
+  if(pw!==pw2){err.textContent='비밀번호가 일치하지 않아요.';return;}
+  const accounts=loadAccounts();
+  if(accounts[id]){err.textContent='이미 존재하는 아이디예요.';return;}
+  accounts[id]={pw:hashPw(pw),created:Date.now()};
+  saveAccounts(accounts);
+  err.textContent='';
+  startSession(id);
+}
+
+function startSession(id){
+  currentUserId=id;
+  localStorage.setItem(SESSION_KEY,id);
+  document.getElementById('login-overlay').classList.add('hidden');
+  initGame();
+}
+
+function doLogout(){
+  if(ticker){clearInterval(ticker);ticker=null;}
+  if(animTimer){clearInterval(animTimer);animTimer=null;}
+  save();
+  localStorage.removeItem(SESSION_KEY);
+  currentUserId=null;
+  G=newGame();
+  _prevMood='';_prevStage=-1;animFrame=0;
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('li-id').value='';
+  document.getElementById('li-pw').value='';
+  document.getElementById('login-err').textContent='';
+  switchLoginTab('login');
+}
+
+function checkAutoLogin(){
+  const saved=localStorage.getItem(SESSION_KEY);
+  if(!saved)return false;
+  const accounts=loadAccounts();
+  if(!accounts[saved])return false;
+  currentUserId=saved;
+  return true;
+}
+
+/* ══════════════════════════════════════════
    INIT
 ══════════════════════════════════════════ */
-load();
-showView(0);
-render();
-startAnim();
-setMsg(
-  G.stage===0?'Egg is shaking...':(G.name?G.name+' says hi!':'Hello there!'),
-  G.stage===0?'':(G.alive?'Tap tiger to pet!':'...')
-);
-ticker=setInterval(tick,1000);
+function initGame(){
+  G=newGame();
+  load();
+  const userEl=document.getElementById('ss-userid');
+  if(userEl)userEl.textContent='@'+currentUserId;
+  showView(0);
+  render();
+  startAnim();
+  setMsg(
+    G.stage===0?'Egg is shaking...':(G.name?G.name+' says hi!':'Hello there!'),
+    G.stage===0?'':(G.alive?'Tap tiger to pet!':'...')
+  );
+  if(ticker)clearInterval(ticker);
+  ticker=setInterval(tick,1000);
+}
+
+if(checkAutoLogin()){
+  document.getElementById('login-overlay').classList.add('hidden');
+  initGame();
+} else {
+  switchLoginTab('login');
+}
+
+// Enter key support for login/signup
+document.getElementById('li-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('su-pw2').addEventListener('keydown',e=>{if(e.key==='Enter')doSignup();});
 </script>
 </body>
 </html>
