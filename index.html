@@ -27,13 +27,10 @@ body{
     0 3px 6px rgba(0,0,0,0.4);
   user-select:none;
 }
-
-/* Tiger stripe SVG overlay */
 .device-stripes{
   position:absolute;top:0;left:0;width:100%;height:100%;
   pointer-events:none;z-index:1;
 }
-
 .device-inner{
   position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:7px;
@@ -41,44 +38,35 @@ body{
 
 /* ══ HEADER ══ */
 .brand-badge{
-  background:#F8F8F8;border-radius:14px;
-  padding:3px 14px 3px;border:2px solid #909090;
-  font-size:9px;font-weight:900;letter-spacing:1.5px;color:#1A1A1A;
+  background:#F8F8F8;border-radius:14px;padding:3px 14px;
+  border:2px solid #909090;font-size:9px;font-weight:900;
+  letter-spacing:1.5px;color:#1A1A1A;
   box-shadow:0 2px 4px rgba(0,0,0,0.35),inset 0 1px 2px rgba(255,255,255,0.8);
   font-family:'Jua',sans-serif;
 }
 .device-title{
-  font-size:19px;font-weight:900;font-style:italic;
-  color:#FFD700;letter-spacing:1px;
+  font-size:19px;font-weight:900;font-style:italic;color:#FFD700;
+  letter-spacing:1px;
   text-shadow:2px 2px 0 #7A4A00,-1px -1px 0 rgba(255,240,150,0.5),0 0 10px rgba(220,160,0,0.4);
   font-family:'Jua',sans-serif;
 }
 
 /* ══ SCREEN FRAME ══ */
 .screen-frame{
-  width:100%;
-  background:#484840;
-  border-radius:7px;padding:6px;
-  box-shadow:
-    inset 0 4px 10px rgba(0,0,0,0.7),
-    inset 0 -1px 3px rgba(255,240,180,0.1),
-    0 3px 6px rgba(0,0,0,0.5);
+  width:100%;background:#484840;border-radius:7px;padding:6px;
+  box-shadow:inset 0 4px 10px rgba(0,0,0,0.7),inset 0 -1px 3px rgba(255,240,180,0.1),0 3px 6px rgba(0,0,0,0.5);
 }
 
 /* ══ LCD SCREEN ══ */
 .screen{
-  background:#A8B880;
-  border-radius:3px;overflow:hidden;
-  position:relative;display:flex;flex-direction:column;
-  min-height:190px;
+  background:#A8B880;border-radius:3px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column;min-height:190px;
 }
-/* Dot-matrix effect */
 .screen::before{
   content:'';position:absolute;inset:0;z-index:15;pointer-events:none;
   background-image:radial-gradient(circle,rgba(0,0,0,0.07) 1px,transparent 1px);
   background-size:3px 3px;
 }
-/* Glass glare */
 .screen::after{
   content:'';position:absolute;top:0;left:0;z-index:16;pointer-events:none;
   width:55%;height:38%;
@@ -88,45 +76,39 @@ body{
 
 /* ══ MESSAGE BAR ══ */
 .screen-msg{
-  padding:4px 6px 3px;
-  border-bottom:1px solid rgba(0,0,0,0.18);
-  background:rgba(0,0,0,0.04);
-  min-height:28px;
+  padding:4px 6px 3px;border-bottom:1px solid rgba(0,0,0,0.18);
+  background:rgba(0,0,0,0.04);min-height:28px;
 }
-.msg-line1{
-  font-family:'Press Start 2P',monospace;font-size:6px;
-  color:#181808;line-height:1.7;
-}
-.msg-line2{
-  font-family:'Press Start 2P',monospace;font-size:6px;
-  color:#3A5018;line-height:1.5;
-}
+.msg-line1{font-family:'Press Start 2P',monospace;font-size:6px;color:#181808;line-height:1.7;}
+.msg-line2{font-family:'Press Start 2P',monospace;font-size:6px;color:#3A5018;line-height:1.5;}
 
-/* ══ MAIN SCENE AREA ══ */
-.screen-main{
-  flex:1;display:flex;position:relative;overflow:hidden;
-}
-.scene-area{
-  flex:1;position:relative;overflow:hidden;
-}
-.scene-bg{
-  position:absolute;inset:0;width:100%;height:100%;
-}
+/* ══ MAIN SCENE ══ */
+.screen-main{flex:1;display:flex;position:relative;overflow:hidden;}
+.scene-area{flex:1;position:relative;overflow:hidden;}
+.scene-bg{position:absolute;inset:0;width:100%;height:100%;}
 
 /* Tiger container */
 .tiger-wrap{
-  position:absolute;bottom:6px;left:12px;
+  position:absolute;bottom:6px;left:14px;
   cursor:pointer;
+  image-rendering:pixelated;image-rendering:crisp-edges;
 }
-.tiger-wrap:active{transform:scale(0.95);}
+.tiger-wrap:active{transform:scale(0.94);}
+
+/* sleeping tilt */
+.tiger-wrap.sleeping-tilt{
+  transform-origin:bottom center;
+  animation:sleepTilt 3s ease-in-out infinite;
+}
+@keyframes sleepTilt{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
 
 /* ZZZ */
 .zzz-anim{
-  position:absolute;top:-18px;right:-6px;
+  position:absolute;top:-20px;right:-4px;
   font-family:'Press Start 2P',monospace;font-size:7px;color:#304010;
-  animation:zzzBob 2s infinite;display:none;
+  animation:zzzBob 2s infinite;display:none;pointer-events:none;
 }
-@keyframes zzzBob{0%,100%{opacity:0;transform:translateY(0);}50%{opacity:1;transform:translateY(-6px);}}
+@keyframes zzzBob{0%,100%{opacity:0;transform:translateY(0);}50%{opacity:1;transform:translateY(-8px);}}
 
 /* ══ ITEM PANEL ══ */
 .item-panel{
@@ -157,25 +139,15 @@ body{
 .sf-energy{background:#2050C0;}
 .sf-clean{background:#8020C0;}
 .sstat-apt{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;}
-.apt-chip{
-  background:rgba(0,0,0,0.12);border:1px solid rgba(0,0,0,0.2);
-  padding:1px 3px;font-size:4px;border-radius:1px;
-}
+.apt-chip{background:rgba(0,0,0,0.12);border:1px solid rgba(0,0,0,0.2);padding:1px 3px;font-size:4px;border-radius:1px;}
 .sstat-branch{margin-top:3px;font-size:4.5px;color:#3A5018;}
 
 /* ══ COLLECTION VIEW ══ */
-.screen-col{
-  flex:1;display:none;flex-direction:column;padding:4px 5px;
-  font-family:'Press Start 2P',monospace;
-}
+.screen-col{flex:1;display:none;flex-direction:column;padding:4px 5px;font-family:'Press Start 2P',monospace;}
 .col-title-sm{font-size:5px;color:#3A5018;margin-bottom:3px;text-align:center;}
-.col-grid-sm{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:3px;flex:1;
-  overflow:hidden;
-}
+.col-grid-sm{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;flex:1;overflow:hidden;}
 .col-card-sm{
-  background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.15);
-  border-radius:2px;padding:2px;
+  background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.15);border-radius:2px;padding:2px;
   display:flex;flex-direction:column;align-items:center;gap:1px;
 }
 .cc-emoji{font-size:13px;line-height:1;}
@@ -186,109 +158,61 @@ body{
 /* ══ EXP BAR ══ */
 .screen-bottom{
   display:flex;align-items:center;gap:5px;
-  padding:3px 6px;
-  border-top:1px solid rgba(0,0,0,0.18);
-  background:rgba(0,0,0,0.04);
+  padding:3px 6px;border-top:1px solid rgba(0,0,0,0.18);background:rgba(0,0,0,0.04);
 }
 .exp-lbl{font-family:'Press Start 2P',monospace;font-size:5px;color:#181808;white-space:nowrap;}
-.exp-outer{
-  flex:1;height:9px;background:rgba(0,0,0,0.18);
-  border:1px solid rgba(0,0,0,0.3);border-radius:1px;overflow:hidden;
-}
+.exp-outer{flex:1;height:9px;background:rgba(0,0,0,0.18);border:1px solid rgba(0,0,0,0.3);border-radius:1px;overflow:hidden;}
 .exp-fill{height:100%;background:#405820;transition:width 0.6s ease;}
 .lv-text{font-family:'Press Start 2P',monospace;font-size:5px;color:#181808;white-space:nowrap;}
 
 /* ══ BUTTONS ══ */
-.btn-row{
-  display:flex;justify-content:space-around;align-items:flex-start;
-  width:100%;padding:3px 10px 0;
-}
+.btn-row{display:flex;justify-content:space-around;align-items:flex-start;width:100%;padding:3px 10px 0;}
 .btn-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
 .btn-icon-top{font-size:11px;opacity:0.75;}
 .btn-pill{
   width:70px;height:34px;border-radius:17px;border:none;cursor:pointer;
   background:linear-gradient(180deg,#FFAA3A 0%,#E07010 55%,#FF9020 100%);
-  box-shadow:
-    0 5px 0 #7A3A00,
-    0 6px 10px rgba(0,0,0,0.45),
-    inset 0 1px 3px rgba(255,220,130,0.5),
-    inset 0 -1px 2px rgba(80,30,0,0.3);
-  font-size:9px;font-weight:900;color:#2A0E00;
-  font-family:'Jua',sans-serif;letter-spacing:0.5px;
-  transition:all 0.08s;
+  box-shadow:0 5px 0 #7A3A00,0 6px 10px rgba(0,0,0,0.45),inset 0 1px 3px rgba(255,220,130,0.5),inset 0 -1px 2px rgba(80,30,0,0.3);
+  font-size:9px;font-weight:900;color:#2A0E00;font-family:'Jua',sans-serif;
+  letter-spacing:0.5px;transition:all 0.08s;
 }
-.btn-pill:active{
-  transform:translateY(4px);
-  box-shadow:
-    0 1px 0 #7A3A00,
-    0 2px 5px rgba(0,0,0,0.3),
-    inset 0 2px 5px rgba(80,30,0,0.3);
-}
+.btn-pill:active{transform:translateY(4px);box-shadow:0 1px 0 #7A3A00,0 2px 5px rgba(0,0,0,0.3),inset 0 2px 5px rgba(80,30,0,0.3);}
 .btn-lbl{font-size:8px;font-weight:900;color:rgba(60,20,0,0.75);font-family:'Jua',sans-serif;}
 
 /* ══ OVERLAYS ══ */
-.overlay{
-  position:fixed;inset:0;background:rgba(40,15,0,0.8);
-  display:none;align-items:center;justify-content:center;
-  z-index:100;backdrop-filter:blur(3px);
-}
+.overlay{position:fixed;inset:0;background:rgba(40,15,0,0.8);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);}
 .overlay.show{display:flex;}
 .ov-box{
-  background:linear-gradient(160deg,#FFE8C0,#F0D090);
-  border-radius:12px;padding:22px 26px;max-width:280px;width:90%;
-  text-align:center;border:3px solid #A06820;
-  box-shadow:0 8px 24px rgba(60,20,0,0.5);
+  background:linear-gradient(160deg,#FFE8C0,#F0D090);border-radius:12px;padding:22px 26px;max-width:280px;width:90%;
+  text-align:center;border:3px solid #A06820;box-shadow:0 8px 24px rgba(60,20,0,0.5);
 }
 .ov-box h2{color:#5A2800;font-size:17px;margin-bottom:8px;}
 .ov-box p{color:#7A4010;font-size:13px;margin-bottom:14px;line-height:1.5;}
 .ov-btn{
-  background:linear-gradient(180deg,#FFAA3A,#D07010);
-  border:none;border-radius:50px;padding:10px 22px;
-  color:#2A0E00;font-size:13px;font-family:'Jua',sans-serif;
-  cursor:pointer;margin:4px;font-weight:900;
+  background:linear-gradient(180deg,#FFAA3A,#D07010);border:none;border-radius:50px;padding:10px 22px;
+  color:#2A0E00;font-size:13px;font-family:'Jua',sans-serif;cursor:pointer;margin:4px;font-weight:900;
   box-shadow:0 4px 0 #804000,0 5px 8px rgba(0,0,0,0.3);
 }
 .ov-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #804000;}
 .ov-input{
-  width:100%;padding:10px;border-radius:8px;
-  border:2px solid #C08030;background:#FFF8E0;
-  font-family:'Jua',sans-serif;font-size:16px;
-  text-align:center;color:#3A1800;margin-bottom:12px;outline:none;
+  width:100%;padding:10px;border-radius:8px;border:2px solid #C08030;
+  background:#FFF8E0;font-family:'Jua',sans-serif;font-size:16px;text-align:center;
+  color:#3A1800;margin-bottom:12px;outline:none;
 }
 
 /* ══ MINI GAME ══ */
-#mg-overlay{
-  position:fixed;inset:0;background:#0A0818;
-  display:none;flex-direction:column;align-items:center;
-  justify-content:flex-start;z-index:200;padding:18px;
-}
+#mg-overlay{position:fixed;inset:0;background:#0A0818;display:none;flex-direction:column;align-items:center;justify-content:flex-start;z-index:200;padding:18px;}
 #mg-overlay.show{display:flex;}
 #mg-hdr{color:#FFD080;font-family:'Press Start 2P',monospace;font-size:11px;margin-bottom:6px;}
 #mg-timer{color:#C0A060;font-family:'Press Start 2P',monospace;font-size:9px;margin-bottom:5px;}
-#mg-area{
-  position:relative;width:300px;height:340px;
-  background:linear-gradient(180deg,#0A1830 0%,#060C18 100%);
-  border-radius:8px;border:2px solid #403080;overflow:hidden;
-}
+#mg-area{position:relative;width:300px;height:340px;background:linear-gradient(180deg,#0A1830 0%,#060C18 100%);border-radius:8px;border:2px solid #403080;overflow:hidden;}
 #mg-score{color:#FFD080;font-family:'Press Start 2P',monospace;font-size:9px;margin-top:8px;}
-.food-item{
-  position:absolute;font-size:26px;cursor:pointer;
-  animation:fallDown 3s linear forwards;
-  filter:drop-shadow(0 0 5px rgba(255,200,80,0.5));
-}
+.food-item{position:absolute;font-size:26px;cursor:pointer;animation:fallDown 3s linear forwards;filter:drop-shadow(0 0 5px rgba(255,200,80,0.5));}
 @keyframes fallDown{from{transform:translateY(-40px);}to{transform:translateY(380px);}}
-#mg-close{
-  margin-top:10px;padding:10px 28px;
-  background:linear-gradient(180deg,#FFAA3A,#D07010);
-  border:none;border-radius:50px;color:#2A0E00;
-  font-family:'Jua',sans-serif;font-size:14px;cursor:pointer;font-weight:900;
-}
+#mg-close{margin-top:10px;padding:10px 28px;background:linear-gradient(180deg,#FFAA3A,#D07010);border:none;border-radius:50px;color:#2A0E00;font-family:'Jua',sans-serif;font-size:14px;cursor:pointer;font-weight:900;}
 
 /* ══ FX ══ */
-.fx{
-  position:fixed;font-size:20px;pointer-events:none;z-index:300;
-  animation:fxUp 1.1s ease-out forwards;
-}
+.fx{position:fixed;font-size:20px;pointer-events:none;z-index:300;animation:fxUp 1.1s ease-out forwards;}
 @keyframes fxUp{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-70px) scale(1.4);}}
 
 /* ══ BATH BUBBLES ══ */
@@ -309,31 +233,26 @@ body{
 <body>
 
 <div class="device" id="device">
-
-  <!-- Tiger stripes SVG overlay -->
+  <!-- Tiger stripes -->
   <svg class="device-stripes" viewBox="0 0 306 560" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <!-- Left edge stripes -->
-    <polygon points="0,75  28,56  46,85  16,104"  fill="#1A0800" opacity="0.52"/>
-    <polygon points="0,138 24,118 42,148 14,168"  fill="#1A0800" opacity="0.52"/>
-    <polygon points="0,200 20,182 37,212 10,230"  fill="#1A0800" opacity="0.48"/>
-    <polygon points="0,262 18,246 34,272  8,290"  fill="#1A0800" opacity="0.46"/>
-    <polygon points="0,330 16,312 32,338  6,356"  fill="#1A0800" opacity="0.42"/>
-    <polygon points="0,400 14,385 28,408  4,424"  fill="#1A0800" opacity="0.38"/>
-    <polygon points="0,470 12,456 24,478  2,493"  fill="#1A0800" opacity="0.32"/>
-    <!-- Right edge stripes -->
-    <polygon points="306,75  278,56  260,85  290,104" fill="#1A0800" opacity="0.52"/>
+    <polygon points="0,75 28,56 46,85 16,104" fill="#1A0800" opacity="0.52"/>
+    <polygon points="0,138 24,118 42,148 14,168" fill="#1A0800" opacity="0.52"/>
+    <polygon points="0,200 20,182 37,212 10,230" fill="#1A0800" opacity="0.48"/>
+    <polygon points="0,262 18,246 34,272 8,290" fill="#1A0800" opacity="0.46"/>
+    <polygon points="0,330 16,312 32,338 6,356" fill="#1A0800" opacity="0.42"/>
+    <polygon points="0,400 14,385 28,408 4,424" fill="#1A0800" opacity="0.38"/>
+    <polygon points="0,470 12,456 24,478 2,493" fill="#1A0800" opacity="0.32"/>
+    <polygon points="306,75 278,56 260,85 290,104" fill="#1A0800" opacity="0.52"/>
     <polygon points="306,138 282,118 264,148 292,168" fill="#1A0800" opacity="0.52"/>
     <polygon points="306,200 286,182 269,212 296,230" fill="#1A0800" opacity="0.48"/>
     <polygon points="306,262 288,246 272,272 298,290" fill="#1A0800" opacity="0.46"/>
     <polygon points="306,330 290,312 274,338 300,356" fill="#1A0800" opacity="0.42"/>
     <polygon points="306,400 292,385 278,408 302,424" fill="#1A0800" opacity="0.38"/>
     <polygon points="306,470 294,456 282,478 304,493" fill="#1A0800" opacity="0.32"/>
-    <!-- Top stripes -->
-    <polygon points="88,0 106,0 112,22  92,24"   fill="#1A0800" opacity="0.38"/>
-    <polygon points="146,0 166,0 170,20 150,22"  fill="#1A0800" opacity="0.38"/>
-    <polygon points="200,0 218,0 220,18 204,20"  fill="#1A0800" opacity="0.35"/>
-    <!-- Bottom stripes -->
-    <polygon points="82,560 108,524 120,542  94,562" fill="#1A0800" opacity="0.3"/>
+    <polygon points="88,0 106,0 112,22 92,24" fill="#1A0800" opacity="0.38"/>
+    <polygon points="146,0 166,0 170,20 150,22" fill="#1A0800" opacity="0.38"/>
+    <polygon points="200,0 218,0 220,18 204,20" fill="#1A0800" opacity="0.35"/>
+    <polygon points="82,560 108,524 120,542 94,562" fill="#1A0800" opacity="0.3"/>
     <polygon points="148,560 174,530 184,548 158,562" fill="#1A0800" opacity="0.3"/>
   </svg>
 
@@ -341,11 +260,8 @@ body{
     <div class="brand-badge">BANDAI NAMCO</div>
     <div class="device-title">TIGERMARUTCHI</div>
 
-    <!-- Screen frame + LCD -->
     <div class="screen-frame">
       <div class="screen">
-
-        <!-- Message bar -->
         <div class="screen-msg">
           <div class="msg-line1" id="msg1">Waiting...</div>
           <div class="msg-line2" id="msg2"></div>
@@ -354,44 +270,33 @@ body{
         <!-- Main scene view -->
         <div class="screen-main" id="view-main">
           <div class="scene-area" id="scene-area">
-            <!-- Background scene SVG -->
             <svg class="scene-bg" viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-              <!-- Sky -->
               <rect x="0" y="0" width="200" height="82" fill="#8CAA70"/>
-              <!-- Mountains -->
-              <polygon points="0,80 35,32 70,80"   fill="#9ABC80"/>
-              <polygon points="45,80 82,18 120,80"  fill="#AACB90"/>
+              <polygon points="0,80 35,32 70,80" fill="#9ABC80"/>
+              <polygon points="45,80 82,18 120,80" fill="#AACB90"/>
               <polygon points="100,80 138,38 175,80" fill="#98BA78"/>
               <polygon points="160,80 190,48 210,80" fill="#90B270"/>
-              <!-- Snow caps -->
               <polygon points="33,36 35,32 37,36" fill="white" opacity="0.9"/>
               <polygon points="80,22 82,18 84,22" fill="white" opacity="0.9"/>
               <polygon points="136,42 138,38 140,42" fill="white" opacity="0.9"/>
-              <!-- Ground -->
               <rect x="0" y="80" width="200" height="50" fill="#5A8038"/>
-              <!-- Ground highlight row -->
               <rect x="0" y="80" width="200" height="5" fill="#6A9A45"/>
-              <!-- Distant trees -->
               <rect x="150" y="56" width="6" height="24" fill="#2A5010"/>
               <polygon points="148,56 153,40 158,56" fill="#3A6820"/>
               <rect x="162" y="60" width="5" height="20" fill="#2A5010"/>
               <polygon points="160,60 164.5,46 169,60" fill="#3A6820"/>
-              <!-- Small deer (background right) -->
               <g transform="translate(156,68)">
                 <rect x="0" y="5" width="10" height="7" rx="1" fill="#7A5030"/>
                 <rect x="7" y="0" width="6" height="6" rx="1" fill="#7A5030"/>
-                <!-- antlers -->
-                <rect x="8"  y="-3" width="1.5" height="4" fill="#4A2810"/>
+                <rect x="8" y="-3" width="1.5" height="4" fill="#4A2810"/>
                 <rect x="10" y="-2" width="1.5" height="3" fill="#4A2810"/>
-                <rect x="8"  y="-3" width="4"   height="1.5" fill="#4A2810"/>
-                <!-- legs -->
+                <rect x="8" y="-3" width="4" height="1.5" fill="#4A2810"/>
                 <rect x="1" y="12" width="2" height="6" fill="#5A3818"/>
                 <rect x="4" y="12" width="2" height="6" fill="#5A3818"/>
                 <rect x="7" y="12" width="2" height="6" fill="#5A3818"/>
               </g>
             </svg>
 
-            <!-- Tiger character -->
             <div class="tiger-wrap" id="tiger-wrap" onclick="tapTiger()">
               <div id="tiger-svg"></div>
               <div class="zzz-anim" id="zzz">z z z</div>
@@ -399,7 +304,6 @@ body{
             </div>
           </div>
 
-          <!-- Item panel -->
           <div class="item-panel" id="item-panel">
             <div class="item-type" id="item-type">--</div>
             <div class="item-icon-big" id="item-icon">🍖</div>
@@ -409,34 +313,31 @@ body{
           </div>
         </div>
 
-        <!-- Stats view (hidden) -->
+        <!-- Stats view -->
         <div class="screen-stats" id="view-stats">
           <div class="sstat-row"><span class="sstat-lbl">Hunger</span><div class="sstat-bar"><div class="sstat-fill sf-hunger" id="ss-hunger"></div></div></div>
-          <div class="sstat-row"><span class="sstat-lbl">Happy</span><div class="sstat-bar"><div class="sstat-fill sf-happy"  id="ss-happy"></div></div></div>
+          <div class="sstat-row"><span class="sstat-lbl">Happy</span><div class="sstat-bar"><div class="sstat-fill sf-happy" id="ss-happy"></div></div></div>
           <div class="sstat-row"><span class="sstat-lbl">Health</span><div class="sstat-bar"><div class="sstat-fill sf-health" id="ss-health"></div></div></div>
           <div class="sstat-row"><span class="sstat-lbl">Energy</span><div class="sstat-bar"><div class="sstat-fill sf-energy" id="ss-energy"></div></div></div>
-          <div class="sstat-row"><span class="sstat-lbl">Clean</span><div class="sstat-bar"><div class="sstat-fill sf-clean"  id="ss-clean"></div></div></div>
+          <div class="sstat-row"><span class="sstat-lbl">Clean</span><div class="sstat-bar"><div class="sstat-fill sf-clean" id="ss-clean"></div></div></div>
           <div class="sstat-apt" id="ss-apt"></div>
           <div class="sstat-branch" id="ss-branch"></div>
         </div>
 
-        <!-- Collection view (hidden) -->
+        <!-- Collection view -->
         <div class="screen-col" id="view-col">
           <div class="col-title-sm">CAREER DEX</div>
           <div class="col-grid-sm" id="col-grid-sm"></div>
         </div>
 
-        <!-- EXP bar (always visible) -->
         <div class="screen-bottom">
           <span class="exp-lbl">EXP</span>
           <div class="exp-outer"><div class="exp-fill" id="exp-fill" style="width:0%"></div></div>
           <span class="lv-text" id="lv-text">Lv.1</span>
         </div>
-
       </div>
     </div>
 
-    <!-- 3 Buttons -->
     <div class="btn-row">
       <div class="btn-wrap">
         <div class="btn-icon-top">🍖</div>
@@ -453,7 +354,6 @@ body{
         <div class="btn-lbl">Clean</div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -479,7 +379,7 @@ body{
   </div>
 </div>
 
-<!-- Game over modal -->
+<!-- Game over -->
 <div class="overlay" id="gameover-ov">
   <div class="ov-box">
     <h2>💀 Game Over</h2>
@@ -488,7 +388,7 @@ body{
   </div>
 </div>
 
-<!-- Career evolution modal -->
+<!-- Career evolution -->
 <div class="overlay" id="career-ov">
   <div class="ov-box">
     <h2 id="career-title">🎉 진화!</h2>
@@ -508,662 +408,687 @@ body{
 </div>
 
 <script>
-/* ══════════════════════════
-   CAREER UNIVERSE
-══════════════════════════ */
-const CareerUniverse = [
-  {id:'doctorchi',    nameKo:'의사 호랑이',      emoji:'🩺', branch:'service',  minStats:{intellect:25},            maxMistakes:3, desc:'청진기를 멘 스마트한 의사!'},
-  {id:'policechi',    nameKo:'경찰 호랑이',      emoji:'👮', branch:'service',  minStats:{justice:25},              maxMistakes:3, desc:'법과 질서를 지키는 경찰!'},
-  {id:'firefighterchi',nameKo:'소방관 호랑이',   emoji:'🚒', branch:'service',  minStats:{justice:10},              maxMistakes:5, desc:'용감한 소방관 호랑이!'},
-  {id:'film_actorchi',nameKo:'영화배우 호랑이',  emoji:'🎬', branch:'service',  minStats:{art:25},                  maxMistakes:3, desc:'스크린의 스타 호랑이!'},
-  {id:'fashion_chi',  nameKo:'패션디자이너',     emoji:'👗', branch:'service',  minStats:{art:35},                  maxMistakes:2, desc:'트렌드를 만드는 패션 호랑이!'},
-  {id:'musicianchi',  nameKo:'음악가 호랑이',    emoji:'🎵', branch:'service',  minStats:{art:30},                  maxMistakes:3, desc:'아름다운 선율의 음악가!'},
-  {id:'lawyerchi',    nameKo:'변호사 호랑이',    emoji:'⚖️', branch:'creative', minStats:{justice:30,intellect:20}, maxMistakes:2, desc:'날카로운 논리의 변호사!'},
-  {id:'judgechi',     nameKo:'판사 호랑이',      emoji:'🔨', branch:'creative', minStats:{justice:40,intellect:30}, maxMistakes:1, desc:'공정한 판결의 판사!'},
-  {id:'ceo_chi',      nameKo:'CEO 호랑이',       emoji:'💼', branch:'business', minStats:{money:30,intellect:20},   maxMistakes:2, desc:'회사를 이끄는 CEO!'},
-  {id:'investorchi',  nameKo:'투자은행가',       emoji:'📈', branch:'business', minStats:{money:35,intellect:25},   maxMistakes:2, desc:'시장을 읽는 투자은행가!'},
-  {id:'rocket_sci',   nameKo:'로켓과학자',       emoji:'🚀', branch:'business', minStats:{tech:35,intellect:30},    maxMistakes:2, desc:'우주를 향한 로켓 과학자!'},
-  // Hidden
-  {id:'astronautchi', nameKo:'우주비행사',       emoji:'👨‍🚀', branch:'hidden', minStats:{intellect:40,tech:40},     maxMistakes:0, desc:'완벽한 관리로 우주에 간 전설의 호랑이!', hidden:true},
-  {id:'ocean_chi',    nameKo:'해양탐험가',       emoji:'🌊', branch:'hidden',  minStats:{art:35,justice:35},        maxMistakes:1, desc:'바다를 탐험하는 신비한 호랑이!', hidden:true},
-  {id:'legendary_chi',nameKo:'전설의 호랑이',    emoji:'🌟', branch:'hidden',  minStats:{intellect:50,art:50,justice:50,tech:50,money:50}, maxMistakes:0, desc:'전설이 된 최강의 호랑이!', hidden:true},
-];
+/* ══════════════════════════════════════════
+   PIXEL ART SYSTEM
+══════════════════════════════════════════ */
+const PX = 4; // SVG units per "pixel"
 
-/* ══════════════════════════
-   PIXEL TIGER SVG
-══════════════════════════ */
-function tigerSVG(mood, stage, careerId) {
-  const sz = [0, 52, 60, 70, 80][stage] || 80;
-  const H  = Math.round(sz * 1.15);
+// Palette
+const C_O = '#D46010'; // orange body
+const C_D = '#181008'; // dark outline/stripes
+const C_F = '#F2E870'; // face cream
+const C_W = '#FAF0A0'; // belly
+const C_N = '#C83848'; // nose pink
+const C_I = '#E08030'; // inner ear
 
-  // Eye shapes by mood
-  const EYE = {
-    idle:    `<rect x="11" y="10" width="7" height="5" fill="#181008"/>
-              <rect x="22" y="10" width="7" height="5" fill="#181008"/>`,
-    happy:   `<path d="M11,13 Q14.5,8 18,13" stroke="#181008" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-              <path d="M22,13 Q25.5,8 29,13" stroke="#181008" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
-    sleeping:`<path d="M11,11 Q14.5,16 18,11" stroke="#181008" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-              <path d="M22,11 Q25.5,16 29,11" stroke="#181008" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
-    sad:     `<rect x="11" y="8"  width="7" height="5" fill="#181008" transform="rotate(12,14.5,10.5)"/>
-              <rect x="22" y="8"  width="7" height="5" fill="#181008" transform="rotate(-12,25.5,10.5)"/>`,
-    sick:    `<line x1="11" y1="8" x2="18" y2="15" stroke="#181008" stroke-width="2.5" stroke-linecap="round"/>
-              <line x1="18" y1="8" x2="11" y2="15" stroke="#181008" stroke-width="2.5" stroke-linecap="round"/>
-              <line x1="22" y1="8" x2="29" y2="15" stroke="#181008" stroke-width="2.5" stroke-linecap="round"/>
-              <line x1="29" y1="8" x2="22" y2="15" stroke="#181008" stroke-width="2.5" stroke-linecap="round"/>`,
-    hungry:  `<rect x="11" y="11" width="7" height="4" fill="#181008"/>
-              <rect x="22" y="11" width="7" height="4" fill="#181008"/>`,
-  };
-  const eyeSvg = EYE[mood] || EYE.idle;
+// Draw a pixel-grid rect
+function pr(cx, cy, cw, ch, fill) {
+  return `<rect x="${cx*PX}" y="${cy*PX}" width="${cw*PX}" height="${ch*PX}" fill="${fill}"/>`;
+}
 
-  // Arms by stage
-  let arms = '';
-  if (stage === 1) {
-    arms = `<rect x="0" y="26" width="7" height="13" rx="2" fill="#D47020" transform="rotate(-35,3,32)"/>
-            <rect x="33" y="26" width="7" height="13" rx="2" fill="#D47020" transform="rotate(35,37,32)"/>`;
-  } else if (stage === 2) {
-    arms = `<rect x="1" y="30" width="7" height="14" rx="2" fill="#D47020" transform="rotate(10,4,37)"/>
-            <rect x="32" y="24" width="7" height="14" rx="2" fill="#D47020" transform="rotate(-42,35,31)"/>`;
-  } else if (stage >= 3) {
-    arms = `<rect x="0" y="30" width="7" height="15" rx="2" fill="#D47020" transform="rotate(6,3,37)"/>
-            <rect x="33" y="30" width="7" height="15" rx="2" fill="#D47020" transform="rotate(-6,37,37)"/>`;
+/* ──────────────────────────────────────────
+   TIGER PIXEL ART
+   Grid: 14 wide × 22 tall pixels
+   ViewBox: 56×88 SVG units
+
+   Layout (pixel rows, b=0):
+     0-0  : (empty above ears)
+     1-3  : ears
+     3-11 : head  (HY = 3)
+     11-16: body  (BY = 12)
+     17-20: legs  (LY = 17)
+     21   : shadow
+────────────────────────────────────────── */
+function tigerPixelArt(mood, frame) {
+  // frame 0 = stance A, frame 1 = stance B (bob up 1px, legs swap)
+  const b   = frame === 1 ? -1 : 0; // character bobs up 1 pixel
+  const ll  = frame === 0 ?  0 : 1; // left  leg drops by 1px on frame 1
+  const rl  = frame === 0 ?  1 : 0; // right leg drops by 1px on frame 0
+
+  const HY  = 3 + b;  // head top row
+  const BY  = 12 + b; // body top row
+  const LY  = 17;     // leg base row (not bobbed)
+
+  // Eye row (3 rows down from head top, into the face cream area)
+  const EY  = HY + 3;
+
+  /* ── Eye shapes ── */
+  let eyeL, eyeR;
+  if (mood === 'happy') {
+    // ^ arcs (upward curve = happy)
+    eyeL = `<path d="M${4*PX},${(EY+2)*PX} Q${5.5*PX},${EY*PX} ${7*PX},${(EY+2)*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
+    eyeR = `<path d="M${8*PX},${(EY+2)*PX} Q${9.5*PX},${EY*PX} ${11*PX},${(EY+2)*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
+  } else if (mood === 'sleeping') {
+    // ∪ arcs (downward curve = closed eyes)
+    eyeL = `<path d="M${4*PX},${EY*PX} Q${5.5*PX},${(EY+2)*PX} ${7*PX},${EY*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
+    eyeR = `<path d="M${8*PX},${EY*PX} Q${9.5*PX},${(EY+2)*PX} ${11*PX},${EY*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
+  } else if (mood === 'sick') {
+    // × cross eyes
+    eyeL = `<line x1="${4*PX}" y1="${EY*PX}" x2="${7*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>
+            <line x1="${7*PX}" y1="${EY*PX}" x2="${4*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>`;
+    eyeR = `<line x1="${8*PX}" y1="${EY*PX}" x2="${11*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>
+            <line x1="${11*PX}" y1="${EY*PX}" x2="${8*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>`;
+  } else if (mood === 'sad') {
+    // diagonal droopy lines
+    eyeL = pr(4,EY,1,1,C_D)+pr(5,EY+1,1,1,C_D)+pr(6,EY+2,1,1,C_D);
+    eyeR = pr(8,EY+2,1,1,C_D)+pr(9,EY+1,1,1,C_D)+pr(10,EY,1,1,C_D);
+  } else {
+    // idle / hungry: filled rectangle eyes
+    eyeL = pr(4,EY,3,2,C_D);
+    eyeR = pr(8,EY,3,2,C_D);
   }
 
-  // Career badge
-  let badge = '';
-  if (careerId) {
-    const c = CareerUniverse.find(x => x.id === careerId);
-    if (c) badge = `<text x="36" y="5" font-size="9" text-anchor="middle">${c.emoji}</text>`;
-  }
+  return `<svg viewBox="0 0 ${14*PX} ${22*PX}" width="52" height="82"
+          xmlns="http://www.w3.org/2000/svg"
+          style="image-rendering:pixelated;image-rendering:crisp-edges">
 
-  return `<svg viewBox="0 0 40 48" width="${sz}" height="${H}" xmlns="http://www.w3.org/2000/svg">
-${badge}
-<!-- Shadow -->
-<ellipse cx="20" cy="46" rx="13" ry="2.5" fill="rgba(0,0,0,0.18)"/>
-<!-- Tail -->
-<path d="M30,38 Q40,32 38,24 Q36,18 30,21" stroke="#D47020" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-<path d="M36,26 Q38,22 36,20" stroke="#904A00" stroke-width="1.5" fill="none" opacity="0.7"/>
-<!-- Arms -->
-${arms}
-<!-- Body -->
-<rect x="8" y="26" width="24" height="18" rx="5" fill="#D47020"/>
-<!-- Body stripes -->
-<rect x="8"  y="28" width="4" height="12" rx="1" fill="#904A00" opacity="0.75"/>
-<rect x="18" y="26" width="4" height="14" rx="1" fill="#904A00" opacity="0.75"/>
-<rect x="28" y="28" width="4" height="12" rx="1" fill="#904A00" opacity="0.75"/>
-<!-- Belly -->
-<rect x="13" y="28" width="14" height="14" rx="4" fill="#F0D890"/>
-<!-- Back legs -->
-<rect x="9"  y="40" width="9" height="7" rx="2" fill="#D47020"/>
-<rect x="22" y="40" width="9" height="7" rx="2" fill="#D47020"/>
-<!-- Ears -->
-<polygon points="6,7 2,0 13,4"  fill="#D47020"/>
-<polygon points="34,7 38,0 27,4" fill="#D47020"/>
-<polygon points="7,6 4,1 12,4"   fill="#E09060"/>
-<polygon points="33,6 36,1 28,4" fill="#E09060"/>
-<!-- Head -->
-<rect x="6" y="4" width="28" height="22" rx="7" fill="#D47020"/>
-<!-- Head stripes -->
-<rect x="6"  y="6"  width="4" height="10" rx="1" fill="#904A00" opacity="0.75"/>
-<rect x="18" y="4"  width="4" height="8"  rx="1" fill="#904A00" opacity="0.75"/>
-<rect x="30" y="6"  width="4" height="10" rx="1" fill="#904A00" opacity="0.75"/>
-<!-- White face -->
-<rect x="10" y="14" width="20" height="11" rx="4" fill="#F0D890"/>
-<!-- Eyes -->
-${eyeSvg}
-<!-- Nose -->
-<rect x="17" y="18" width="6" height="4" rx="1.5" fill="#C04060"/>
-<!-- Mouth -->
-<rect x="15" y="22" width="3" height="2" fill="#181008" opacity="0.7"/>
-<rect x="22" y="22" width="3" height="2" fill="#181008" opacity="0.7"/>
-<!-- Whiskers -->
-<line x1="3"  y1="17" x2="12" y2="18" stroke="#181008" stroke-width="1" opacity="0.4"/>
-<line x1="3"  y1="20" x2="12" y2="20" stroke="#181008" stroke-width="1" opacity="0.4"/>
-<line x1="28" y1="18" x2="37" y2="17" stroke="#181008" stroke-width="1" opacity="0.4"/>
-<line x1="28" y1="20" x2="37" y2="20" stroke="#181008" stroke-width="1" opacity="0.4"/>
-<!-- Blush -->
-<ellipse cx="9"  cy="20" rx="4" ry="3" fill="#E08080" opacity="0.4"/>
-<ellipse cx="31" cy="20" rx="4" ry="3" fill="#E08080" opacity="0.4"/>
+<!-- ── SHADOW ── -->
+<ellipse cx="${7*PX}" cy="${21.5*PX}" rx="${5*PX}" ry="${0.65*PX}" fill="rgba(0,0,0,0.14)"/>
+
+<!-- ── TAIL (behind body) ── -->
+<path d="M${11*PX},${(BY+5)*PX}
+         C${17*PX},${(BY+2)*PX}
+           ${17*PX},${(HY)*PX}
+           ${12*PX},${(HY-1)*PX}"
+  stroke="${C_O}" stroke-width="7" fill="none" stroke-linecap="round"/>
+<!-- tail stripe tip -->
+<path d="M${15*PX},${(HY+2)*PX} Q${17*PX},${(HY)*PX} ${14*PX},${(HY-1)*PX}"
+  stroke="${C_D}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+<!-- ── EARS ── -->
+${pr(1,HY-2,3,3,C_O)}
+${pr(9,HY-2,3,3,C_O)}
+<!-- inner ear -->
+${pr(2,HY-2,1,2,C_I)}
+${pr(10,HY-2,1,2,C_I)}
+<!-- ear outline dark tip -->
+${pr(1,HY-2,1,1,C_D)}
+${pr(12,HY-2,1,1,C_D)}
+
+<!-- ── HEAD (12×9 pixels) ── -->
+${pr(1,HY,12,9,C_O)}
+
+<!-- ── HEAD STRIPES ── -->
+${pr(1,HY+1,1,6,C_D)}
+${pr(6,HY,  1,5,C_D)}
+${pr(12,HY+1,1,6,C_D)}
+
+<!-- ── FACE (cream, 10×5 pixels) ── -->
+${pr(2,HY+3,10,5,C_F)}
+
+<!-- ── EYES ── -->
+${eyeL}
+${eyeR}
+
+<!-- ── NOSE ── -->
+${pr(5,HY+6,4,1,C_N)}
+
+<!-- ── MOUTH ── -->
+${pr(3,HY+7,2,1,C_D)}
+${pr(9,HY+7,2,1,C_D)}
+
+<!-- ── CHEEK BLUSH ── -->
+<ellipse cx="${2.3*PX}" cy="${(HY+6.5)*PX}" rx="${1.3*PX}" ry="${PX}" fill="${C_N}" opacity="0.22"/>
+<ellipse cx="${11.7*PX}" cy="${(HY+6.5)*PX}" rx="${1.3*PX}" ry="${PX}" fill="${C_N}" opacity="0.22"/>
+
+<!-- ── WHISKERS ── -->
+<line x1="2" y1="${(HY+5.5)*PX}" x2="${2.8*PX}" y2="${(HY+6.3)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
+<line x1="2" y1="${(HY+7)*PX}" x2="${2.8*PX}" y2="${(HY+7)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
+<line x1="${11.2*PX}" y1="${(HY+6.3)*PX}" x2="${14*PX}" y2="${(HY+5.5)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
+<line x1="${11.2*PX}" y1="${(HY+7)*PX}" x2="${14*PX}" y2="${(HY+7)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
+
+<!-- ── BODY (12×5 pixels) ── -->
+${pr(1,BY,  12,5,C_O)}
+<!-- body stripes -->
+${pr(1,BY+1, 1,3,C_D)}
+${pr(6,BY,   1,5,C_D)}
+${pr(12,BY+1,1,3,C_D)}
+<!-- belly -->
+${pr(2,BY+1,10,3,C_W)}
+
+<!-- ── ARMS (small stubs on body sides) ── -->
+${pr(0,BY+1,1,2,C_O)}
+${pr(13,BY+1,1,2,C_O)}
+
+<!-- ── LEGS ── -->
+<!-- left leg -->
+${pr(2,LY+ll,3,3,C_O)}
+${pr(2,LY+ll,1,3,C_D)}
+<!-- right leg -->
+${pr(9,LY+rl,3,3,C_O)}
+${pr(11,LY+rl,1,3,C_D)}
+
 </svg>`;
 }
 
-function eggSVG(t) {
-  const crack = t > 14 ? `<path d="M21,14 L19,19 L22,21 L20,27" stroke="#A09050" stroke-width="1.5" fill="none" stroke-linecap="round"/>` : '';
-  const shake = t > 9  ? `style="animation:eggShake 0.45s infinite"` : '';
-  return `<svg viewBox="0 0 40 50" width="60" height="75" xmlns="http://www.w3.org/2000/svg" ${shake}>
-<style>@keyframes eggShake{0%,100%{transform:rotate(0)}30%{transform:rotate(-3.5deg)}70%{transform:rotate(3.5deg)}}</style>
-<ellipse cx="20" cy="48" rx="14" ry="2.5" fill="rgba(0,0,0,0.12)"/>
-<ellipse cx="20" cy="28" rx="16" ry="20" fill="#FFF8E0" stroke="#C8B060" stroke-width="2"/>
-<ellipse cx="20" cy="28" rx="12" ry="15" fill="none" stroke="#E0C870" stroke-width="1" opacity="0.5"/>
-<ellipse cx="16" cy="22" rx="3.5" ry="4" fill="rgba(255,240,180,0.5)"/>
+/* ──────────────────────────────────────────
+   EGG PIXEL ART
+   Grid: 14×20 pixels (56×80 SVG units)
+────────────────────────────────────────── */
+function eggPixelArt(ticks) {
+  const E = '#E8E0A0', ED = '#B0A040', EW = 'rgba(255,255,255,0.55)';
+  const crack = ticks > 14
+    ? `<line x1="${6*PX}" y1="${5*PX}" x2="${5*PX}" y2="${8*PX}" stroke="${ED}" stroke-width="2.5" stroke-linecap="round"/>
+       <line x1="${5*PX}" y1="${8*PX}" x2="${7*PX}" y2="${11*PX}" stroke="${ED}" stroke-width="2.5" stroke-linecap="round"/>`
+    : '';
+  const shk = ticks > 9 ? 'style="animation:eggShk 0.42s infinite"' : '';
+  return `<svg viewBox="0 0 ${14*PX} ${20*PX}" width="48" height="68" xmlns="http://www.w3.org/2000/svg" ${shk}>
+<style>@keyframes eggShk{0%,100%{transform:rotate(0) translateX(0)}30%{transform:rotate(-3.5deg) translateX(-1px)}70%{transform:rotate(3.5deg) translateX(1px)}}</style>
+<!-- shadow -->
+<ellipse cx="${7*PX}" cy="${19.5*PX}" rx="${4.5*PX}" ry="${0.6*PX}" fill="rgba(0,0,0,0.13)"/>
+<!-- egg outline (pixel rounded) -->
+${pr(3,1,8,1,ED)}${pr(2,2,10,1,ED)}
+${pr(1,3,1,12,ED)}${pr(12,3,1,12,ED)}
+${pr(2,15,10,1,ED)}${pr(2,16,10,1,ED)}${pr(3,17,8,1,ED)}
+<!-- egg fill -->
+${pr(2,3,10,12,E)}
+<!-- shine -->
+${pr(3,3,3,3,EW)}
+<!-- crack -->
 ${crack}
 </svg>`;
 }
 
-/* ══════════════════════════
-   SOUND
-══════════════════════════ */
-const Sound = {
-  _ctx: null,
-  ctx() {
-    if (!this._ctx) try { this._ctx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
-    return this._ctx;
-  },
-  osc(freq, type, t0, dur, vol) {
-    const ac = this.ctx(); if (!ac) return;
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.type = type||'sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(vol||0.18, ac.currentTime+t0);
-    g.gain.linearRampToValueAtTime(0, ac.currentTime+t0+dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(ac.currentTime+t0); o.stop(ac.currentTime+t0+dur+0.01);
-  },
-  play(type) {
-    if (!G||!G.soundOn) return;
-    const p = {
-      feed:   ()=>{ this.osc(523,'sine',0,.12,.2); this.osc(659,'sine',.1,.13,.2); this.osc(784,'sine',.2,.15,.2); },
-      happy:  ()=>{ [523,659,784].forEach((f,i)=>this.osc(f,'sine',i*.1,.12,.18)); },
-      sleep:  ()=>{ this.osc(220,'sine',0,.5,.12); this.osc(196,'sine',.3,.4,.1); },
-      clean:  ()=>{ [600,750,900,750,600].forEach((f,i)=>this.osc(f,'sine',i*.07,.09,.1)); },
-      heal:   ()=>{ this.osc(440,'square',0,.15,.08); this.osc(550,'square',.1,.15,.08); },
-      evolve: ()=>{ [262,330,392,523,659,784,1047].forEach((f,i)=>this.osc(f,'sine',i*.09,.15,.18)); },
-      catch:  ()=>{ this.osc(880,'sine',0,.07,.18); this.osc(1100,'sine',.05,.1,.18); },
-      die:    ()=>{ this.osc(300,'sawtooth',0,.6,.25); this.osc(160,'sawtooth',.4,.8,.15); },
-    };
-    if (p[type]) p[type]();
-  }
+/* ══════════════════════════════════════════
+   ANIMATION ENGINE
+══════════════════════════════════════════ */
+let animFrame  = 0;
+let animTimer  = null;
+let _prevMood  = '';
+let _prevStage = -1;
+
+const ANIM_SPEED = {
+  idle:     680,
+  happy:    300,
+  sad:     1300,
+  sleeping:1900,
+  sick:     900,
+  hungry:   560,
 };
 
-/* ══════════════════════════
-   GAME STATE
-══════════════════════════ */
-const SAVE_KEY = 'hrtama_v7';
-function newGame() {
-  return {
-    stage:0, age:0, ticks:0,
-    hunger:80, happy:80, health:100, energy:100, clean:100,
-    intellect:0, art:0, justice:0, tech:0, money:0,
-    feedLog:{meat:0,seafood:0,formula:0},
-    careMistakes:0, branch:null, careerId:null,
-    alive:true, sleeping:false,
-    name:'', soundOn:true, coins:0,
-    collection:[], pw:null, saved:Date.now(),
-    lastFood:'', lastFoodIcon:'🍖',
-  };
-}
-let G = newGame();
-let ticker = null;
-let statusView = 0; // 0=main, 1=stats, 2=collection
-
-/* ══════════════════════════
-   SAVE / LOAD
-══════════════════════════ */
-function save() {
-  G.saved = Date.now();
-  localStorage.setItem(SAVE_KEY, JSON.stringify(G));
-}
-function load() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return;
-    G = Object.assign(newGame(), JSON.parse(raw));
-    if (!G.feedLog) G.feedLog = {meat:0,seafood:0,formula:0};
-    const off = Math.min(Math.floor((Date.now()-G.saved)/1000), 600);
-    for (let i=0;i<off;i++) applyTick(true);
-  } catch(e) { G = newGame(); }
+function startAnim() {
+  if (animTimer) clearInterval(animTimer);
+  if (G.stage === 0 || !G.alive) return;
+  const speed = ANIM_SPEED[getMood()] || 680;
+  animTimer = setInterval(() => {
+    if (G.stage === 0) return;
+    animFrame = 1 - animFrame;
+    const el = document.getElementById('tiger-svg');
+    if (el) el.innerHTML = tigerPixelArt(getMood(), animFrame);
+  }, speed);
 }
 
-/* ══════════════════════════
-   MOOD
-══════════════════════════ */
-function getMood() {
-  if (!G.alive)     return 'sad';
-  if (G.sleeping)   return 'sleeping';
-  if (G.health<20)  return 'sick';
-  if (G.hunger<20)  return 'hungry';
-  if (G.happy>70)   return 'happy';
-  if (G.happy<30)   return 'sad';
-  return 'idle';
-}
+// Update only the tiger SVG (not full render)
+function updateTigerView() {
+  const mood  = getMood();
+  const stage = G.stage;
+  const el    = document.getElementById('tiger-svg');
+  if (!el) return;
 
-/* ══════════════════════════
-   RENDER
-══════════════════════════ */
-function showView(n) {
-  statusView = n;
-  document.getElementById('view-main').style.display  = n===0 ? 'flex'   : 'none';
-  document.getElementById('view-stats').style.display = n===1 ? 'flex'   : 'none';
-  document.getElementById('view-col').style.display   = n===2 ? 'flex'   : 'none';
-}
-
-function render() {
-  // Tiger
-  const el = document.getElementById('tiger-svg');
-  if (G.stage === 0) {
-    el.innerHTML = eggSVG(G.ticks);
-  } else {
-    el.innerHTML = tigerSVG(getMood(), G.stage, G.careerId);
-  }
-
-  // ZZZ
-  document.getElementById('zzz').style.display = G.sleeping ? 'block' : 'none';
-
-  // EXP / Level
-  const level = Math.floor(G.ticks / 100) + 1;
-  const exp   = (G.ticks % 100);
-  document.getElementById('exp-fill').style.width = exp + '%';
-  document.getElementById('lv-text').textContent = 'Lv.' + level;
-
-  // Item panel
-  const foodLabels = {
-    meat:    {type:'Meat',    icon:'🍖', name:'Sliced\nSteak'},
-    seafood: {type:'Seafood', icon:'🐟', name:'Fresh\nFish'},
-    formula: {type:'Formula', icon:'🍼', name:'Baby\nFormula'},
-  };
-  const fl = foodLabels[G.lastFood];
-  if (fl) {
-    document.getElementById('item-type').textContent  = fl.type;
-    document.getElementById('item-icon').textContent  = fl.icon;
-    document.getElementById('item-name').innerHTML    = fl.name.replace('\n','<br>');
-    const total = (G.feedLog.meat||0)+(G.feedLog.seafood||0)+(G.feedLog.formula||0);
-    document.getElementById('item-count').textContent = 'x' + (G.feedLog[G.lastFood]||0);
-    document.getElementById('item-hint').innerHTML    = 'Total<br>' + total;
-  }
-
-  // Stats view
-  ['hunger','happy','health','energy','clean'].forEach(s => {
-    const el2 = document.getElementById('ss-'+s);
-    if (el2) el2.style.width = Math.max(0,Math.min(100,G[s]))+'%';
-    const el3 = document.getElementById('bar-'+s);
-    if (el3) el3.style.width = Math.max(0,Math.min(100,G[s]))+'%';
-  });
-  const apt = document.getElementById('ss-apt');
-  if (apt) apt.innerHTML =
-    `<div class="apt-chip">INT ${Math.floor(G.intellect)}</div>` +
-    `<div class="apt-chip">ART ${Math.floor(G.art)}</div>` +
-    `<div class="apt-chip">LAW ${Math.floor(G.justice)}</div>` +
-    `<div class="apt-chip">TEC ${Math.floor(G.tech)}</div>` +
-    `<div class="apt-chip">MON ${Math.floor(G.money)}</div>`;
-  const brEl = document.getElementById('ss-branch');
-  if (brEl) {
-    const bmap = {service:'Service 🍖', creative:'Creative ⚖️', business:'Business 💼'};
-    brEl.textContent = G.branch ? 'Branch: '+(bmap[G.branch]||G.branch) : (G.stage>=2?'Branch: ?':'');
-    if (G.careerId) {
-      const c = CareerUniverse.find(x=>x.id===G.careerId);
-      if (c) brEl.textContent = c.emoji+' '+c.nameKo;
-    }
-  }
-}
-
-function setMsg(l1, l2) {
-  document.getElementById('msg1').textContent = l1 || '';
-  document.getElementById('msg2').textContent = l2 || '';
-}
-
-function showFX(emojis) {
-  const r = document.getElementById('device').getBoundingClientRect();
-  emojis.forEach((em,i) => {
-    const d = document.createElement('div');
-    d.className = 'fx';
-    d.textContent = em;
-    d.style.cssText = `left:${r.left+30+Math.random()*(r.width-60)}px;top:${r.top+80+Math.random()*80}px;animation-delay:${i*.1}s`;
-    document.body.appendChild(d);
-    setTimeout(()=>d.remove(),1400);
-  });
-}
-
-/* ══════════════════════════
-   EVOLUTION
-══════════════════════════ */
-const EV_TICKS = [0,20,200,450,900];
-
-function determineBranch() {
-  const f = G.feedLog;
-  const m = Math.max(f.meat||0, f.seafood||0, f.formula||0);
-  if (!m) return 'service';
-  if ((f.meat||0)===m) return 'service';
-  if ((f.seafood||0)===m) return 'creative';
-  return 'business';
-}
-
-function determineCareer() {
-  const m=G.careMistakes, s=G;
-  if (m===0 && s.intellect>=40 && s.tech>=40) return 'astronautchi';
-  if (m<=1 && s.art>=35 && s.justice>=35 && (G.feedLog.seafood||0)>=(G.feedLog.meat||0)) return 'ocean_chi';
-  if (m===0 && Math.min(s.intellect,s.art,s.justice,s.tech,s.money)>=50) return 'legendary_chi';
-  const br = G.branch;
-  if (br==='service') {
-    if (s.art>=35&&m<=2) return 'fashion_chi';
-    if (s.art>=25&&m<=3) return 'film_actorchi';
-    if (s.intellect>=25&&m<=3) return 'doctorchi';
-    if (s.justice>=25&&m<=3) return 'policechi';
-    if (s.art>=20&&m<=3) return 'musicianchi';
-    return 'firefighterchi';
-  }
-  if (br==='creative') {
-    if (s.justice>=40&&s.intellect>=30&&m<=1) return 'judgechi';
-    return 'lawyerchi';
-  }
-  if (s.tech>=35&&s.intellect>=30&&m<=2) return 'rocket_sci';
-  if (s.money>=35&&s.intellect>=25&&m<=2) return 'investorchi';
-  return 'ceo_chi';
-}
-
-function evolve(n) {
-  G.stage = n;
-  Sound.play('evolve');
-  document.getElementById('tiger-wrap').classList.add('evolving');
-  setTimeout(()=>document.getElementById('tiger-wrap').classList.remove('evolving'),1500);
-  showFX(['✨','🌟','💫','⭐','🎉']);
-
-  if (n===2) {
-    G.branch = determineBranch();
-    const bn={service:'Service 🍖',creative:'Creative ⚖️',business:'Business 💼'};
-    setMsg('Branch decided!', bn[G.branch]);
-  }
-  if (n===4) {
-    G.careerId = determineCareer();
-    const c = CareerUniverse.find(x=>x.id===G.careerId);
-    if (c) {
-      if (!G.collection.includes(c.id)) { G.collection.push(c.id); G.coins+=c.hidden?100:60; }
-      document.getElementById('career-title').textContent = '🎉 CAREER!';
-      document.getElementById('career-icon').textContent  = c.emoji;
-      document.getElementById('career-desc').textContent  = c.desc;
-      document.getElementById('career-ov').classList.add('show');
-    }
-  }
-  render(); save();
-}
-
-/* ══════════════════════════
-   TICK
-══════════════════════════ */
-function applyTick(silent) {
-  if (!G.alive||G.stage===0) return;
-  G.ticks++;
-  G.age = Math.floor(G.ticks/10);
-
-  if (G.sleeping) {
-    G.energy  = Math.min(100,G.energy+1.5);
-    G.hunger  = Math.max(0,G.hunger-0.4);
-    G.clean   = Math.max(0,G.clean-0.1);
-  } else {
-    G.hunger  = Math.max(0,G.hunger-0.35);
-    G.happy   = Math.max(0,G.happy-0.2);
-    G.energy  = Math.max(0,G.energy-0.25);
-    G.clean   = Math.max(0,G.clean-0.15);
-  }
-
-  if (G.hunger<15||G.clean<15) {
-    G.health  = Math.max(0,G.health-0.5);
-    if (!silent) G.careMistakes++;
-  } else if (G.health<100&&G.hunger>40) {
-    G.health  = Math.min(100,G.health+0.08);
-  }
-
-  if (G.stage>=2) {
-    if (G.branch==='service')  { G.art=Math.min(100,G.art+0.06);     G.justice=Math.min(100,G.justice+0.04); }
-    if (G.branch==='creative') { G.justice=Math.min(100,G.justice+0.08); G.intellect=Math.min(100,G.intellect+0.05); }
-    if (G.branch==='business') { G.money=Math.min(100,G.money+0.08); G.tech=Math.min(100,G.tech+0.06); }
-  }
-  G.intellect = Math.min(100,G.intellect+0.02);
-
-  if (G.health<=0) {
-    G.alive = false;
-    if (!silent) {
-      Sound.play('die');
-      document.getElementById('gameover-msg').textContent = G.name
-        ? `${G.name}이(가) 무지개 다리를 건넜어요...`
-        : '호랑이가 무지개 다리를 건넜어요...';
-      document.getElementById('gameover-ov').classList.add('show');
-    }
+  if (stage === 0) {
+    el.innerHTML = eggPixelArt(G.ticks);
     return;
   }
 
-  if (!silent) {
-    if (G.stage===1&&G.ticks>=EV_TICKS[1]) evolve(2);
-    else if (G.stage===2&&G.ticks>=EV_TICKS[2]) evolve(3);
-    else if (G.stage===3&&G.ticks>=EV_TICKS[3]) evolve(4);
+  // Restart animation if mood or stage changed
+  if (mood !== _prevMood || stage !== _prevStage) {
+    _prevMood  = mood;
+    _prevStage = stage;
+    animFrame  = 0;
+    el.innerHTML = tigerPixelArt(mood, animFrame);
+    startAnim();
+  }
+
+  // Sleeping tilt class
+  const wrap = document.getElementById('tiger-wrap');
+  if (wrap) wrap.classList.toggle('sleeping-tilt', mood === 'sleeping');
+
+  // ZZZ
+  const zzz = document.getElementById('zzz');
+  if (zzz) zzz.style.display = mood === 'sleeping' ? 'block' : 'none';
+}
+
+/* ══════════════════════════════════════════
+   CAREER UNIVERSE
+══════════════════════════════════════════ */
+const CareerUniverse = [
+  {id:'doctorchi',    nameKo:'의사 호랑이',     emoji:'🩺', branch:'service',  minStats:{intellect:25},            maxMistakes:3, desc:'청진기를 멘 스마트한 의사!'},
+  {id:'policechi',    nameKo:'경찰 호랑이',     emoji:'👮', branch:'service',  minStats:{justice:25},              maxMistakes:3, desc:'법과 질서를 지키는 경찰!'},
+  {id:'firefighterchi',nameKo:'소방관 호랑이',  emoji:'🚒', branch:'service',  minStats:{justice:10},              maxMistakes:5, desc:'용감한 소방관 호랑이!'},
+  {id:'film_actorchi',nameKo:'영화배우 호랑이', emoji:'🎬', branch:'service',  minStats:{art:25},                  maxMistakes:3, desc:'스크린의 스타 호랑이!'},
+  {id:'fashion_chi',  nameKo:'패션디자이너',    emoji:'👗', branch:'service',  minStats:{art:35},                  maxMistakes:2, desc:'트렌드를 만드는 패션 호랑이!'},
+  {id:'musicianchi',  nameKo:'음악가 호랑이',   emoji:'🎵', branch:'service',  minStats:{art:30},                  maxMistakes:3, desc:'아름다운 선율의 음악가!'},
+  {id:'lawyerchi',    nameKo:'변호사 호랑이',   emoji:'⚖️', branch:'creative', minStats:{justice:30,intellect:20}, maxMistakes:2, desc:'날카로운 논리의 변호사!'},
+  {id:'judgechi',     nameKo:'판사 호랑이',     emoji:'🔨', branch:'creative', minStats:{justice:40,intellect:30}, maxMistakes:1, desc:'공정한 판결의 판사!'},
+  {id:'ceo_chi',      nameKo:'CEO 호랑이',      emoji:'💼', branch:'business', minStats:{money:30,intellect:20},   maxMistakes:2, desc:'회사를 이끄는 CEO!'},
+  {id:'investorchi',  nameKo:'투자은행가',      emoji:'📈', branch:'business', minStats:{money:35,intellect:25},   maxMistakes:2, desc:'시장을 읽는 투자은행가!'},
+  {id:'rocket_sci',   nameKo:'로켓과학자',      emoji:'🚀', branch:'business', minStats:{tech:35,intellect:30},    maxMistakes:2, desc:'우주를 향한 로켓 과학자!'},
+  {id:'astronautchi', nameKo:'우주비행사',      emoji:'👨‍🚀',branch:'hidden',  minStats:{intellect:40,tech:40},     maxMistakes:0, desc:'완벽한 관리로 우주에 간 전설의 호랑이!', hidden:true},
+  {id:'ocean_chi',    nameKo:'해양탐험가',      emoji:'🌊', branch:'hidden',  minStats:{art:35,justice:35},        maxMistakes:1, desc:'바다를 탐험하는 신비한 호랑이!', hidden:true},
+  {id:'legendary_chi',nameKo:'전설의 호랑이',   emoji:'🌟', branch:'hidden',  minStats:{intellect:50,art:50,justice:50,tech:50,money:50}, maxMistakes:0, desc:'전설이 된 최강의 호랑이!', hidden:true},
+];
+
+/* ══════════════════════════════════════════
+   SOUND
+══════════════════════════════════════════ */
+const Sound = {
+  _ctx:null,
+  ctx(){if(!this._ctx)try{this._ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return this._ctx;},
+  osc(f,t,t0,d,v){const ac=this.ctx();if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||0.18,ac.currentTime+t0);g.gain.linearRampToValueAtTime(0,ac.currentTime+t0+d);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+t0);o.stop(ac.currentTime+t0+d+0.01);},
+  play(type){
+    if(!G||!G.soundOn)return;
+    const p={
+      feed:  ()=>{this.osc(523,'sine',0,.12,.2);this.osc(659,'sine',.1,.13,.2);this.osc(784,'sine',.2,.15,.2);},
+      happy: ()=>{[523,659,784].forEach((f,i)=>this.osc(f,'sine',i*.1,.12,.18));},
+      sleep: ()=>{this.osc(220,'sine',0,.5,.12);this.osc(196,'sine',.3,.4,.1);},
+      clean: ()=>{[600,750,900,750,600].forEach((f,i)=>this.osc(f,'sine',i*.07,.09,.1));},
+      heal:  ()=>{this.osc(440,'square',0,.15,.08);this.osc(550,'square',.1,.15,.08);},
+      evolve:()=>{[262,330,392,523,659,784,1047].forEach((f,i)=>this.osc(f,'sine',i*.09,.15,.18));},
+      catch: ()=>{this.osc(880,'sine',0,.07,.18);this.osc(1100,'sine',.05,.1,.18);},
+      die:   ()=>{this.osc(300,'sawtooth',0,.6,.25);this.osc(160,'sawtooth',.4,.8,.15);},
+    };
+    if(p[type])p[type]();
+  }
+};
+
+/* ══════════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════════ */
+const SAVE_KEY = 'hrtama_v7';
+function newGame(){
+  return{
+    stage:0,age:0,ticks:0,
+    hunger:80,happy:80,health:100,energy:100,clean:100,
+    intellect:0,art:0,justice:0,tech:0,money:0,
+    feedLog:{meat:0,seafood:0,formula:0},
+    careMistakes:0,branch:null,careerId:null,
+    alive:true,sleeping:false,
+    name:'',soundOn:true,coins:0,
+    collection:[],pw:null,saved:Date.now(),lastFood:'',
+  };
+}
+let G=newGame(), ticker=null, statusView=0;
+
+/* ══════════════════════════════════════════
+   SAVE / LOAD
+══════════════════════════════════════════ */
+function save(){G.saved=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(G));}
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+    G=Object.assign(newGame(),JSON.parse(raw));
+    if(!G.feedLog)G.feedLog={meat:0,seafood:0,formula:0};
+    const off=Math.min(Math.floor((Date.now()-G.saved)/1000),600);
+    for(let i=0;i<off;i++)applyTick(true);
+  }catch(e){G=newGame();}
+}
+
+/* ══════════════════════════════════════════
+   MOOD
+══════════════════════════════════════════ */
+function getMood(){
+  if(!G.alive)     return'sad';
+  if(G.sleeping)   return'sleeping';
+  if(G.health<20)  return'sick';
+  if(G.hunger<20)  return'hungry';
+  if(G.happy>70)   return'happy';
+  if(G.happy<30)   return'sad';
+  return'idle';
+}
+
+/* ══════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════ */
+function showView(n){
+  statusView=n;
+  document.getElementById('view-main').style.display  = n===0?'flex':'none';
+  document.getElementById('view-stats').style.display = n===1?'flex':'none';
+  document.getElementById('view-col').style.display   = n===2?'flex':'none';
+}
+
+function render(){
+  // Tiger (incremental - only restarts if mood/stage changed)
+  updateTigerView();
+
+  // EXP / Level
+  const level=Math.floor(G.ticks/100)+1;
+  const exp=G.ticks%100;
+  document.getElementById('exp-fill').style.width=exp+'%';
+  document.getElementById('lv-text').textContent='Lv.'+level;
+
+  // Item panel
+  const fMap={meat:{type:'Meat',icon:'🍖',name:'Sliced\nSteak'},seafood:{type:'Seafood',icon:'🐟',name:'Fresh\nFish'},formula:{type:'Formula',icon:'🍼',name:'Baby\nFormula'}};
+  const fl=fMap[G.lastFood];
+  if(fl){
+    document.getElementById('item-type').textContent=fl.type;
+    document.getElementById('item-icon').textContent=fl.icon;
+    document.getElementById('item-name').innerHTML=fl.name.replace('\n','<br>');
+    document.getElementById('item-count').textContent='x'+(G.feedLog[G.lastFood]||0);
+    const tot=(G.feedLog.meat||0)+(G.feedLog.seafood||0)+(G.feedLog.formula||0);
+    document.getElementById('item-hint').innerHTML='Total<br>'+tot;
+  }
+
+  // Stats bars
+  ['hunger','happy','health','energy','clean'].forEach(s=>{
+    const e=document.getElementById('ss-'+s);
+    if(e)e.style.width=Math.max(0,Math.min(100,G[s]))+'%';
+  });
+  const apt=document.getElementById('ss-apt');
+  if(apt)apt.innerHTML=
+    `<div class="apt-chip">INT ${Math.floor(G.intellect)}</div>`+
+    `<div class="apt-chip">ART ${Math.floor(G.art)}</div>`+
+    `<div class="apt-chip">LAW ${Math.floor(G.justice)}</div>`+
+    `<div class="apt-chip">TEC ${Math.floor(G.tech)}</div>`+
+    `<div class="apt-chip">MON ${Math.floor(G.money)}</div>`;
+  const brEl=document.getElementById('ss-branch');
+  if(brEl){
+    const bmap={service:'Service 🍖',creative:'Creative ⚖️',business:'Business 💼'};
+    if(G.careerId){const c=CareerUniverse.find(x=>x.id===G.careerId);brEl.textContent=c?c.emoji+' '+c.nameKo:'';}
+    else brEl.textContent=G.branch?'Branch: '+(bmap[G.branch]||G.branch):(G.stage>=2?'Branch: ?':'');
   }
 }
 
-function tick() {
-  if (!G.alive) return;
-  if (G.stage===0) {
-    G.ticks++;
-    if (G.ticks>=20) {
-      G.stage=1; G.ticks=0;
-      Sound.play('evolve');
-      showFX(['🐣','✨','💛','🐯']);
-      if (!G.name) showNameModal();
-      else setMsg(`${G.name} hatched!`,'Take good care!');
-    } else {
-      setMsg('Egg is shaking...', G.ticks>14?'About to hatch!':'');
-    }
-    render(); save(); return;
+function setMsg(l1,l2){
+  document.getElementById('msg1').textContent=l1||'';
+  document.getElementById('msg2').textContent=l2||'';
+}
+
+function showFX(emojis){
+  const r=document.getElementById('device').getBoundingClientRect();
+  emojis.forEach((em,i)=>{
+    const d=document.createElement('div');d.className='fx';d.textContent=em;
+    d.style.cssText=`left:${r.left+30+Math.random()*(r.width-60)}px;top:${r.top+80+Math.random()*80}px;animation-delay:${i*.1}s`;
+    document.body.appendChild(d);setTimeout(()=>d.remove(),1400);
+  });
+}
+
+/* ══════════════════════════════════════════
+   EVOLUTION
+══════════════════════════════════════════ */
+const EV_TICKS=[0,20,200,450,900];
+
+function determineBranch(){
+  const f=G.feedLog,m=Math.max(f.meat||0,f.seafood||0,f.formula||0);
+  if(!m)return'service';
+  if((f.meat||0)===m)return'service';
+  if((f.seafood||0)===m)return'creative';
+  return'business';
+}
+
+function determineCareer(){
+  const m=G.careMistakes,s=G;
+  if(m===0&&s.intellect>=40&&s.tech>=40)return'astronautchi';
+  if(m<=1&&s.art>=35&&s.justice>=35&&(G.feedLog.seafood||0)>=(G.feedLog.meat||0))return'ocean_chi';
+  if(m===0&&Math.min(s.intellect,s.art,s.justice,s.tech,s.money)>=50)return'legendary_chi';
+  const br=G.branch;
+  if(br==='service'){
+    if(s.art>=35&&m<=2)return'fashion_chi';
+    if(s.art>=25&&m<=3)return'film_actorchi';
+    if(s.intellect>=25&&m<=3)return'doctorchi';
+    if(s.justice>=25&&m<=3)return'policechi';
+    if(s.art>=20&&m<=3)return'musicianchi';
+    return'firefighterchi';
   }
+  if(br==='creative'){if(s.justice>=40&&s.intellect>=30&&m<=1)return'judgechi';return'lawyerchi';}
+  if(s.tech>=35&&s.intellect>=30&&m<=2)return'rocket_sci';
+  if(s.money>=35&&s.intellect>=25&&m<=2)return'investorchi';
+  return'ceo_chi';
+}
 
+function evolve(n){
+  G.stage=n;
+  Sound.play('evolve');
+  const wrap=document.getElementById('tiger-wrap');
+  wrap.classList.add('evolving');
+  setTimeout(()=>wrap.classList.remove('evolving'),1500);
+  showFX(['✨','🌟','💫','⭐','🎉']);
+  _prevMood='';_prevStage=-1; // force animation restart
+  if(n===2){
+    G.branch=determineBranch();
+    const bn={service:'Service 🍖',creative:'Creative ⚖️',business:'Business 💼'};
+    setMsg('Branch decided!',bn[G.branch]);
+  }
+  if(n===4){
+    G.careerId=determineCareer();
+    const c=CareerUniverse.find(x=>x.id===G.careerId);
+    if(c){
+      if(!G.collection.includes(c.id)){G.collection.push(c.id);G.coins+=c.hidden?100:60;}
+      document.getElementById('career-title').textContent='🎉 CAREER!';
+      document.getElementById('career-icon').textContent=c.emoji;
+      document.getElementById('career-desc').textContent=c.desc;
+      document.getElementById('career-ov').classList.add('show');
+    }
+  }
+  render();save();
+}
+
+/* ══════════════════════════════════════════
+   TICK
+══════════════════════════════════════════ */
+function applyTick(silent){
+  if(!G.alive||G.stage===0)return;
+  G.ticks++;G.age=Math.floor(G.ticks/10);
+  if(G.sleeping){G.energy=Math.min(100,G.energy+1.5);G.hunger=Math.max(0,G.hunger-0.4);G.clean=Math.max(0,G.clean-0.1);}
+  else{G.hunger=Math.max(0,G.hunger-0.35);G.happy=Math.max(0,G.happy-0.2);G.energy=Math.max(0,G.energy-0.25);G.clean=Math.max(0,G.clean-0.15);}
+  if(G.hunger<15||G.clean<15){G.health=Math.max(0,G.health-0.5);if(!silent)G.careMistakes++;}
+  else if(G.health<100&&G.hunger>40)G.health=Math.min(100,G.health+0.08);
+  if(G.stage>=2){
+    if(G.branch==='service'){G.art=Math.min(100,G.art+0.06);G.justice=Math.min(100,G.justice+0.04);}
+    if(G.branch==='creative'){G.justice=Math.min(100,G.justice+0.08);G.intellect=Math.min(100,G.intellect+0.05);}
+    if(G.branch==='business'){G.money=Math.min(100,G.money+0.08);G.tech=Math.min(100,G.tech+0.06);}
+  }
+  G.intellect=Math.min(100,G.intellect+0.02);
+  if(G.health<=0){
+    G.alive=false;
+    if(!silent){
+      Sound.play('die');
+      document.getElementById('gameover-msg').textContent=G.name?`${G.name}이(가) 무지개 다리를 건넜어요...`:'호랑이가 무지개 다리를 건넜어요...';
+      document.getElementById('gameover-ov').classList.add('show');
+      if(animTimer){clearInterval(animTimer);animTimer=null;}
+    }
+    return;
+  }
+  if(!silent){
+    if(G.stage===1&&G.ticks>=EV_TICKS[1])evolve(2);
+    else if(G.stage===2&&G.ticks>=EV_TICKS[2])evolve(3);
+    else if(G.stage===3&&G.ticks>=EV_TICKS[3])evolve(4);
+  }
+}
+
+function tick(){
+  if(!G.alive)return;
+  if(G.stage===0){
+    G.ticks++;
+    if(G.ticks>=20){
+      G.stage=1;G.ticks=0;
+      Sound.play('evolve');showFX(['🐣','✨','💛','🐯']);
+      _prevMood='';_prevStage=-1;
+      if(!G.name)showNameModal();
+      else setMsg(G.name+' hatched!','Take good care!');
+    } else {
+      setMsg('Egg is shaking...',G.ticks>14?'About to hatch!':'');
+      document.getElementById('tiger-svg').innerHTML=eggPixelArt(G.ticks);
+    }
+    render();save();return;
+  }
   applyTick(false);
-
-  if (G.ticks%30===0) {
-    const pools = {
-      idle:     [['Feeling good!',''],['Play with me!',''],['All okay~','']],
-      happy:    [['So happy!','Thank you!'],['Best day ever!','']],
-      sad:      [['Im sad...',''],['Please care...','']],
-      hungry:   [['Feed Sliced Steak','Perfect care!'],['So hungry!!','']],
-      sleeping: [['z z z...',''],['Sweet dreams...','']],
-      sick:     [['Feeling sick...','Need medicine!'],['Ouch...','']],
+  if(G.ticks%30===0){
+    const pools={
+      idle:    [['All good!',''],['Play with me!',''],['Happy today~','']],
+      happy:   [['So happy!','Thank you!'],['Best day ever!','']],
+      sad:     [['Im sad...',''],['Please care...','']],
+      hungry:  [['Feed Sliced Steak','Perfect care!'],['So hungry!!','']],
+      sleeping:[['z z z...',''],['Sweet dreams...','']],
+      sick:    [['Feeling sick...','Need medicine!'],['Ouch...','']],
     };
-    const pool = pools[getMood()]||pools.idle;
-    const pick = pool[Math.floor(Math.random()*pool.length)];
+    const pool=pools[getMood()]||pools.idle;
+    const pick=pool[Math.floor(Math.random()*pool.length)];
     setMsg(pick[0],pick[1]);
   }
-
   render();
-  if (G.ticks%10===0) save();
+  if(G.ticks%10===0)save();
 }
 
-/* ══════════════════════════
+/* ══════════════════════════════════════════
    BUTTONS
-══════════════════════════ */
-function btnFeed() {
+══════════════════════════════════════════ */
+function btnFeed(){
   Sound.ctx();
-  if (!G.alive) return;
-  if (G.stage===0) return;
-  if (G.sleeping) { setMsg('Sleeping!','Wake up first'); return; }
+  if(!G.alive||G.stage===0)return;
+  if(G.sleeping){setMsg('Sleeping!','Wake up first');return;}
   document.getElementById('feed-ov').classList.add('show');
 }
-
-function btnStatus() {
-  statusView = (statusView+1)%3;
+function btnStatus(){
+  statusView=(statusView+1)%3;
   showView(statusView);
-  if (statusView===2) buildColGrid();
+  if(statusView===2)buildColGrid();
   render();
 }
-
-function btnClean() {
+function btnClean(){
   Sound.ctx();
-  if (!G.alive||G.stage===0) return;
-  if (G.health<40) { doHeal(); return; }
+  if(!G.alive||G.stage===0)return;
+  if(G.health<40){doHeal();return;}
   doBath();
 }
 
-/* ══════════════════════════
+/* ══════════════════════════════════════════
    ACTIONS
-══════════════════════════ */
-function doFeed(type) {
+══════════════════════════════════════════ */
+function doFeed(type){
   document.getElementById('feed-ov').classList.remove('show');
-  G.hunger = Math.min(100,G.hunger+30);
-  G.happy  = Math.min(100,G.happy+5);
-  G.feedLog[type] = (G.feedLog[type]||0)+1;
-  G.lastFood = type;
-  if (type==='meat')    { G.art=Math.min(100,G.art+2);     G.justice=Math.min(100,G.justice+1); }
-  if (type==='seafood') { G.justice=Math.min(100,G.justice+2); G.intellect=Math.min(100,G.intellect+2); }
-  if (type==='formula') { G.money=Math.min(100,G.money+2); G.tech=Math.min(100,G.tech+2); G.intellect=Math.min(100,G.intellect+1); }
-  Sound.play('feed');
-  showFX(['🍖','😋','💛']);
-  setMsg('Nom nom~','Perfect care!');
-  showView(0);
-  render(); save();
+  G.hunger=Math.min(100,G.hunger+30);G.happy=Math.min(100,G.happy+5);
+  G.feedLog[type]=(G.feedLog[type]||0)+1;G.lastFood=type;
+  if(type==='meat'){G.art=Math.min(100,G.art+2);G.justice=Math.min(100,G.justice+1);}
+  if(type==='seafood'){G.justice=Math.min(100,G.justice+2);G.intellect=Math.min(100,G.intellect+2);}
+  if(type==='formula'){G.money=Math.min(100,G.money+2);G.tech=Math.min(100,G.tech+2);G.intellect=Math.min(100,G.intellect+1);}
+  Sound.play('feed');showFX(['🍖','😋','💛']);
+  setMsg('Nom nom~','Perfect care!');showView(0);render();save();
 }
-function closeFeedOv() { document.getElementById('feed-ov').classList.remove('show'); }
+function closeFeedOv(){document.getElementById('feed-ov').classList.remove('show');}
 
-function doBath() {
-  G.clean = Math.min(100,G.clean+40);
-  G.happy = Math.min(100,G.happy+8);
-  Sound.play('clean');
-  showFX(['🫧','💦','✨']);
-  setMsg('All clean!','Sparkling!');
-  spawnBubbles();
-  render(); save();
+function doBath(){
+  G.clean=Math.min(100,G.clean+40);G.happy=Math.min(100,G.happy+8);
+  Sound.play('clean');showFX(['🫧','💦','✨']);setMsg('All clean!','Sparkling!');
+  spawnBubbles();render();save();
 }
-
-function doHeal() {
-  G.health = Math.min(100,G.health+30);
-  G.happy  = Math.max(0,G.happy-5);
-  Sound.play('heal');
-  showFX(['💊','❤️‍🩹']);
-  setMsg('Medicine time!','Feeling better');
-  render(); save();
+function doHeal(){
+  G.health=Math.min(100,G.health+30);G.happy=Math.max(0,G.happy-5);
+  Sound.play('heal');showFX(['💊','❤️‍🩹']);setMsg('Medicine time!','Feeling better');render();save();
 }
-
-function tapTiger() {
+function tapTiger(){
   Sound.ctx();
-  if (!G.alive||G.stage===0) return;
-  if (G.sleeping) { setMsg('Shh... sleeping',''); return; }
-  // Pet on single tap
-  G.happy     = Math.min(100,G.happy+12);
-  G.intellect = Math.min(100,G.intellect+0.5);
-  Sound.play('happy');
-  showFX(['❤️','💛','🐯']);
-  setMsg('Purr~!','So happy!');
-  render(); save();
+  if(!G.alive||G.stage===0)return;
+  if(G.sleeping){setMsg('Shh... sleeping','');return;}
+  G.happy=Math.min(100,G.happy+12);G.intellect=Math.min(100,G.intellect+0.5);
+  Sound.play('happy');showFX(['❤️','💛','🐯']);setMsg('Purr~!','So happy!');render();save();
 }
-
-function spawnBubbles() {
-  const c = document.getElementById('bath-bubbles');
-  for (let i=0;i<12;i++) {
-    const b=document.createElement('div');
-    b.className='bubble';
-    const sz=5+Math.random()*13, d=0.7+Math.random()*0.9, dl=Math.random()*0.6;
+function spawnBubbles(){
+  const c=document.getElementById('bath-bubbles');
+  for(let i=0;i<12;i++){
+    const b=document.createElement('div');b.className='bubble';
+    const sz=5+Math.random()*13,d=0.7+Math.random()*0.9,dl=Math.random()*0.6;
     b.style.cssText=`width:${sz}px;height:${sz}px;left:${5+Math.random()*60}px;bottom:${5+Math.random()*30}px;--d:${d}s;--dl:${dl}s`;
-    c.appendChild(b);
-    setTimeout(()=>b.remove(),(d+dl+0.5)*1000);
+    c.appendChild(b);setTimeout(()=>b.remove(),(d+dl+0.5)*1000);
   }
 }
 
-/* ══════════════════════════
-   NAME
-══════════════════════════ */
-function showNameModal() {
+/* ══════════════════════════════════════════
+   NAME / OVERLAYS
+══════════════════════════════════════════ */
+function showNameModal(){
   document.getElementById('name-ov').classList.add('show');
   setTimeout(()=>document.getElementById('name-input').focus(),150);
 }
-function confirmName() {
-  const v = document.getElementById('name-input').value.trim();
-  if (!v) return;
-  G.name = v;
-  document.getElementById('name-ov').classList.remove('show');
-  setMsg(`${v} hatched!`,'Take good care!');
-  showFX(['🐯','💛','✨']);
-  render(); save();
+function confirmName(){
+  const v=document.getElementById('name-input').value.trim();if(!v)return;
+  G.name=v;document.getElementById('name-ov').classList.remove('show');
+  setMsg(v+' hatched!','Take good care!');showFX(['🐯','💛','✨']);render();save();
 }
-document.getElementById('name-input').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmName(); });
+document.getElementById('name-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
+function closeCareerOv(){document.getElementById('career-ov').classList.remove('show');}
 
-/* ══════════════════════════
-   CAREER / COLLECTION
-══════════════════════════ */
-function closeCareerOv() { document.getElementById('career-ov').classList.remove('show'); }
-
-function buildColGrid() {
-  const g = document.getElementById('col-grid-sm');
-  g.innerHTML = '';
-  const vis = CareerUniverse.filter(c=>!c.hidden||G.collection.includes(c.id));
-  vis.forEach(c=>{
-    const unlocked = G.collection.includes(c.id);
-    const card = document.createElement('div');
-    card.className = 'col-card-sm'+(unlocked?'':' locked');
-    card.innerHTML = `<div class="cc-emoji">${c.emoji}</div><div class="cc-name">${unlocked?c.nameKo:'???'}</div>`;
-    if (unlocked) card.title = c.desc;
+/* ══════════════════════════════════════════
+   COLLECTION
+══════════════════════════════════════════ */
+function buildColGrid(){
+  const g=document.getElementById('col-grid-sm');g.innerHTML='';
+  CareerUniverse.filter(c=>!c.hidden||G.collection.includes(c.id)).forEach(c=>{
+    const u=G.collection.includes(c.id);
+    const card=document.createElement('div');card.className='col-card-sm'+(u?'':' locked');
+    card.innerHTML=`<div class="cc-emoji">${c.emoji}</div><div class="cc-name">${u?c.nameKo:'???'}</div>`;
+    if(u)card.title=c.desc;
     g.appendChild(card);
   });
 }
 
-/* ══════════════════════════
+/* ══════════════════════════════════════════
    MINI GAME
-══════════════════════════ */
-let mgScore=0, mgLeft=0, mgInt=null, mgSpawn=null;
+══════════════════════════════════════════ */
+let mgScore=0,mgLeft=0,mgInt=null,mgSpawn=null;
 const FOODS=['🍖','🐟','🍗','🍣','🥩','🦴','🐠','🥚','🍱','🧀'];
-
-function startMG() {
-  if (G.energy<10) { setMsg('Too tired!','Rest first'); return; }
-  G.energy=Math.max(0,G.energy-15);
-  G.hunger=Math.max(0,G.hunger-10);
-  mgScore=0; mgLeft=15;
+function startMG(){
+  if(G.energy<10){setMsg('Too tired!','Rest first');return;}
+  G.energy=Math.max(0,G.energy-15);G.hunger=Math.max(0,G.hunger-10);
+  mgScore=0;mgLeft=15;
   document.getElementById('mg-score').textContent='Score: 0';
   document.getElementById('mg-timer').textContent='Time: 15';
   document.getElementById('mg-area').innerHTML='';
   document.getElementById('mg-close').style.display='none';
   document.getElementById('mg-overlay').classList.add('show');
   mgSpawn=setInterval(spawnF,750);
-  mgInt=setInterval(()=>{ mgLeft--; document.getElementById('mg-timer').textContent='Time: '+mgLeft; if(mgLeft<=0)endMG(); },1000);
+  mgInt=setInterval(()=>{mgLeft--;document.getElementById('mg-timer').textContent='Time: '+mgLeft;if(mgLeft<=0)endMG();},1000);
 }
-function spawnF() {
-  const a=document.getElementById('mg-area');
-  const f=document.createElement('div'); f.className='food-item';
-  f.textContent=FOODS[Math.floor(Math.random()*FOODS.length)];
-  f.style.left=(8+Math.random()*255)+'px';
-  f.style.animationDuration=(1.8+Math.random()*1.4)+'s';
-  f.onclick=()=>{ mgScore++; document.getElementById('mg-score').textContent='Score: '+mgScore; Sound.play('catch'); f.remove(); };
-  a.appendChild(f);
-  setTimeout(()=>{ if(f.parentNode)f.remove(); },3500);
+function spawnF(){
+  const a=document.getElementById('mg-area'),f=document.createElement('div');
+  f.className='food-item';f.textContent=FOODS[Math.floor(Math.random()*FOODS.length)];
+  f.style.left=(8+Math.random()*255)+'px';f.style.animationDuration=(1.8+Math.random()*1.4)+'s';
+  f.onclick=()=>{mgScore++;document.getElementById('mg-score').textContent='Score: '+mgScore;Sound.play('catch');f.remove();};
+  a.appendChild(f);setTimeout(()=>{if(f.parentNode)f.remove();},3500);
 }
-function endMG() {
-  clearInterval(mgInt); clearInterval(mgSpawn);
+function endMG(){
+  clearInterval(mgInt);clearInterval(mgSpawn);
   document.getElementById('mg-area').innerHTML='';
   const bonus=Math.min(45,mgScore*3);
-  G.happy=Math.min(100,G.happy+bonus);
-  G.art  =Math.min(100,G.art+mgScore*0.3);
+  G.happy=Math.min(100,G.happy+bonus);G.art=Math.min(100,G.art+mgScore*0.3);
   document.getElementById('mg-score').textContent=`Done! ${mgScore} pts → Happy+${bonus}`;
   document.getElementById('mg-timer').textContent='Game over!';
   document.getElementById('mg-close').style.display='block';
-  Sound.play('happy'); save();
+  Sound.play('happy');save();
 }
-function closeMG() {
-  clearInterval(mgInt); clearInterval(mgSpawn);
-  document.getElementById('mg-overlay').classList.remove('show');
-  render();
-}
+function closeMG(){clearInterval(mgInt);clearInterval(mgSpawn);document.getElementById('mg-overlay').classList.remove('show');render();}
 
-/* ══════════════════════════
+/* ══════════════════════════════════════════
    RESTART
-══════════════════════════ */
-function restartGame() {
-  const {name,soundOn,pw,collection}=G;
-  G=newGame(); G.name=name; G.soundOn=soundOn; G.pw=pw; G.collection=collection;
+══════════════════════════════════════════ */
+function restartGame(){
+  const{name,soundOn,pw,collection}=G;
+  G=newGame();G.name=name;G.soundOn=soundOn;G.pw=pw;G.collection=collection;
+  _prevMood='';_prevStage=-1;
   document.getElementById('gameover-ov').classList.remove('show');
-  render(); save();
+  render();save();
 }
 
-/* ══════════════════════════
-   LONG PRESS TIGER = MINI GAME
-══════════════════════════ */
+/* ══════════════════════════════════════════
+   LONG-PRESS TIGER = MINI GAME
+══════════════════════════════════════════ */
 let lpTimer=null;
-document.getElementById('tiger-wrap').addEventListener('touchstart',()=>{ lpTimer=setTimeout(startMG,600); },{passive:true});
+document.getElementById('tiger-wrap').addEventListener('touchstart',()=>{lpTimer=setTimeout(startMG,600);},{passive:true});
 document.getElementById('tiger-wrap').addEventListener('touchend',()=>clearTimeout(lpTimer),{passive:true});
-document.getElementById('tiger-wrap').addEventListener('mousedown',()=>{ lpTimer=setTimeout(startMG,600); });
+document.getElementById('tiger-wrap').addEventListener('mousedown',()=>{lpTimer=setTimeout(startMG,600);});
 document.getElementById('tiger-wrap').addEventListener('mouseup',()=>clearTimeout(lpTimer));
 
-/* ══════════════════════════
+/* ══════════════════════════════════════════
    INIT
-══════════════════════════ */
+══════════════════════════════════════════ */
 load();
 showView(0);
 render();
+startAnim();
 setMsg(
-  G.stage===0 ? 'Egg is shaking...' : (G.name?`${G.name} says hi!`:'Hello there!'),
-  G.stage===0 ? '' : 'Tap tiger to pet!'
+  G.stage===0?'Egg is shaking...':(G.name?G.name+' says hi!':'Hello there!'),
+  G.stage===0?'':(G.alive?'Tap tiger to pet!':'...')
 );
-ticker = setInterval(tick, 1000);
+ticker=setInterval(tick,1000);
 </script>
 </body>
 </html>
