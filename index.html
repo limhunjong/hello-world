@@ -487,155 +487,216 @@ body{
 /* ══════════════════════════════════════════
    PIXEL ART SYSTEM
 ══════════════════════════════════════════ */
-const PX = 4; // SVG units per "pixel"
+const PX = 4;
 
-// Palette
-const C_O = '#D46010'; // orange body
-const C_D = '#181008'; // dark outline/stripes
-const C_F = '#F2E870'; // face cream
-const C_W = '#FAF0A0'; // belly
-const C_N = '#C83848'; // nose pink
-const C_I = '#E08030'; // inner ear
+// Palette — matches reference Tamagotchi tiger image
+const C_O  = '#E88018'; // bright orange body
+const C_D  = '#2A1408'; // dark brown stripes / outlines
+const C_F  = '#FAF0D0'; // cream face / belly
+const C_W  = '#FAF0D0'; // belly (alias)
+const C_N  = '#E84858'; // pink nose
+const C_I  = '#F4B060'; // inner ear pale orange
+const C_E  = '#2A1408'; // eye dark (same as C_D)
+const C_SH = '#C06010'; // shadow shading
 
-// Draw a pixel-grid rect
 function pr(cx, cy, cw, ch, fill) {
   return `<rect x="${cx*PX}" y="${cy*PX}" width="${cw*PX}" height="${ch*PX}" fill="${fill}"/>`;
 }
 
 /* ──────────────────────────────────────────
-   TIGER PIXEL ART
-   Grid: 14 wide × 22 tall pixels
-   ViewBox: 56×88 SVG units
-
-   Layout (pixel rows, b=0):
-     0-0  : (empty above ears)
-     1-3  : ears
-     3-11 : head  (HY = 3)
-     11-16: body  (BY = 12)
-     17-20: legs  (LY = 17)
-     21   : shadow
+   STANDING TIGER (all moods except sleeping)
+   Grid: 14w × 22h  (ViewBox 56×88)
+   HY=3+b  BY=HY+9  LY=19 (fixed)
 ────────────────────────────────────────── */
 function tigerPixelArt(mood, frame) {
-  // frame 0 = stance A, frame 1 = stance B (bob up 1px, legs swap)
-  const b   = frame === 1 ? -1 : 0; // character bobs up 1 pixel
-  const ll  = frame === 0 ?  0 : 1; // left  leg drops by 1px on frame 1
-  const rl  = frame === 0 ?  1 : 0; // right leg drops by 1px on frame 0
+  if (mood === 'sleeping') return tigerSleepArt(frame);
 
-  const HY  = 3 + b;  // head top row
-  const BY  = 12 + b; // body top row
-  const LY  = 17;     // leg base row (not bobbed)
+  const b  = frame === 1 ? -1 : 0;
+  const ll = frame === 0 ?  0 : 1;
+  const rl = frame === 0 ?  1 : 0;
 
-  // Eye row (3 rows down from head top, into the face cream area)
-  const EY  = HY + 3;
+  const HY  = 3 + b;
+  const EY  = HY - 2;          // ear top row (= 1+b)
+  const BY  = HY + 9;          // body top row (= 12+b)
+  const LY  = 19;
+  const ELY = HY + 4;          // eye row
+  const MZY = HY + 7;          // muzzle top row
 
-  /* ── Eye shapes ── */
-  let eyeL, eyeR;
+  // ── EYE SHAPES ──
+  let eyes = '';
   if (mood === 'happy') {
-    // ^ arcs (upward curve = happy)
-    eyeL = `<path d="M${4*PX},${(EY+2)*PX} Q${5.5*PX},${EY*PX} ${7*PX},${(EY+2)*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
-    eyeR = `<path d="M${8*PX},${(EY+2)*PX} Q${9.5*PX},${EY*PX} ${11*PX},${(EY+2)*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
-  } else if (mood === 'sleeping') {
-    // ∪ arcs (downward curve = closed eyes)
-    eyeL = `<path d="M${4*PX},${EY*PX} Q${5.5*PX},${(EY+2)*PX} ${7*PX},${EY*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
-    eyeR = `<path d="M${8*PX},${EY*PX} Q${9.5*PX},${(EY+2)*PX} ${11*PX},${EY*PX}" stroke="${C_D}" stroke-width="${PX}" fill="none" stroke-linecap="round"/>`;
+    // upward ^ arcs = happy
+    eyes  = `<path d="M${3*PX},${(ELY+2)*PX} Q${5*PX},${ELY*PX} ${7*PX},${(ELY+2)*PX}" stroke="${C_E}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+    eyes += `<path d="M${7*PX},${(ELY+2)*PX} Q${9*PX},${ELY*PX} ${11*PX},${(ELY+2)*PX}" stroke="${C_E}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
   } else if (mood === 'sick') {
     // × cross eyes
-    eyeL = `<line x1="${4*PX}" y1="${EY*PX}" x2="${7*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>
-            <line x1="${7*PX}" y1="${EY*PX}" x2="${4*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>`;
-    eyeR = `<line x1="${8*PX}" y1="${EY*PX}" x2="${11*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>
-            <line x1="${11*PX}" y1="${EY*PX}" x2="${8*PX}" y2="${(EY+2)*PX}" stroke="${C_D}" stroke-width="3" stroke-linecap="round"/>`;
+    eyes  = `<line x1="${3*PX}" y1="${ELY*PX}" x2="${7*PX}" y2="${(ELY+2)*PX}" stroke="${C_E}" stroke-width="2.5" stroke-linecap="round"/>`;
+    eyes += `<line x1="${7*PX}" y1="${ELY*PX}" x2="${3*PX}" y2="${(ELY+2)*PX}" stroke="${C_E}" stroke-width="2.5" stroke-linecap="round"/>`;
+    eyes += `<line x1="${7*PX}" y1="${ELY*PX}" x2="${11*PX}" y2="${(ELY+2)*PX}" stroke="${C_E}" stroke-width="2.5" stroke-linecap="round"/>`;
+    eyes += `<line x1="${11*PX}" y1="${ELY*PX}" x2="${7*PX}" y2="${(ELY+2)*PX}" stroke="${C_E}" stroke-width="2.5" stroke-linecap="round"/>`;
   } else if (mood === 'sad') {
-    // diagonal droopy lines
-    eyeL = pr(4,EY,1,1,C_D)+pr(5,EY+1,1,1,C_D)+pr(6,EY+2,1,1,C_D);
-    eyeR = pr(8,EY+2,1,1,C_D)+pr(9,EY+1,1,1,C_D)+pr(10,EY,1,1,C_D);
+    // droopy U arcs + teardrops
+    eyes  = `<path d="M${3*PX},${ELY*PX} Q${5*PX},${(ELY+2)*PX} ${7*PX},${ELY*PX}" stroke="${C_E}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+    eyes += `<path d="M${7*PX},${ELY*PX} Q${9*PX},${(ELY+2)*PX} ${11*PX},${ELY*PX}" stroke="${C_E}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+    eyes += pr(4, ELY+3, 1, 1, '#80B0E0') + pr(9, ELY+3, 1, 1, '#80B0E0');
+  } else if (mood === 'hungry') {
+    // dot eyes + worried angled brows
+    eyes  = pr(3, ELY, 2, 2, C_E) + pr(9, ELY, 2, 2, C_E);
+    eyes += pr(4, ELY, 1, 1, '#FFF') + pr(10, ELY, 1, 1, '#FFF');
+    eyes += `<line x1="${3*PX}" y1="${(ELY-1)*PX}" x2="${6*PX}" y2="${(ELY-2)*PX}" stroke="${C_E}" stroke-width="1.8" stroke-linecap="round"/>`;
+    eyes += `<line x1="${8*PX}" y1="${(ELY-2)*PX}" x2="${11*PX}" y2="${(ELY-1)*PX}" stroke="${C_E}" stroke-width="1.8" stroke-linecap="round"/>`;
   } else {
-    // idle / hungry: filled rectangle eyes
-    eyeL = pr(4,EY,3,2,C_D);
-    eyeR = pr(8,EY,3,2,C_D);
+    // idle: round dot eyes with shine
+    eyes  = pr(3, ELY, 2, 2, C_E) + pr(9, ELY, 2, 2, C_E);
+    eyes += pr(4, ELY, 1, 1, '#FFF') + pr(10, ELY, 1, 1, '#FFF');
   }
 
-  return `<svg viewBox="0 0 ${14*PX} ${22*PX}" width="52" height="82"
-          xmlns="http://www.w3.org/2000/svg"
-          style="image-rendering:pixelated;image-rendering:crisp-edges">
+  return `<svg viewBox="0 0 56 88" width="52" height="82"
+    xmlns="http://www.w3.org/2000/svg"
+    style="image-rendering:pixelated;image-rendering:crisp-edges">
 
-<!-- ── SHADOW ── -->
-<ellipse cx="${7*PX}" cy="${21.5*PX}" rx="${5*PX}" ry="${0.65*PX}" fill="rgba(0,0,0,0.14)"/>
+<!-- SHADOW -->
+<ellipse cx="28" cy="${21.5*PX}" rx="20" ry="2.8" fill="rgba(0,0,0,0.16)"/>
 
-<!-- ── TAIL (behind body) ── -->
-<path d="M${11*PX},${(BY+5)*PX}
-         C${17*PX},${(BY+2)*PX}
-           ${17*PX},${(HY)*PX}
-           ${12*PX},${(HY-1)*PX}"
+<!-- TAIL (behind body) -->
+<path d="M${11*PX},${(BY+4)*PX} C${18*PX},${(BY+1)*PX} ${18*PX},${HY*PX} ${12*PX},${(HY-1)*PX}"
   stroke="${C_O}" stroke-width="7" fill="none" stroke-linecap="round"/>
-<!-- tail stripe tip -->
-<path d="M${15*PX},${(HY+2)*PX} Q${17*PX},${(HY)*PX} ${14*PX},${(HY-1)*PX}"
+<path d="M${15*PX},${(HY+3)*PX} Q${17*PX},${(HY+1)*PX} ${13*PX},${HY*PX}"
   stroke="${C_D}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>
 
-<!-- ── EARS ── -->
-${pr(1,HY-2,3,3,C_O)}
-${pr(9,HY-2,3,3,C_O)}
-<!-- inner ear -->
-${pr(2,HY-2,1,2,C_I)}
-${pr(10,HY-2,1,2,C_I)}
-<!-- ear outline dark tip -->
-${pr(1,HY-2,1,1,C_D)}
-${pr(12,HY-2,1,1,C_D)}
+<!-- EARS -->
+${pr(1, EY, 3, 3, C_O)}${pr(10, EY, 3, 3, C_O)}
+${pr(2, EY, 1, 2, C_I)}${pr(11, EY, 1, 2, C_I)}
+${pr(1, EY, 1, 1, C_D)}${pr(12, EY, 1, 1, C_D)}
 
-<!-- ── HEAD (12×9 pixels) ── -->
-${pr(1,HY,12,9,C_O)}
+<!-- HEAD (graduated widths for round shape) -->
+${pr(4,   HY,   6, 1, C_O)}
+${pr(3,   HY+1, 8, 1, C_O)}
+${pr(2,   HY+2,10, 1, C_O)}
+${pr(1,   HY+3,12, 5, C_O)}
+${pr(2,   HY+8,10, 1, C_O)}
+${pr(3,   HY+9, 8, 1, C_O)}
 
-<!-- ── HEAD STRIPES ── -->
-${pr(1,HY+1,1,6,C_D)}
-${pr(6,HY,  1,5,C_D)}
-${pr(12,HY+1,1,6,C_D)}
+<!-- HEAD STRIPES (3 vertical from crown) -->
+${pr(4,  HY,   1, 3, C_D)}
+${pr(7,  HY,   1, 3, C_D)}
+${pr(10, HY,   1, 3, C_D)}
 
-<!-- ── FACE (cream, 10×5 pixels) ── -->
-${pr(2,HY+3,10,5,C_F)}
+<!-- MUZZLE (big cream area, lower half of face) -->
+${pr(3, MZY, 8, 3, C_W)}
 
-<!-- ── EYES ── -->
-${eyeL}
-${eyeR}
+<!-- NOSE -->
+${pr(6, MZY, 2, 1, C_N)}
 
-<!-- ── NOSE ── -->
-${pr(5,HY+6,4,1,C_N)}
+<!-- EYES -->
+${eyes}
 
-<!-- ── MOUTH ── -->
-${pr(3,HY+7,2,1,C_D)}
-${pr(9,HY+7,2,1,C_D)}
+<!-- CHEEK BLUSH -->
+<ellipse cx="${2.2*PX}" cy="${(MZY+1.5)*PX}" rx="5" ry="4" fill="${C_N}" opacity="0.28"/>
+<ellipse cx="${11.8*PX}" cy="${(MZY+1.5)*PX}" rx="5" ry="4" fill="${C_N}" opacity="0.28"/>
+${mood==='happy'?`<ellipse cx="${2.2*PX}" cy="${(MZY+1.5)*PX}" rx="5" ry="4" fill="${C_N}" opacity="0.3"/><ellipse cx="${11.8*PX}" cy="${(MZY+1.5)*PX}" rx="5" ry="4" fill="${C_N}" opacity="0.3"/>`:''}
 
-<!-- ── CHEEK BLUSH ── -->
-<ellipse cx="${2.3*PX}" cy="${(HY+6.5)*PX}" rx="${1.3*PX}" ry="${PX}" fill="${C_N}" opacity="0.22"/>
-<ellipse cx="${11.7*PX}" cy="${(HY+6.5)*PX}" rx="${1.3*PX}" ry="${PX}" fill="${C_N}" opacity="0.22"/>
+<!-- WHISKERS -->
+<line x1="2" y1="${(MZY+0.5)*PX}" x2="${2.5*PX}" y2="${(MZY+1.5)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.3"/>
+<line x1="2" y1="${(MZY+2.5)*PX}" x2="${2.5*PX}" y2="${(MZY+2)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.3"/>
+<line x1="${13*PX}" y1="${(MZY+0.5)*PX}" x2="${11.5*PX}" y2="${(MZY+1.5)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.3"/>
+<line x1="${13*PX}" y1="${(MZY+2.5)*PX}" x2="${11.5*PX}" y2="${(MZY+2)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.3"/>
 
-<!-- ── WHISKERS ── -->
-<line x1="2" y1="${(HY+5.5)*PX}" x2="${2.8*PX}" y2="${(HY+6.3)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
-<line x1="2" y1="${(HY+7)*PX}" x2="${2.8*PX}" y2="${(HY+7)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
-<line x1="${11.2*PX}" y1="${(HY+6.3)*PX}" x2="${14*PX}" y2="${(HY+5.5)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
-<line x1="${11.2*PX}" y1="${(HY+7)*PX}" x2="${14*PX}" y2="${(HY+7)*PX}" stroke="${C_D}" stroke-width="1.5" opacity="0.28"/>
+<!-- BODY (graduated widths for round shape) -->
+${pr(4,  BY,   6, 1, C_O)}
+${pr(3,  BY+1, 8, 1, C_O)}
+${pr(2,  BY+2,10, 1, C_O)}
+${pr(1,  BY+3,12, 4, C_O)}
+${pr(2,  BY+7,10, 1, C_O)}
+${pr(3,  BY+8, 8, 1, C_O)}
 
-<!-- ── BODY (12×5 pixels) ── -->
-${pr(1,BY,  12,5,C_O)}
-<!-- body stripes -->
-${pr(1,BY+1, 1,3,C_D)}
-${pr(6,BY,   1,5,C_D)}
-${pr(12,BY+1,1,3,C_D)}
-<!-- belly -->
-${pr(2,BY+1,10,3,C_W)}
+<!-- BODY STRIPES (4 stripes: outer pair + inner pair) -->
+${pr(1,  BY+4, 1, 3, C_D)}
+${pr(3,  BY+1, 1, 4, C_D)}
+${pr(10, BY+1, 1, 4, C_D)}
+${pr(12, BY+4, 1, 3, C_D)}
 
-<!-- ── ARMS (small stubs on body sides) ── -->
-${pr(0,BY+1,1,2,C_O)}
-${pr(13,BY+1,1,2,C_O)}
+<!-- BELLY -->
+${pr(4, BY+2, 6, 5, C_W)}
 
-<!-- ── LEGS ── -->
-<!-- left leg -->
-${pr(2,LY+ll,3,3,C_O)}
-${pr(2,LY+ll,1,3,C_D)}
-<!-- right leg -->
-${pr(9,LY+rl,3,3,C_O)}
-${pr(11,LY+rl,1,3,C_D)}
+<!-- ARM STUBS -->
+${pr(0, BY+3, 1, 3, C_O)}${pr(13, BY+3, 1, 3, C_O)}
+
+<!-- LEGS (alternating walk) -->
+${pr(3, LY+ll, 3, 2, C_O)}${pr(2, LY+ll+1, 5, 1, C_O)}
+${pr(9, LY+rl, 3, 2, C_O)}${pr(8, LY+rl+1, 5, 1, C_O)}
 
 </svg>`;
 }
+
+/* ──────────────────────────────────────────
+   SLEEPING TIGER — lying on belly
+   Matches reference image: wide flat body,
+   head on left, eyes closed, ZZZ above
+────────────────────────────────────────── */
+function tigerSleepArt(frame) {
+  const b = frame === 1 ? 1 : 0;   // gentle breathing bob (down)
+  const Y = 5 + b;                  // base Y offset
+
+  return `<svg viewBox="0 0 56 88" width="52" height="82"
+    xmlns="http://www.w3.org/2000/svg"
+    style="image-rendering:pixelated;image-rendering:crisp-edges">
+
+<!-- SHADOW (wider when lying) -->
+<ellipse cx="28" cy="${21.5*PX}" rx="24" ry="2.5" fill="rgba(0,0,0,0.16)"/>
+
+<!-- TAIL curl (right side) -->
+<path d="M${12*PX},${(Y+5)*PX} C${17*PX},${(Y+3)*PX} ${17*PX},${(Y+0)*PX} ${14*PX},${(Y-1)*PX}"
+  stroke="${C_O}" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path d="M${15*PX},${(Y+3)*PX} Q${17*PX},${(Y+1)*PX} ${15*PX},${(Y-1)*PX}"
+  stroke="${C_D}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+<!-- BODY (wide horizontal oval) -->
+${pr(4,  Y+3, 9, 1, C_O)}
+${pr(3,  Y+4,10, 5, C_O)}
+${pr(4,  Y+9, 9, 1, C_O)}
+
+<!-- BODY STRIPES (diagonal on right/top) -->
+${pr(6,  Y+3, 1, 4, C_D)}
+${pr(9,  Y+4, 1, 4, C_D)}
+${pr(12, Y+4, 1, 3, C_D)}
+
+<!-- BELLY (cream lower area) -->
+${pr(5, Y+7, 7, 2, C_W)}
+
+<!-- HEAD (left side, slightly overlapping body) -->
+${pr(1, Y+1, 2, 2, C_O)}
+${pr(4, Y+1, 2, 2, C_O)}
+${pr(2, Y+1, 1, 1, C_I)}
+${pr(5, Y+1, 1, 1, C_I)}
+
+${pr(1, Y+3, 7, 1, C_O)}
+${pr(0, Y+4, 8, 4, C_O)}
+${pr(1, Y+8, 7, 1, C_O)}
+
+<!-- HEAD STRIPES -->
+${pr(1, Y+3, 1, 3, C_D)}
+${pr(4, Y+3, 1, 3, C_D)}
+
+<!-- EYES (closed crescent) -->
+<path d="M${1*PX},${(Y+6)*PX} Q${3*PX},${(Y+5)*PX} ${5*PX},${(Y+6)*PX}" stroke="${C_E}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+<!-- MUZZLE -->
+${pr(1, Y+7, 6, 2, C_W)}
+${pr(3, Y+7, 2, 1, C_N)}
+
+<!-- FRONT PAWS -->
+${pr(0, Y+9,  5, 2, C_O)}
+${pr(0, Y+10, 5, 1, C_SH)}
+
+<!-- ZZZ text -->
+<text x="${9*PX}" y="${(Y+1)*PX}" font-family="serif" font-size="6" font-weight="bold" font-style="italic" fill="${C_D}" opacity="0.7">z</text>
+<text x="${10*PX}" y="${(Y-0.5)*PX}" font-family="serif" font-size="8" font-weight="bold" font-style="italic" fill="${C_D}" opacity="0.7">z</text>
+<text x="${11*PX}" y="${(Y-2)*PX}" font-family="serif" font-size="10" font-weight="bold" font-style="italic" fill="${C_D}" opacity="0.7">z</text>
+
+</svg>`;
+}
+
 
 /* ──────────────────────────────────────────
    EGG PIXEL ART
@@ -715,13 +776,13 @@ function updateTigerView() {
     startAnim();
   }
 
-  // Sleeping tilt class
+  // Sleeping tilt class — disabled when using lying-down sprite
   const wrap = document.getElementById('tiger-wrap');
-  if (wrap) wrap.classList.toggle('sleeping-tilt', mood === 'sleeping');
+  if (wrap) wrap.classList.remove('sleeping-tilt');
 
-  // ZZZ
+  // ZZZ is now drawn inside the sleeping SVG sprite
   const zzz = document.getElementById('zzz');
-  if (zzz) zzz.style.display = mood === 'sleeping' ? 'block' : 'none';
+  if (zzz) zzz.style.display = 'none';
 }
 
 /* ══════════════════════════════════════════
