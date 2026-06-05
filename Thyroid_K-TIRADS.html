@@ -2114,8 +2114,19 @@ function buildPrevBiopsyCard(bx, i) {
   const mSel = makeDateSel('MM', MONTHS, bx.month, v => { state.prevBiopsies[i].month = v; saveState(); });
   const dSel = makeDateSel('DD', DAYS, bx.day, v => { state.prevBiopsies[i].day = v; saveState(); });
   const tl = document.createElement('span'); tl.style.cssText = 'font-size:13px;color:var(--label2);margin-left:4px;'; tl.textContent = 'Target:';
-  const ti = document.createElement('input'); ti.type = 'text'; ti.placeholder = 'Nodule'; ti.value = bx.target || ''; ti.style.width = '90px';
-  ti.oninput = () => { state.prevBiopsies[i].target = ti.value; saveState(); };
+  // Target: dropdown populated from existing nodules
+  const ti = document.createElement('select');
+  ti.style.cssText = 'font-size:14px;min-width:70px;';
+  const defOpt = document.createElement('option'); defOpt.value = ''; defOpt.textContent = '—'; ti.appendChild(defOpt);
+  ['right','left','isthmus'].forEach(lobe => {
+    (state.nodules[lobe] || []).forEach((nod, ni) => {
+      const lbl = LOBE_LABELS[lobe] + (ni + 1);
+      const opt = document.createElement('option'); opt.value = lbl; opt.textContent = lbl;
+      if ((bx.target || '') === lbl) opt.selected = true;
+      ti.appendChild(opt);
+    });
+  });
+  ti.onchange = () => { state.prevBiopsies[i].target = ti.value; saveState(); };
   [dl, ySel, document.createTextNode(' . '), mSel, document.createTextNode(' . '), dSel, tl, ti].forEach(n => r1.appendChild(n));
   card.appendChild(r1);
 
@@ -2194,6 +2205,7 @@ function renderNoduleCol(lobe) {
   refreshPopupIfOpen(lobe);
   renderDiagramMarkers();
   updateZoneFullState();
+  renderPrevBiopsies(); // keep target dropdown in sync with nodule list
 }
 
 function updateAddBtns() {
