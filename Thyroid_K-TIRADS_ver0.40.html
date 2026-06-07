@@ -538,8 +538,8 @@ input[id^="sizeLeft"] {
 .tirads-none { color: var(--label4); background: transparent; }
 
 /* ===== LYMPH NODE TABLE ===== */
-.ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); }
-table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-sm); }
+.ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); margin-bottom: 12px; }
+table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-base); }
 table.ln-table th, table.ln-table td {
   border-bottom: 0.5px solid rgba(84,84,88,0.3);
   padding: 10px 12px; text-align: center; vertical-align: middle;
@@ -745,17 +745,22 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 .ln-check-label {
   display: flex; align-items: center; justify-content: center; gap: 5px;
   white-space: nowrap; cursor: pointer;
-  padding: 7px 11px; border-radius: 8px;
+  padding: 8px 13px; border-radius: 8px;
   transition: background 0.15s;
-  color: var(--label2); font-size: var(--font-sm); font-weight: 500; letter-spacing: -0.1px;
-  min-height: 40px; text-align: center;
+  color: var(--label2); font-size: var(--font-md); font-weight: 500; letter-spacing: -0.1px;
+  min-height: 42px; text-align: center;
 }
 .ln-section-hdr {
   background: var(--fill4); color: var(--label3);
   font-weight: 700; text-align: left;
   padding: 8px 12px; font-size: var(--font-xs);
-  letter-spacing: 0.5px; text-transform: uppercase;
 }
+.ln-measure-cell { display: flex; flex-direction: column; gap: 3px; }
+.ln-measure-row { display: flex; align-items: center; gap: 3px; }
+.ln-size-input { width: 50px; }
+table.ln-table textarea { width: 100%; }
+table.ln-table td.td-top { vertical-align: top; }
+#tab-content-extra textarea { width: 100%; }
 
 /* ===== NODULE LABEL COLUMN ===== */
 .nodule-label-cell {
@@ -2162,7 +2167,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
                 <label><input type="checkbox" name="postopOperationType" value="totalThyroidectomy" onchange="onPostopOperationChange()"> Total thyroidectomy</label>
                 <label><input type="checkbox" name="postopOperationType" value="isthmusectomy" onchange="onPostopOperationChange()"> Isthmusectomy</label>
                 <label><input type="checkbox" name="postopOperationType" value="other" onchange="onPostopOperationChange()"> Other / Custom</label>
-                <input type="text" id="postopCustomOperationName" placeholder="custom operation" style="width:190px" oninput="state.postop.customOperationName=this.value;saveState();renderPostop();">
+                <input type="text" id="postopCustomOperationName" placeholder="custom operation" oninput="state.postop.customOperationName=this.value;saveState();renderPostop();">
               </div>
               <div class="postop-custom-structures" id="postopCustomStructures">
                 <div class="check-group">
@@ -2247,7 +2252,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
     <table class="data-table">
       <thead><tr><th>Extrathyroidal Lesion</th></tr></thead>
       <tbody>
-        <tr><td><textarea id="extraLesion" rows="8" style="width:100%" oninput="onExtraLesionInput()"></textarea></td></tr>
+        <tr><td><textarea id="extraLesion" rows="8" oninput="onExtraLesionInput()"></textarea></td></tr>
       </tbody>
     </table>
     </div>
@@ -4676,7 +4681,7 @@ function renderLymphTable() {
   const td1L = document.createElement('td'); td1L.className='row-label'; td1L.textContent='Neck Level'; tr1.appendChild(td1L);
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
-    const td = document.createElement('td'); td.style.verticalAlign='top';
+    const td = document.createElement('td'); td.className='td-top';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -4697,8 +4702,8 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td'); td.className='required-cell';
-    const mkInp = (ph, stk, ww) => {
-      const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.style.width=ww||'50px'; i.value=ln[stk]||'';
+    const mkInp = (ph, stk) => {
+      const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.className='ln-size-input'; i.value=ln[stk]||'';
       i.addEventListener('input',()=>{ const cur=getLN(ci); cur[stk]=i.value; setLN(ci,cur); saveState(); });
       return i;
     };
@@ -4707,10 +4712,10 @@ function renderLymphTable() {
       s.addEventListener('change',()=>{ const cur=getLN(ci); cur[stk]=s.value; setLN(ci,cur); saveState(); });
       return s;
     };
-    const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
-    const r1 = document.createElement('div'); r1.style.display='flex';r1.style.alignItems='center';r1.style.gap='3px';
+    const d = document.createElement('div'); d.className='ln-measure-cell';
+    const r1 = document.createElement('div'); r1.className='ln-measure-row';
     r1.append('LD:'); r1.appendChild(mkInp('LD','ldValue')); r1.appendChild(mkSel('ldUnit'));
-    const r2 = document.createElement('div'); r2.style.display='flex';r2.style.alignItems='center';r2.style.gap='3px';
+    const r2 = document.createElement('div'); r2.className='ln-measure-row';
     r2.append('SD:'); r2.appendChild(mkInp('SD','sdValue')); r2.appendChild(mkSel('sdUnit'));
     d.appendChild(r1); d.appendChild(r2);
     td.appendChild(d);
@@ -4724,7 +4729,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
-    const ta = document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=ln.comment||'';
+    const ta = document.createElement('textarea'); ta.rows=2; ta.value=ln.comment||'';
     ta.addEventListener('input',()=>{ const cur=getLN(ci); cur.comment=ta.value; setLN(ci,cur); saveState(); });
     td.appendChild(ta); tr3.appendChild(td);
   }
@@ -4796,7 +4801,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
-    const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
+    const d = document.createElement('div'); d.className='ln-measure-cell';
     const r1 = document.createElement('div'); r1.className='check-group';
 
     const noLbl = document.createElement('label'); noLbl.className='inline-check-label';
@@ -4812,7 +4817,7 @@ function renderLymphTable() {
     d.appendChild(r1);
 
     if (ln.compYes) {
-      const compTxt = document.createElement('input'); compTxt.type='text'; compTxt.placeholder='specify'; compTxt.style.width='100%'; compTxt.value=ln.compText||'';
+      const compTxt = document.createElement('input'); compTxt.type='text'; compTxt.placeholder='specify'; compTxt.value=ln.compText||'';
       compTxt.addEventListener('input',()=>{ const cur=getLN(ci); cur.compText=compTxt.value; setLN(ci,cur); saveState(); });
       d.appendChild(compTxt);
     }
