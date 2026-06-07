@@ -3879,14 +3879,24 @@ function onPostopOperationChange(changedEl) {
   const vals = {};
   allChk.forEach(c => { vals[c.value] = c.checked; });
 
-  // Isthmusectomy is only compatible with right/left lobectomy (alone or combined).
-  // It cannot coexist with totalThyroidectomy or other.
+  // Isthmusectomy is only compatible with right-only or left-only lobectomy.
+  // Cannot coexist with totalThyroidectomy, other, or both right+left lobectomy
+  // (right+left+isthmusectomy = total thyroidectomy).
   const changedVal = changedEl ? changedEl.value : null;
   const ISTHM_INCOMPATIBLE = ['totalThyroidectomy', 'other'];
   if (changedVal === 'isthmusectomy' && vals['isthmusectomy']) {
     ISTHM_INCOMPATIBLE.forEach(v => { vals[v] = false; });
+    // right + left + isthmusectomy = total thyroidectomy → block
+    if (vals['rightLobectomy'] && vals['leftLobectomy']) {
+      vals['isthmusectomy'] = false;
+    }
   } else if (ISTHM_INCOMPATIBLE.includes(changedVal) && vals[changedVal]) {
     vals['isthmusectomy'] = false;
+  } else if ((changedVal === 'rightLobectomy' || changedVal === 'leftLobectomy') && vals[changedVal]) {
+    // adding the second lobectomy while isthmusectomy is on → uncheck isthmusectomy
+    if (vals['isthmusectomy'] && vals['rightLobectomy'] && vals['leftLobectomy']) {
+      vals['isthmusectomy'] = false;
+    }
   }
   allChk.forEach(c => { c.checked = vals[c.value]; });
 
