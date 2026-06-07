@@ -489,7 +489,7 @@ input[id^="sizeLeft"] {
 .nodule-col { flex: 1; min-width: 0; }
 .nodule-col-header {
   background: var(--blue); color: #fff; text-align: center;
-  padding: 11px 14px; font-weight: 700; font-size: 14px;
+  padding: 11px 16px; font-weight: 700; font-size: 14px;
   border-radius: var(--r-lg) var(--r-lg) 0 0; letter-spacing: -0.2px;
 }
 .nodule-item {
@@ -676,7 +676,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 /* ===== DYNAMICALLY-RENDERED CELLS (nodule / LN tables) ===== */
 /* These replace inline style.cssText so CSS variables work in light mode */
 .nodule-data-cell {
-  padding: 9px 12px;
+  padding: 10px 16px;
   border-bottom: 0.5px solid var(--sep);
   background: var(--bg1);
   color: var(--label1);
@@ -689,7 +689,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   color: var(--label3);
   font-weight: 700; text-align: left;
   font-size: var(--font-xs); letter-spacing: 0.45px; text-transform: uppercase;
-  padding: 9px 12px 7px;
+  padding: 10px 16px 8px;
   border-bottom: 0.5px solid var(--sep);
 }
 .nodule-table-el {
@@ -706,7 +706,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 12px 16px;
   gap: 10px;
 }
 .nodule-title-wrap {
@@ -739,7 +739,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   white-space: nowrap;
 }
 .nodule-reset-cell {
-  padding: 10px; text-align: center;
+  padding: 10px 16px; text-align: center;
   border-bottom: none; background: var(--bg1);
 }
 .ln-check-label {
@@ -765,7 +765,7 @@ table.ln-table td.td-top { vertical-align: top; }
 /* ===== NODULE LABEL COLUMN ===== */
 .nodule-label-cell {
   width: 136px; font-weight: 600; font-size: var(--font-sm);
-  padding: 10px 12px; border-bottom: 0.5px solid rgba(84,84,88,0.25);
+  padding: 10px 14px; border-bottom: 0.5px solid rgba(84,84,88,0.25);
   border-right: 0.5px solid rgba(84,84,88,0.2);
   color: var(--label2); white-space: pre-line; vertical-align: middle;
   background: rgba(99, 99, 115, 0.12); line-height: 1.35;
@@ -788,7 +788,10 @@ table.ln-table td.td-top { vertical-align: top; }
   table.data-table th { padding: 10px 10px; font-size: var(--font-sm); }
   .nodule-section { flex-direction: column; }
   .nodule-col { width: 100%; }
-  .nodule-label-cell { width: 108px !important; font-size: var(--font-sm) !important; padding: 10px 8px !important; }
+  .nodule-label-cell { width: 108px !important; font-size: var(--font-sm) !important; padding: 10px 10px !important; }
+  .nodule-data-cell { padding: 10px 10px; }
+  .nodule-header-inner { padding: 12px 12px; }
+  .nodule-section-hdr { padding: 10px 10px 8px; }
   .nodule-section-title { font-size: var(--font-md); padding: 10px 14px; }
   .radio-group { width: fit-content; max-width: 100%; }
   .radio-group label { flex: 0 0 auto; min-width: 96px; }
@@ -1211,7 +1214,10 @@ body.light #right-panel.sheet-open #live-preview-pane {
 
   .nodule-section { flex-direction: column; }
   .nodule-col { width: 100%; }
-  .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 8px !important; }
+  .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 10px !important; }
+  .nodule-data-cell { padding: 10px 10px; }
+  .nodule-header-inner { padding: 12px 12px; }
+  .nodule-section-hdr { padding: 10px 10px 8px; }
   .nodule-section-title { font-size: 14px; padding: 10px 14px; }
 
   .radio-group { width: 100%; }
