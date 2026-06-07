@@ -2168,11 +2168,11 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
             <td class="label-cell required">Operation Type</td>
             <td>
               <div class="radio-group" id="postopOperationTypeGroup">
-                <label><input type="checkbox" name="postopOperationType" value="rightLobectomy" onchange="onPostopOperationChange()"> Right lobectomy</label>
-                <label><input type="checkbox" name="postopOperationType" value="leftLobectomy" onchange="onPostopOperationChange()"> Left lobectomy</label>
-                <label><input type="checkbox" name="postopOperationType" value="totalThyroidectomy" onchange="onPostopOperationChange()"> Total thyroidectomy</label>
-                <label><input type="checkbox" name="postopOperationType" value="isthmusectomy" onchange="onPostopOperationChange()"> Isthmusectomy</label>
-                <label><input type="checkbox" name="postopOperationType" value="other" onchange="onPostopOperationChange()"> Other / Custom</label>
+                <label><input type="checkbox" name="postopOperationType" value="rightLobectomy" onchange="onPostopOperationChange(this)"> Right lobectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="leftLobectomy" onchange="onPostopOperationChange(this)"> Left lobectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="totalThyroidectomy" onchange="onPostopOperationChange(this)"> Total thyroidectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="isthmusectomy" onchange="onPostopOperationChange(this)"> Isthmusectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="other" onchange="onPostopOperationChange(this)"> Other / Custom</label>
                 <input type="text" id="postopCustomOperationName" placeholder="custom operation" oninput="state.postop.customOperationName=this.value;saveState();renderPostop();">
               </div>
               <div class="postop-custom-structures" id="postopCustomStructures">
@@ -3874,9 +3874,24 @@ function getPostopLabelFor(kind, key) {
   }
   return key;
 }
-function onPostopOperationChange() {
+function onPostopOperationChange(changedEl) {
+  const allChk = [...document.querySelectorAll('input[name="postopOperationType"]')];
+  const vals = {};
+  allChk.forEach(c => { vals[c.value] = c.checked; });
+
+  // Isthmusectomy is only compatible with right/left lobectomy (alone or combined).
+  // It cannot coexist with totalThyroidectomy or other.
+  const changedVal = changedEl ? changedEl.value : null;
+  const ISTHM_INCOMPATIBLE = ['totalThyroidectomy', 'other'];
+  if (changedVal === 'isthmusectomy' && vals['isthmusectomy']) {
+    ISTHM_INCOMPATIBLE.forEach(v => { vals[v] = false; });
+  } else if (ISTHM_INCOMPATIBLE.includes(changedVal) && vals[changedVal]) {
+    vals['isthmusectomy'] = false;
+  }
+  allChk.forEach(c => { c.checked = vals[c.value]; });
+
+  const checked = allChk.filter(c => c.checked).map(c => c.value);
   const po = ensurePostopState();
-  const checked = [...document.querySelectorAll('input[name="postopOperationType"]:checked')].map(c => c.value);
   po.operationTypes = checked;
   po.operationType = checked.find(v => v !== 'isthmusectomy' && v !== 'other') || checked[0] || '';
   po.withIsthmusectomy = checked.includes('isthmusectomy') && checked.some(v => ['rightLobectomy','leftLobectomy'].includes(v));
