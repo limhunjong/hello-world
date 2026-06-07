@@ -1973,11 +1973,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     <!-- Section A: Clinical Information -->
     <div class="table-card">
     <table class="data-table" id="clinicalTable">
+      <colgroup><col style="width:124px"><col></colgroup>
       <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
       <tbody>
         <tr>
           <td class="label-cell">Clinical Indication</td>
-          <td style="width:100%">
+          <td>
             <div class="radio-group" style="display:inline-flex;margin-bottom:6px;"><label><input type="checkbox" id="clinIndDefault" onchange="state.clinIndDefault=this.checked;saveState()" checked> Thyroid nodule</label></div>
             <textarea id="clinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';state.clinIndText=this.value;saveState()"></textarea>
           </td>
@@ -2453,7 +2454,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.54';
+const APP_VERSION = 'ver0.55';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
