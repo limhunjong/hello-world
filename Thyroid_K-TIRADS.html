@@ -114,17 +114,60 @@ label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   -webkit-backdrop-filter: saturate(180%) blur(40px);
   border-bottom: 0.5px solid rgba(84,84,88,0.4);
   display: flex; align-items: center;
-  padding: 0 16px; height: 52px; gap: 0;
+  padding: 0 12px; height: 52px; gap: 4px;
 }
-.tab-btn {
-  padding: 0 14px; height: 52px; background: none; border: none;
-  border-bottom: 2px solid transparent; cursor: pointer;
-  font-size: 13px; font-weight: 500; color: var(--label3);
+/* Thyroid / Postop segmented mode selector */
+.mode-seg {
+  display: inline-flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  align-items: center;
+  flex-shrink: 0;
+}
+body.light .mode-seg { background: rgba(0,0,0,0.06); }
+.mode-btn {
+  padding: 0 15px; height: 36px;
+  background: transparent; border: none;
+  border-radius: 8px; cursor: pointer;
+  font-size: 14px; font-weight: 600;
+  color: rgba(235,235,245,0.5);
+  letter-spacing: -0.2px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  font-family: inherit; white-space: nowrap;
+}
+body.light .mode-btn { color: var(--label3); }
+.mode-btn.active {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(10,132,255,0.45);
+}
+/* Separator between mode-seg and section nav */
+.nav-sep {
+  width: 0.5px; height: 22px;
+  background: rgba(84,84,88,0.45);
+  margin: 0 4px; flex-shrink: 0;
+}
+/* Cervical LN / Extrathyroidal section nav buttons */
+.sec-nav-btn {
+  padding: 0 11px; height: 52px;
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 12px; font-weight: 500;
+  color: rgba(235,235,245,0.35);
   letter-spacing: -0.1px;
-  transition: color 0.2s; font-family: inherit;
+  transition: color 0.18s, border-color 0.18s;
+  font-family: inherit; white-space: nowrap;
 }
-.tab-btn:active { opacity: 0.55; }
-.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+body.light .sec-nav-btn { color: var(--label4); }
+.sec-nav-btn.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+  font-weight: 600;
+}
+.sec-nav-btn:active { opacity: 0.6; }
 .top-spacer { flex: 1; }
 .report-btn {
   background: #FFFFFF; color: var(--blue); border: 0.5px solid rgba(0,0,0,0.08);
@@ -775,7 +818,8 @@ table.ln-table td.td-top { vertical-align: top; }
 /* ===== MOBILE ===== */
 @media (max-width: 680px) {
   #top-bar { height: auto; padding: 0 10px 8px; flex-wrap: wrap; gap: 0; }
-  .tab-btn { flex: 1; height: 44px; padding: 0 6px; font-size: 12px; border-bottom-width: 2px; min-width: 0; letter-spacing: -0.2px; }
+  .mode-btn { padding: 0 12px; height: 34px; font-size: 13px; }
+  .sec-nav-btn { padding: 0 9px; font-size: 11px; }
   .top-spacer { flex-basis: 100%; height: 0; flex-shrink: 0; }
   .report-btn { flex: 1; margin: 6px 6px 0 0; padding: 10px 10px; font-size: var(--font-md); }
   .reset-all-btn { flex-shrink: 0; margin: 6px 0 0; padding: 10px 14px; font-size: var(--font-md); }
@@ -819,7 +863,8 @@ table.ln-table td.td-top { vertical-align: top; }
   }
 }
 @media (max-width: 390px) {
-  .tab-btn { font-size: 10px; }
+  .mode-btn { font-size: 12px; padding: 0 10px; }
+  .sec-nav-btn { font-size: 10px; padding: 0 7px; }
   table.data-table td.label-cell { width: 76px !important; }
   .nodule-label-cell { width: 84px !important; }
 }
@@ -1196,7 +1241,8 @@ body.light #right-panel.sheet-open #live-preview-pane {
     padding: env(safe-area-inset-top, 0px) max(10px, env(safe-area-inset-right, 10px)) 8px max(10px, env(safe-area-inset-left, 10px));
     flex-wrap: wrap; gap: 0;
   }
-  .tab-btn { flex: 1; height: 44px; padding: 0 6px; font-size: 12px; border-bottom-width: 2px; min-width: 0; letter-spacing: -0.2px; }
+  .mode-btn { padding: 0 13px; height: 34px; font-size: 13px; }
+  .sec-nav-btn { padding: 0 10px; font-size: 11px; }
   .top-spacer { flex-basis: 100%; height: 0; flex-shrink: 0; }
   .report-btn { flex: 1; margin: 6px 6px 0 0; padding: 10px 10px; font-size: 14px; min-height: 46px; }
   .reset-all-btn { flex-shrink: 0; margin: 6px 0 0; padding: 10px 14px; font-size: 14px; }
@@ -1253,7 +1299,8 @@ body.light #right-panel.sheet-open #live-preview-pane {
 
 /* ===== MOBILE STANDARD (< 430px) ===== */
 @media (max-width: 429px) {
-  .tab-btn { font-size: 11px; }
+  .mode-btn { font-size: 12px; padding: 0 11px; }
+  .sec-nav-btn { font-size: 11px; padding: 0 8px; }
   table.data-table td.label-cell { width: 82px !important; }
   .nodule-label-cell { width: 90px !important; }
 }
@@ -1302,7 +1349,8 @@ body.light #right-panel.sheet-open #live-preview-pane {
   }
   /* Suppress the line-break spacer used in portrait mobile wrap */
   #top-bar .top-spacer { flex: 1; flex-basis: auto !important; height: 0; }
-  .tab-btn { height: 40px; font-size: 11px; padding: 0 8px; border-bottom-width: 2px; }
+  .mode-btn { height: 30px; font-size: 12px; padding: 0 11px; }
+  .sec-nav-btn { height: 40px; font-size: 11px; padding: 0 8px; }
   .report-btn { margin: 0 0 0 6px; padding: 0 14px; height: 30px; font-size: 13px; min-height: 30px; border-radius: 15px; }
   .reset-all-btn { padding: 0 10px; height: 30px; font-size: 13px; }
   .theme-toggle-btn { width: 28px; height: 28px; margin-left: 4px; }
@@ -1934,10 +1982,13 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
 
 <!-- TOP BAR -->
 <div id="top-bar">
-  <button class="tab-btn active" onclick="switchTab(&#39;thyroid&#39;)" id="tab-thyroid">Thyroid</button>
-  <button class="tab-btn" onclick="switchTab(&#39;postop&#39;)" id="tab-postop">Postop</button>
-  <button class="tab-btn" onclick="switchTab(&#39;lymph&#39;)" id="tab-lymph">Cervical Lymph Node</button>
-  <button class="tab-btn" onclick="switchTab(&#39;extra&#39;)" id="tab-extra">Extrathyroidal Lesion</button>
+  <div class="mode-seg" role="group" aria-label="Mode">
+    <button class="mode-btn active" onclick="selectMode(&#39;thyroid&#39;)" id="tab-thyroid">Thyroid</button>
+    <button class="mode-btn" onclick="selectMode(&#39;postop&#39;)" id="tab-postop">Postop</button>
+  </div>
+  <div class="nav-sep"></div>
+  <button class="sec-nav-btn" onclick="switchTab(&#39;lymph&#39;)" id="tab-lymph">Cervical LN</button>
+  <button class="sec-nav-btn" onclick="switchTab(&#39;extra&#39;)" id="tab-extra">Extrathyroidal</button>
   <div class="top-spacer"></div>
   <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
@@ -2412,6 +2463,7 @@ function hasValue(v) { return v !== null && v !== undefined && String(v).trim() 
 // ==================== STATE ====================
 const defaultState = {
   activeTab: 'thyroid',
+  reportMode: 'thyroid',
   normalThyroid: false,
   clinInd: 'Thyroid nodule',
   clinIndCustom: '',
@@ -2578,6 +2630,12 @@ function deepMerge(target, source) {
 }
 
 // ==================== TAB SWITCHING ====================
+function selectMode(mode) {
+  // mode = 'thyroid' | 'postop': sets report mode AND navigates to that tab
+  state.reportMode = mode;
+  switchTab(mode);
+}
+
 function switchTab(tab) {
   const changed = state.activeTab !== tab;
   state.activeTab = tab;
@@ -2586,12 +2644,21 @@ function switchTab(tab) {
     if (typeof closeNodulePopup === 'function') closeNodulePopup();
     if (typeof closePostopPopup === 'function') closePostopPopup();
   }
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  const tabBtn = document.getElementById('tab-' + tab);
   const tabContent = document.getElementById('tab-content-' + tab);
-  if (tabBtn) tabBtn.classList.add('active');
   if (tabContent) tabContent.classList.add('active');
+
+  // Mode buttons (Thyroid/Postop): highlight based on reportMode, not activeTab
+  const rm = state.reportMode || 'thyroid';
+  ['thyroid','postop'].forEach(m => {
+    const btn = document.getElementById('tab-' + m);
+    if (btn) btn.classList.toggle('active', rm === m);
+  });
+  // Section nav buttons (LN/Extra): highlight when that tab is active
+  ['lymph','extra'].forEach(s => {
+    const btn = document.getElementById('tab-' + s);
+    if (btn) btn.classList.toggle('active', tab === s);
+  });
 }
 
 // ==================== RENDER ====================
@@ -4922,142 +4989,142 @@ function buildReportText() {
     lines.push('Comparison: not available');
   }
 
-  // Previous biopsy — collected from per-nodule biopsy history
-  const prevBxLines = [];
-  ['right','isthmus','left'].forEach(lobe => {
-    (state.nodules[lobe] || []).forEach((nod, idx) => {
-      const label = LOBE_LABELS[lobe] + (idx+1);
-      const tgt = ' (target: ' + label + ')';
-      (nod.prevBiopsies || []).forEach(prevBx => {
-        const dateParts = [prevBx.year, prevBx.month, prevBx.day].filter(v=>v);
-        const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
-        if (prevBx.fna && prevBx.fnaPathDx && prevBx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + prevBx.fnaPathDx.trim() + '.');
-        if (prevBx.cnb && prevBx.cnbPathDx && prevBx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + prevBx.cnbPathDx.trim() + '.');
+  const reportMode = state.reportMode || 'thyroid';
+
+  // Previous biopsy (thyroid mode only)
+  if (reportMode === 'thyroid') {
+    const prevBxLines = [];
+    ['right','isthmus','left'].forEach(lobe => {
+      (state.nodules[lobe] || []).forEach((nod, idx) => {
+        const label = LOBE_LABELS[lobe] + (idx+1);
+        const tgt = ' (target: ' + label + ')';
+        (nod.prevBiopsies || []).forEach(prevBx => {
+          const dateParts = [prevBx.year, prevBx.month, prevBx.day].filter(v=>v);
+          const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
+          if (prevBx.fna && prevBx.fnaPathDx && prevBx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + prevBx.fnaPathDx.trim() + '.');
+          if (prevBx.cnb && prevBx.cnbPathDx && prevBx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + prevBx.cnbPathDx.trim() + '.');
+        });
+        if ((!nod.prevBiopsies || nod.prevBiopsies.length === 0) && nod.biopsyDone) {
+          const dateParts = [nod.biopsyYear, nod.biopsyMonth, nod.biopsyDay].filter(v=>v);
+          const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
+          if (nod.biopsyFNA && nod.fnaPathDx && nod.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + nod.fnaPathDx.trim() + '.');
+          if (nod.biopsyCNB && nod.cnbPathDx && nod.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + nod.cnbPathDx.trim() + '.');
+        }
       });
-      // Backward compatibility for old ver0.1 nodule-level pathology fields not yet migrated in memory.
-      if ((!nod.prevBiopsies || nod.prevBiopsies.length === 0) && nod.biopsyDone) {
-        const dateParts = [nod.biopsyYear, nod.biopsyMonth, nod.biopsyDay].filter(v=>v);
-        const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
-        if (nod.biopsyFNA && nod.fnaPathDx && nod.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + nod.fnaPathDx.trim() + '.');
-        if (nod.biopsyCNB && nod.cnbPathDx && nod.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + nod.cnbPathDx.trim() + '.');
-      }
     });
-  });
-  // Legacy: also include old global prevBiopsies entries (backward compatibility)
-  (state.prevBiopsies || []).forEach(bx => {
-    const tgt = bx.target && bx.target.trim() ? ' (target: ' + bx.target.trim() + ')' : '';
-    const dateParts = [bx.year, bx.month, bx.day].filter(v=>v);
-    const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
-    if (bx.fna && bx.fnaPathDx && bx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + bx.fnaPathDx.trim() + '.');
-    if (bx.cnb && bx.cnbPathDx && bx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + bx.cnbPathDx.trim() + '.');
-  });
-  if (prevBxLines.length > 0) lines.push(prevBxLines.join('\n'));
+    (state.prevBiopsies || []).forEach(bx => {
+      const tgt = bx.target && bx.target.trim() ? ' (target: ' + bx.target.trim() + ')' : '';
+      const dateParts = [bx.year, bx.month, bx.day].filter(v=>v);
+      const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
+      if (bx.fna && bx.fnaPathDx && bx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + bx.fnaPathDx.trim() + '.');
+      if (bx.cnb && bx.cnbPathDx && bx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + bx.cnbPathDx.trim() + '.');
+    });
+    if (prevBxLines.length > 0) lines.push(prevBxLines.join('\n'));
+  }
 
   lines.push('');
   lines.push('Findings:');
-
   let findingNum = 1;
 
-  // 1. Thyroid parenchyma
-  lines.push(findingNum++ + '. Thyroid parenchyma');
-  if (state.normalThyroid) {
-    lines.push('   Normal thyroid');
-  } else {
-    const parLines = [];
-    const szParts = [];
-    if (state.thySize !== 'Normal') szParts.push(state.thySize + ' thyroid');
-    if (szParts.length > 0) parLines.push(szParts.join(', '));
-    if (state.diffuseDis) {
-      let parDesc = 'Diffuse thyroid disease';
-      if (state.echotexture) parDesc += ', ' + state.echotexture + 'geneous echotexture';
-      if (state.parVasc) parDesc += ', ' + state.parVasc.toLowerCase() + ' vascularity';
-      parLines.push(parDesc);
-    }
-    if (state.multinodular) parLines.push('Multinodular goiter');
-    if (parLines.length === 0) parLines.push('No diffuse thyroid disease');
-    parLines.forEach(l => lines.push('   ' + l));
-  }
-
-  // 2. Thyroid nodule
+  // ---- THYROID MODE ----
   const allNodules = [];
-  ['right','isthmus','left'].forEach(lobe => {
-    (state.nodules[lobe]||[]).forEach((nod,idx) => { allNodules.push({lobe,idx,nod}); });
-  });
-
-  if (allNodules.length > 0) {
-    lines.push(findingNum++ + '. Thyroid nodule');
+  if (reportMode === 'thyroid') {
+    lines.push(findingNum++ + '. Thyroid parenchyma');
+    if (state.normalThyroid) {
+      lines.push('   Normal thyroid');
+    } else {
+      const parLines = [];
+      if (state.thySize !== 'Normal') parLines.push(state.thySize + ' thyroid');
+      if (state.diffuseDis) {
+        let parDesc = 'Diffuse thyroid disease';
+        if (state.echotexture) parDesc += ', ' + state.echotexture + 'geneous echotexture';
+        if (state.parVasc) parDesc += ', ' + state.parVasc.toLowerCase() + ' vascularity';
+        parLines.push(parDesc);
+      }
+      if (state.multinodular) parLines.push('Multinodular goiter');
+      if (parLines.length === 0) parLines.push('No diffuse thyroid disease');
+      parLines.forEach(l => lines.push('   ' + l));
+    }
 
     ['right','isthmus','left'].forEach(lobe => {
-      const nods = state.nodules[lobe] || [];
-      if (nods.length === 0) return;
-      const lobeName = lobe === 'right' ? '1) Right lobe' : lobe === 'isthmus' ? '2) Isthmus' : '3) Left lobe';
-      lines.push('   ' + lobeName);
-      nods.forEach((nod, idx) => {
-        const label = LOBE_LABELS[lobe] + (idx+1);
-        const parts = [];
-        const locText = getLocationText(nod, lobe);
-        if (locText) parts.push(locText);
-        const ms = calcMaxSize(nod);
-        if (nod.diamAP || nod.diamT || nod.diamL) {
-          const dimStr = [nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×') + ' ' + (nod.diamUnit||'cm');
-          parts.push(dimStr);
-        }
-        if (nod.composition) parts.push(nod.composition);
-        if (nod.echogenicity) parts.push(nod.echogenicity);
-        if (nod.orientation === 'Nonparallel (taller-than-wide)') parts.push('nonparallel');
-        if (nod.margin === 'Irregular (spiculated/microlobulated)') parts.push('irregular margin');
-        if (nod.calcification_micro) parts.push('PEF/microcalcification');
-        if (nod.calcification_rim) parts.push('rim calcification');
-        if (nod.calcification_macro) parts.push('macrocalcification');
-        if (nod.calcification_entire) parts.push('macrocalcification (entirely calcified)');
-        if (nod.spongiform === 'Yes') parts.push('spongiform');
-        if (nod.cometTailArtifact === 'Yes') parts.push('comet tail artifact');
-        if (nod.diffuseLesion === 'extensive') parts.push('extensive parenchymal PEF');
-        if (nod.diffuseLesion === 'infiltrative') parts.push('diffuse infiltrative lesion');
-        if (nod.eteType && nod.eteType !== 'none') {
-          if (nod.eteType === 'minor') {
-            let eteStr = 'minor ETE';
-            const dirs = [];
-            if (nod.eteMinorAnt) dirs.push('ant');
-            if (nod.eteMinorPost) dirs.push('post');
-            if (dirs.length) eteStr += ' (' + dirs.join(', ') + ')';
-            parts.push(eteStr);
-          } else if (nod.eteType === 'gross') {
-            let eteStr = 'gross ETE';
-            const sites = [];
-            if (nod.eteGrossTrachea) sites.push('trachea');
-            if (nod.eteGrossRLN) sites.push('RLN');
-            if (nod.eteGrossStrap) sites.push('strap muscle');
-            if (nod.eteGrossOthers) sites.push(nod.eteGrossOthersText||'others');
-            if (sites.length) eteStr += ' (' + sites.join(', ') + ')';
-            parts.push(eteStr);
-          }
-        }
-        if (nod.sizeChangeInitial) parts.push('initial');
-        else if (nod.sizeChangeFU && nod.sizeChangeType) parts.push(nod.sizeChangeType.toLowerCase());
-        const tirads = getKTIRADS(nod, state.normalThyroid);
-        if (tirads) parts.push(tirads);
-        lines.push('      ' + label + ': ' + parts.join(', '));
-        if (nod.comment) lines.push('      Comment: ' + nod.comment);
-      });
+      (state.nodules[lobe]||[]).forEach((nod,idx) => { allNodules.push({lobe,idx,nod}); });
     });
+
+    if (allNodules.length > 0) {
+      lines.push(findingNum++ + '. Thyroid nodule');
+      ['right','isthmus','left'].forEach(lobe => {
+        const nods = state.nodules[lobe] || [];
+        if (nods.length === 0) return;
+        const lobeName = lobe === 'right' ? '1) Right lobe' : lobe === 'isthmus' ? '2) Isthmus' : '3) Left lobe';
+        lines.push('   ' + lobeName);
+        nods.forEach((nod, idx) => {
+          const label = LOBE_LABELS[lobe] + (idx+1);
+          const parts = [];
+          const locText = getLocationText(nod, lobe);
+          if (locText) parts.push(locText);
+          if (nod.diamAP || nod.diamT || nod.diamL) {
+            const dimStr = [nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×') + ' ' + (nod.diamUnit||'cm');
+            parts.push(dimStr);
+          }
+          if (nod.composition) parts.push(nod.composition);
+          if (nod.echogenicity) parts.push(nod.echogenicity);
+          if (nod.orientation === 'Nonparallel (taller-than-wide)') parts.push('nonparallel');
+          if (nod.margin === 'Irregular (spiculated/microlobulated)') parts.push('irregular margin');
+          if (nod.calcification_micro) parts.push('PEF/microcalcification');
+          if (nod.calcification_rim) parts.push('rim calcification');
+          if (nod.calcification_macro) parts.push('macrocalcification');
+          if (nod.calcification_entire) parts.push('macrocalcification (entirely calcified)');
+          if (nod.spongiform === 'Yes') parts.push('spongiform');
+          if (nod.cometTailArtifact === 'Yes') parts.push('comet tail artifact');
+          if (nod.diffuseLesion === 'extensive') parts.push('extensive parenchymal PEF');
+          if (nod.diffuseLesion === 'infiltrative') parts.push('diffuse infiltrative lesion');
+          if (nod.eteType && nod.eteType !== 'none') {
+            if (nod.eteType === 'minor') {
+              let eteStr = 'minor ETE';
+              const dirs = [];
+              if (nod.eteMinorAnt) dirs.push('ant');
+              if (nod.eteMinorPost) dirs.push('post');
+              if (dirs.length) eteStr += ' (' + dirs.join(', ') + ')';
+              parts.push(eteStr);
+            } else if (nod.eteType === 'gross') {
+              let eteStr = 'gross ETE';
+              const sites = [];
+              if (nod.eteGrossTrachea) sites.push('trachea');
+              if (nod.eteGrossRLN) sites.push('RLN');
+              if (nod.eteGrossStrap) sites.push('strap muscle');
+              if (nod.eteGrossOthers) sites.push(nod.eteGrossOthersText||'others');
+              if (sites.length) eteStr += ' (' + sites.join(', ') + ')';
+              parts.push(eteStr);
+            }
+          }
+          if (nod.sizeChangeInitial) parts.push('initial');
+          else if (nod.sizeChangeFU && nod.sizeChangeType) parts.push(nod.sizeChangeType.toLowerCase());
+          const tirads = getKTIRADS(nod, state.normalThyroid);
+          if (tirads) parts.push(tirads);
+          lines.push('      ' + label + ': ' + parts.join(', '));
+          if (nod.comment) lines.push('      Comment: ' + nod.comment);
+        });
+      });
+    }
   }
 
-  // Postop
-  const postopLines = buildPostopFindingLines();
-  if (postopLines.length > 0) {
-    lines.push(findingNum++ + '. Postoperative thyroid bed');
-    postopLines.forEach(l => lines.push('   ' + l));
+  // ---- POSTOP MODE ----
+  if (reportMode === 'postop') {
+    const postopLines = buildPostopFindingLines();
+    if (postopLines.length > 0) {
+      lines.push(findingNum++ + '. Postoperative thyroid bed');
+      postopLines.forEach(l => lines.push('   ' + l));
+    }
   }
 
-  // Cervical lymph node
+  // Cervical lymph node (always)
   const lnLines = buildLNFindingLines();
   if (lnLines.length > 0) {
     lines.push(findingNum++ + '. Cervical lymph node');
     lnLines.forEach(l => lines.push('   ' + l));
   }
 
-  // Extrathyroidal lesion
+  // Extrathyroidal lesion (always)
   if (state.extraLesion && state.extraLesion.trim()) {
     lines.push(findingNum++ + '. Extrathyroidal lesion');
     lines.push('   ' + state.extraLesion.trim());
@@ -5068,56 +5135,55 @@ function buildReportText() {
   lines.push('Conclusion:');
   let concNum = 1;
 
-  // Thyroid parenchyma conclusion
-  if (state.normalThyroid) {
-    lines.push(concNum++ + '. Normal thyroid');
-  } else if (state.diffuseDis) {
-    lines.push(concNum++ + '. Diffuse thyroid disease');
+  // ---- THYROID MODE conclusion ----
+  if (reportMode === 'thyroid') {
+    if (state.normalThyroid) {
+      lines.push(concNum++ + '. Normal thyroid');
+    } else if (state.diffuseDis) {
+      lines.push(concNum++ + '. Diffuse thyroid disease');
+    }
+
+    if (allNodules.length > 0) {
+      const tiradsOrder = { '[K-TIRADS 5, High suspicion]': 5, '[K-TIRADS 4, Intermediate suspicion]': 4, '[K-TIRADS 3, Low suspicion]': 3, '[K-TIRADS 2, Benign]': 2, '': 0 };
+      const sorted = [...allNodules].sort((a, b) => {
+        const ta = tiradsOrder[getKTIRADS(a.nod, state.normalThyroid)] || 0;
+        const tb = tiradsOrder[getKTIRADS(b.nod, state.normalThyroid)] || 0;
+        if (tb !== ta) return tb - ta;
+        return (calcMaxSizeCm(b.nod)||0) - (calcMaxSizeCm(a.nod)||0);
+      });
+      lines.push(concNum++ + '. Thyroid nodule');
+      let nodNum = 1;
+      sorted.forEach(({lobe, idx, nod}) => {
+        const label = LOBE_LABELS[lobe] + (idx+1);
+        const tirads = getKTIRADS(nod, state.normalThyroid);
+        const ms = calcMaxSize(nod);
+        const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
+        let line = nodNum++ + ') ' + label;
+        const locT = getLocationText(nod, lobe); if (locT) line += ', ' + locT;
+        if (msStr) line += ', ' + msStr;
+        if (tirads) line += ', ' + tirads;
+        if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
+        lines.push('   ' + line);
+      });
+    }
   }
 
-  // Nodule conclusions (sorted by K-TIRADS desc, size desc)
-  const tiradsOrder = { '[K-TIRADS 5, High suspicion]': 5, '[K-TIRADS 4, Intermediate suspicion]': 4, '[K-TIRADS 3, Low suspicion]': 3, '[K-TIRADS 2, Benign]': 2, '': 0 };
-
-  if (allNodules.length > 0) {
-    const sorted = [...allNodules].sort((a, b) => {
-      const ta = tiradsOrder[getKTIRADS(a.nod, state.normalThyroid)] || 0;
-      const tb = tiradsOrder[getKTIRADS(b.nod, state.normalThyroid)] || 0;
-      if (tb !== ta) return tb - ta;
-      const sa = (state.nodules[a.lobe]?.[a.idx] ? calcMaxSizeCm(a.nod) : 0);
-      const sb = (state.nodules[b.lobe]?.[b.idx] ? calcMaxSizeCm(b.nod) : 0);
-      return sb - sa;
-    });
-
-    lines.push(concNum++ + '. Thyroid nodule');
-    let nodNum = 1;
-    sorted.forEach(({lobe, idx, nod}) => {
-      const label = LOBE_LABELS[lobe] + (idx+1);
-      const tirads = getKTIRADS(nod, state.normalThyroid);
-      const ms = calcMaxSize(nod);
-      const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
-      let line = nodNum++ + ') ' + label;
-      const locT = getLocationText(nod, lobe); if (locT) line += ', ' + locT;
-      if (msStr) line += ', ' + msStr;
-      if (tirads) line += ', ' + tirads;
-      if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
-      lines.push('   ' + line);
-    });
+  // ---- POSTOP MODE conclusion ----
+  if (reportMode === 'postop') {
+    const postopConc = buildPostopConclusionLines();
+    if (postopConc.length > 0) {
+      lines.push(concNum++ + '. Postoperative thyroid bed');
+      postopConc.forEach(l => lines.push('   ' + l));
+    }
   }
 
-  // Postop conclusion
-  const postopConc = buildPostopConclusionLines();
-  if (postopConc.length > 0) {
-    lines.push(concNum++ + '. Postoperative thyroid bed');
-    postopConc.forEach(l => lines.push('   ' + l));
-  }
-
-  // Extrathyroidal lesion conclusion
+  // Extrathyroidal lesion conclusion (always)
   if (state.extraLesion && state.extraLesion.trim()) {
     lines.push(concNum++ + '. Extrathyroidal lesion');
     lines.push('   ' + state.extraLesion.trim());
   }
 
-  // Cervical lymph node conclusion
+  // Cervical lymph node conclusion (always)
   const lnConclusion = buildLNConclusionLines();
   if (lnConclusion.length > 0) {
     lines.push(concNum++ + '. Cervical lymph node');
@@ -5131,12 +5197,14 @@ function buildReportText() {
     bxLines.forEach(l => lines.push('   ' + l));
   }
 
-  // Recommendation
+  // Recommendation (mode-specific)
   const recLines = [];
-  allNodules.forEach(({lobe,idx,nod}) => {
-    if (nod.recommendation) recLines.push(LOBE_LABELS[lobe]+(idx+1)+': '+nod.recommendation);
-  });
-  if (state.postop) {
+  if (reportMode === 'thyroid') {
+    allNodules.forEach(({lobe,idx,nod}) => {
+      if (nod.recommendation) recLines.push(LOBE_LABELS[lobe]+(idx+1)+': '+nod.recommendation);
+    });
+  }
+  if (reportMode === 'postop' && state.postop) {
     ensurePostopState();
     ['right','isthmus','left'].forEach(lobe => (state.postop.residualThyroidNodules[lobe]||[]).forEach((nod,idx)=>{ if(nod.recommendation) recLines.push('Postop '+LOBE_LABELS[lobe]+(idx+1)+' ('+getPostopLabelFor('residual', lobe)+'): '+nod.recommendation); }));
     ['right','isthmus','left','central'].forEach(site => (state.postop.opBedLesions[site]||[]).forEach((les,idx)=>{ if(les.recommendation) recLines.push('Op bed '+postopOpBedLabel(site,idx)+' ('+getPostopLabelFor('opbed', site)+'): '+les.recommendation); }));
