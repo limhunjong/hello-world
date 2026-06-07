@@ -1635,7 +1635,8 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   pointer-events: none;
   user-select: none;
 }
-#thyroid-svg .lobe-label {
+#thyroid-svg .lobe-label,
+.postop-diagram-svg .postop-lobe-label {
   fill: var(--label2);
   font-size: 11px;
   font-weight: 700;
@@ -1955,8 +1956,6 @@ body.light .zone-path.zone-drag-preview { fill: rgba(0,122,255,0.18); stroke: rg
 .postop-zone.residual { fill:url(#postopLobeGradient); stroke:rgba(10,132,255,.55); }
 .postop-zone.opbed { fill:rgba(255,159,10,.14); stroke:rgba(255,159,10,.75); stroke-dasharray:5 4; }
 .postop-zone.hidden-zone { opacity:.12; fill:var(--fill4); stroke:var(--sep); stroke-dasharray:3 5; cursor:default; pointer-events:none; }
-.postop-diagram-label { font-size:12px; font-weight:700; fill:var(--label1); pointer-events:none; }
-.postop-diagram-sub { font-size:8px; font-weight:650; fill:var(--label3); pointer-events:none; letter-spacing:-.15px; }
 .postop-diagram-marker text { pointer-events:none; }
 .postop-diagram-marker .marker-body { stroke:#fff; stroke-width:2.2; }
 .postop-diagram-marker.opbed .marker-body { stroke:#FF9F0A; stroke-width:2.4; stroke-dasharray:4 3; fill:#FFF4E0; }
@@ -4068,27 +4067,49 @@ function addSvgText(svg, cls, x, y, txt, anchor='middle') {
 }
 function addPostopDiagramLabels(svg, present) {
   const map = getPostopAnatomyMap();
-  const labelAt = (m, x, y, residualSub='lobe') => {
-    if (m.kind === 'residual') {
-      const words = (m.shortLabel || m.label).split(' ');
-      addSvgText(svg,'postop-diagram-label',x,y,words.slice(0,2).join(' '));
-      addSvgText(svg,'postop-diagram-sub',x,y+15,residualSub);
-      return;
-    }
-    const side = m.site === 'right' ? 'Right' : m.site === 'left' ? 'Left' : (m.shortLabel || m.label);
-    addSvgText(svg,'postop-diagram-label',x,y,side);
-    addSvgText(svg,'postop-diagram-sub',x,y+15,m.label.replace(side,'').trim() || 'Op. Bed');
-  };
-  if (map.right.kind === 'residual') { labelAt(map.right,82,62,'lobe'); addSvgText(svg,'zone-label',82,105,'Middle'); addSvgText(svg,'zone-label',82,146,'Lower'); }
-  else if (map.right.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',82,84,'Right'); addSvgText(svg,'postop-diagram-sub',82,100,'Thyroidectomy'); addSvgText(svg,'postop-diagram-sub',82,114,'Site'); }
-  if (map.left.kind === 'residual') { labelAt(map.left,218,62,'lobe'); addSvgText(svg,'zone-label',218,105,'Middle'); addSvgText(svg,'zone-label',218,146,'Lower'); }
-  else if (map.left.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',218,84,'Left'); addSvgText(svg,'postop-diagram-sub',218,100,'Thyroidectomy'); addSvgText(svg,'postop-diagram-sub',218,114,'Site'); }
-  if (map.isthmus.kind === 'residual') { addSvgText(svg,'postop-diagram-label',150,106,map.isthmus.label); addSvgText(svg,'postop-diagram-sub',150,121,''); }
-  else if (map.isthmus.kind === 'opbed') {
-    if (map.isthmus.site === 'central') { addSvgText(svg,'postop-diagram-label',150,98,'Central / Isthmus'); addSvgText(svg,'postop-diagram-sub',150,114,'Bed'); }
-    else { addSvgText(svg,'postop-diagram-label',150,106,'Isthmus'); addSvgText(svg,'postop-diagram-sub',150,121,'Site'); }
+
+  // Right lobe slot
+  if (map.right.kind === 'residual') {
+    addSvgText(svg,'zone-label',82,64,'Upper');
+    addSvgText(svg,'zone-label',82,105,'Middle');
+    addSvgText(svg,'zone-label',82,146,'Lower');
+    addSvgText(svg,'postop-lobe-label',82,184,'Right Lobe');
+  } else if (map.right.kind === 'opbed') {
+    addSvgText(svg,'zone-label',82,102,'Thyroidectomy');
+    addSvgText(svg,'zone-label',82,114,'Site');
+    addSvgText(svg,'postop-lobe-label',82,184,'Right');
   }
-  if (map.central && map.central.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',150,98,'Central / Isthmus'); addSvgText(svg,'postop-diagram-sub',150,114,'Bed'); }
+
+  // Left lobe slot
+  if (map.left.kind === 'residual') {
+    addSvgText(svg,'zone-label',218,64,'Upper');
+    addSvgText(svg,'zone-label',218,105,'Middle');
+    addSvgText(svg,'zone-label',218,146,'Lower');
+    addSvgText(svg,'postop-lobe-label',218,184,'Left Lobe');
+  } else if (map.left.kind === 'opbed') {
+    addSvgText(svg,'zone-label',218,102,'Thyroidectomy');
+    addSvgText(svg,'zone-label',218,114,'Site');
+    addSvgText(svg,'postop-lobe-label',218,184,'Left');
+  }
+
+  // Isthmus slot
+  if (map.isthmus.kind === 'residual') {
+    addSvgText(svg,'zone-label',150,106,'Isthmus');
+  } else if (map.isthmus.kind === 'opbed') {
+    if (map.isthmus.site === 'central') {
+      addSvgText(svg,'zone-label',150,101,'Central /');
+      addSvgText(svg,'zone-label',150,113,'Isthmus Bed');
+    } else {
+      addSvgText(svg,'zone-label',150,101,'Isthmus');
+      addSvgText(svg,'zone-label',150,113,'Site');
+    }
+  }
+
+  // Central op bed (large oval, rendered separately)
+  if (map.central && map.central.kind === 'opbed') {
+    addSvgText(svg,'zone-label',150,101,'Central /');
+    addSvgText(svg,'zone-label',150,113,'Isthmus Bed');
+  }
 }
 function postopDiagramPointForResidual(lobe, idx, nod) {
   const base = lobe === 'right' ? {x:82,y:104} : lobe === 'left' ? {x:218,y:104} : {x:150,y:102};
