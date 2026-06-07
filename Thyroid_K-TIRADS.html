@@ -280,6 +280,9 @@ body.light table.ln-table th.sub-header {
 #main { padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+/* Force second column to fill remaining width */
+#clinicalTable { table-layout: fixed; }
+
 /* Normal Thyroid active: gray out clinical/parenchyma sections */
 #clinicalTable:has(input:disabled),
 #parenchymaTable:has(input:disabled) {
@@ -2450,7 +2453,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.53';
+const APP_VERSION = 'ver0.54';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
