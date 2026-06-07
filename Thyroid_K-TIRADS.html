@@ -4032,6 +4032,50 @@ function postopSetDiagramPoint(item, svgPt, site) {
   item.diagramX = Math.round(pt.x * 10) / 10;
   item.diagramY = Math.round(pt.y * 10) / 10;
 }
+function getPostopDiagramSvgPoint(clientX, clientY) {
+  const svg = document.getElementById('postop-svg');
+  if (!svg || !svg.createSVGPoint) return null;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  try {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    return pt.matrixTransform(ctm.inverse());
+  } catch(e) { return null; }
+}
+function getPostopDiagramZoneFromSvgPosition(clientX, clientY) {
+  const svg = document.getElementById('postop-svg');
+  if (!svg || !svg.createSVGPoint) return null;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  let svgPt;
+  try { const pt = svg.createSVGPoint(); pt.x = clientX; pt.y = clientY; svgPt = pt.matrixTransform(ctm.inverse()); } catch(e) { return null; }
+  const { x, y } = svgPt;
+  const map = getPostopAnatomyMap();
+  // Right lobe slot (x ≤ 140)
+  if (x >= 30 && x <= 140 && y >= 30 && y <= 180) {
+    const m = map.right;
+    if (m.kind === 'residual') { const location = y < 84 ? 'upper' : y < 132 ? 'middle' : 'lower'; return { type: 'residual', lobe: m.lobe, location }; }
+    if (m.kind === 'opbed') return { type: 'opbed', site: m.site };
+  }
+  // Left lobe slot (x ≥ 160)
+  if (x >= 160 && x <= 270 && y >= 30 && y <= 180) {
+    const m = map.left;
+    if (m.kind === 'residual') { const location = y < 84 ? 'upper' : y < 132 ? 'middle' : 'lower'; return { type: 'residual', lobe: m.lobe, location }; }
+    if (m.kind === 'opbed') return { type: 'opbed', site: m.site };
+  }
+  // Isthmus slot (center narrow band)
+  if (x >= 113 && x <= 187 && y >= 84 && y <= 118) {
+    const m = map.isthmus;
+    if (m.kind === 'residual') return { type: 'residual', lobe: 'isthmus', location: 'middle' };
+    if (m.kind === 'opbed') return { type: 'opbed', site: m.site };
+  }
+  // Central op bed (large oval)
+  if (map.central && map.central.kind === 'opbed' && x >= 90 && x <= 210 && y >= 56 && y <= 154) {
+    return { type: 'opbed', site: map.central.site };
+  }
+  return null;
+}
 function postopSiteForResidualMove(targetZone, drag) {
   return (targetZone && targetZone.type === 'residual' && targetZone.lobe) ? targetZone.lobe : drag.lobe;
 }
@@ -4216,7 +4260,7 @@ function postopResidualMarkerPointerMove(event) {
   const dx = event.clientX - postopDiagramMarkerDrag.startX;
   const dy = event.clientY - postopDiagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramMarkerDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
+  const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
   if (!zone || zone.type !== 'residual') return;
   postopDiagramMarkerDrag.lastZone = zone;
   const po = ensurePostopState();
@@ -4227,7 +4271,7 @@ function postopResidualMarkerPointerMove(event) {
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
-  postopSetDiagramPoint(nod, getDiagramSvgPoint(event.clientX, event.clientY), targetLobe);
+  postopSetDiagramPoint(nod, getPostopDiagramSvgPoint(event.clientX, event.clientY), targetLobe);
   if (targetLobe !== postopDiagramMarkerDrag.lobe) {
     po.residualThyroidNodules[postopDiagramMarkerDrag.lobe].splice(postopDiagramMarkerDrag.idx, 1);
     if (!po.residualThyroidNodules[targetLobe]) po.residualThyroidNodules[targetLobe] = [];
@@ -4267,7 +4311,7 @@ function postopResidualSpanHandlePointerMove(event) {
   const dx = event.clientX - postopDiagramSpanHandleDrag.startX;
   const dy = event.clientY - postopDiagramSpanHandleDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramSpanHandleDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
+  const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
   if (!zone || zone.type !== 'residual' || zone.lobe !== postopDiagramSpanHandleDrag.lobe) return;
   postopDiagramSpanHandleDrag.lastZone = zone;
   const po = ensurePostopState();
@@ -4277,7 +4321,7 @@ function postopResidualSpanHandlePointerMove(event) {
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
-  postopSetDiagramPoint(nod, getDiagramSvgPoint(event.clientX, event.clientY), postopDiagramSpanHandleDrag.lobe);
+  postopSetDiagramPoint(nod, getPostopDiagramSvgPoint(event.clientX, event.clientY), postopDiagramSpanHandleDrag.lobe);
   saveState();
   renderPostop();
   refreshPostopPopupIfOpen(postopDiagramSpanHandleDrag.lobe);
@@ -4310,14 +4354,14 @@ function postopOpBedMarkerPointerMove(event) {
   const dx = event.clientX - postopDiagramMarkerDrag.startX;
   const dy = event.clientY - postopDiagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramMarkerDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
+  const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
   if (!zone || zone.type !== 'opbed') return;
   postopDiagramMarkerDrag.lastZone = zone;
   const po = ensurePostopState();
   const les = po.opBedLesions[postopDiagramMarkerDrag.site] && po.opBedLesions[postopDiagramMarkerDrag.site][postopDiagramMarkerDrag.idx];
   if (!les) return;
   const targetSite = postopSiteForOpBedMove(zone, postopDiagramMarkerDrag);
-  const dropPoint = getDiagramSvgPoint(event.clientX, event.clientY) || null;
+  const dropPoint = getPostopDiagramSvgPoint(event.clientX, event.clientY) || null;
   postopSetDiagramPoint(les, dropPoint, targetSite);
   if (zone.site) {
     les.location = zone.site === 'central' ? 'Central Neck / Thyroidectomy Bed' : zone.site === 'isthmus' ? 'Isthmus Op. Bed' : zone.site === 'right' ? 'Right Op. Bed' : 'Left Op. Bed';
