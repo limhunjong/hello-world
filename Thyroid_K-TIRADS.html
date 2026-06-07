@@ -1609,48 +1609,58 @@ body.light .zone-path.zone-drag-preview { fill: rgba(0,122,255,0.18); stroke: rg
   opacity: 0.34;
   filter: drop-shadow(0 4px 10px rgba(10,132,255,0.42));
 }
-#thyroid-svg .diagram-drag-ghost {
+#thyroid-svg .diagram-drag-ghost,
+#postop-svg .diagram-drag-ghost {
   pointer-events: none;
   opacity: 0.95;
   filter: drop-shadow(0 6px 14px rgba(0,0,0,0.34));
 }
-#thyroid-svg .diagram-drag-ghost ellipse {
+#thyroid-svg .diagram-drag-ghost ellipse,
+#postop-svg .diagram-drag-ghost ellipse {
   stroke-width: 2.4;
 }
-#thyroid-svg .diagram-delete-hit {
+#thyroid-svg .diagram-delete-hit,
+#postop-svg .diagram-delete-hit {
   cursor: pointer;
 }
-#thyroid-svg .diagram-span-handle {
+#thyroid-svg .diagram-span-handle,
+#postop-svg .diagram-span-handle {
   cursor: ns-resize;
 }
-#thyroid-svg .diagram-span-handle-stem {
+#thyroid-svg .diagram-span-handle-stem,
+#postop-svg .diagram-span-handle-stem {
   stroke: rgba(255,255,255,0.62);
   stroke-width: 1.2;
   stroke-linecap: round;
   pointer-events: none;
 }
-#thyroid-svg .diagram-span-handle-pill {
+#thyroid-svg .diagram-span-handle-pill,
+#postop-svg .diagram-span-handle-pill {
   fill: rgba(10,132,255,0.88);
   stroke: rgba(255,255,255,0.96);
   stroke-width: 1.4;
   filter: drop-shadow(0 3px 8px rgba(0,0,0,0.36));
 }
-#thyroid-svg .diagram-span-handle-grip {
+#thyroid-svg .diagram-span-handle-grip,
+#postop-svg .diagram-span-handle-grip {
   stroke: rgba(255,255,255,0.86);
   stroke-width: 1.15;
   stroke-linecap: round;
   pointer-events: none;
 }
-#thyroid-svg .diagram-span-handle:hover .diagram-span-handle-pill {
+#thyroid-svg .diagram-span-handle:hover .diagram-span-handle-pill,
+#postop-svg .diagram-span-handle:hover .diagram-span-handle-pill {
   fill: rgba(64,156,255,0.96);
 }
-#thyroid-svg .diagram-delete-circle {
+#thyroid-svg .diagram-delete-circle,
+#postop-svg .diagram-delete-circle {
   fill: rgba(255,69,58,0.95);
   stroke: rgba(255,255,255,0.92);
   stroke-width: 1.6;
   filter: drop-shadow(0 3px 7px rgba(0,0,0,0.34));
 }
-#thyroid-svg .diagram-delete-x {
+#thyroid-svg .diagram-delete-x,
+#postop-svg .diagram-delete-x {
   fill: #fff;
   font-size: 8px;
   font-weight: 800;
@@ -4243,8 +4253,68 @@ function renderPostopDiagramMarkers(svg) {
   };
   ['right','isthmus','left'].forEach(lobe => (po.residualThyroidNodules[lobe] || []).forEach((nod, idx) => addResidualMarker(lobe, idx, nod)));
   ['right','isthmus','left','central'].forEach(site => (po.opBedLesions[site] || []).forEach((les, idx) => addOpBedMarker(site, idx, les)));
+  const ghostG = document.createElementNS(ns, 'g');
+  ghostG.setAttribute('id', 'postop-drag-ghost');
+  ghostG.setAttribute('class', 'diagram-drag-ghost');
+  svg.appendChild(ghostG);
 }
 
+
+function clearPostopDraggingClass() {
+  const svg = document.getElementById('postop-svg');
+  if (svg) svg.querySelectorAll('.diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
+}
+function clearPostopDragGhost() {
+  const g = document.getElementById('postop-drag-ghost');
+  if (g) g.innerHTML = '';
+}
+function updatePostopDragGhost(clientX, clientY) {
+  if (!postopDiagramMarkerDrag) return;
+  const ghost = document.getElementById('postop-drag-ghost');
+  const svgPt = getPostopDiagramSvgPoint(clientX, clientY);
+  if (!ghost || !svgPt) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const po = ensurePostopState();
+  ghost.innerHTML = '';
+  let cx = svgPt.x, cy = svgPt.y, rx = 14, ry = 10;
+  let fill = '#0A84FF', stroke = '#fff', strokeDash = null, labelFill = '#fff', label = '';
+  if (postopDiagramMarkerDrag.kind === 'residual') {
+    const { lobe, idx } = postopDiagramMarkerDrag;
+    const nod = po.residualThyroidNodules[lobe] && po.residualThyroidNodules[lobe][idx];
+    if (!nod) return;
+    const pt = postopClampDiagramPointToSite(svgPt, lobe);
+    if (pt) { cx = pt.x; cy = pt.y; }
+    const shape = postopResidualDiagramShape(nod, lobe, true);
+    rx = shape.rx; ry = shape.ry;
+    const tirads = getKTIRADS(nod, state.normalThyroid);
+    if (tirads.includes('5')) fill = '#FF453A';
+    else if (tirads.includes('4')) fill = '#FF9F0A';
+    else if (tirads.includes('3')) fill = '#30D158';
+    label = (LOBE_LABELS[lobe] || lobe) + (idx + 1);
+  } else if (postopDiagramMarkerDrag.kind === 'opbed') {
+    const { site, idx } = postopDiagramMarkerDrag;
+    const les = po.opBedLesions[site] && po.opBedLesions[site][idx];
+    if (!les) return;
+    const pt = postopClampDiagramPointToSite(svgPt, site);
+    if (pt) { cx = pt.x; cy = pt.y; }
+    const shape = postopOpBedMarkerShape(les, true);
+    rx = shape.rx; ry = shape.ry;
+    fill = document.body.classList.contains('light') ? '#FFF4E0' : '#3a2608';
+    stroke = '#FF9F0A'; strokeDash = '4 3'; labelFill = '#FF9F0A';
+    label = postopOpBedLabel(site, idx);
+  }
+  const el = document.createElementNS(ns, 'ellipse');
+  el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+  el.setAttribute('rx', rx); el.setAttribute('ry', ry);
+  el.setAttribute('fill', fill); el.setAttribute('stroke', stroke); el.setAttribute('stroke-width', '2.4');
+  if (strokeDash) el.setAttribute('stroke-dasharray', strokeDash);
+  ghost.appendChild(el);
+  const txt = document.createElementNS(ns, 'text');
+  txt.setAttribute('x', cx); txt.setAttribute('y', cy + 4);
+  txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-size', '9'); txt.setAttribute('font-weight', '700');
+  txt.setAttribute('fill', labelFill); txt.style.pointerEvents = 'none'; txt.textContent = label;
+  ghost.appendChild(txt);
+}
 
 function postopResidualMarkerPointerDown(event, lobe, idx) {
   event.preventDefault();
@@ -4253,6 +4323,9 @@ function postopResidualMarkerPointerDown(event, lobe, idx) {
   const nod = po.residualThyroidNodules[lobe] && po.residualThyroidNodules[lobe][idx];
   if (!nod) return;
   postopDiagramMarkerDrag = { kind: 'residual', lobe, idx, startX: event.clientX, startY: event.clientY, moved: false, lastZone: null };
+  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
+  if (marker) marker.classList.add('diagram-marker-dragging');
+  updatePostopDragGhost(event.clientX, event.clientY);
   document.addEventListener('pointermove', postopResidualMarkerPointerMove, { passive: false });
   document.addEventListener('pointerup', postopResidualMarkerPointerUp, { once: true });
   document.addEventListener('pointercancel', postopResidualMarkerPointerCancel, { once: true });
@@ -4263,39 +4336,44 @@ function postopResidualMarkerPointerMove(event) {
   const dx = event.clientX - postopDiagramMarkerDrag.startX;
   const dy = event.clientY - postopDiagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramMarkerDrag.moved = true;
+  updatePostopDragGhost(event.clientX, event.clientY);
   const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone || zone.type !== 'residual') return;
-  postopDiagramMarkerDrag.lastZone = zone;
+  if (zone && zone.type === 'residual') postopDiagramMarkerDrag.lastZone = zone;
+}
+function postopResidualMarkerPointerUp(event) {
+  document.removeEventListener('pointermove', postopResidualMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
+  const drag = postopDiagramMarkerDrag;
+  postopDiagramMarkerDrag = null;
+  if (!drag) return;
+  if (!drag.moved) { openPostopPopup('residual', drag.lobe, drag.idx); return; }
+  const zone = (event && getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY)) || drag.lastZone;
+  if (!zone || zone.type !== 'residual') { renderPostop(); return; }
   const po = ensurePostopState();
-  const nod = po.residualThyroidNodules[postopDiagramMarkerDrag.lobe] && po.residualThyroidNodules[postopDiagramMarkerDrag.lobe][postopDiagramMarkerDrag.idx];
-  if (!nod) return;
-  const targetLobe = postopSiteForResidualMove(zone, postopDiagramMarkerDrag);
+  const targetLobe = postopSiteForResidualMove(zone, drag);
+  const nod = po.residualThyroidNodules[drag.lobe] && po.residualThyroidNodules[drag.lobe][drag.idx];
+  if (!nod) { renderPostop(); return; }
   const locations = postopLocationsForMovedMarker(nod, { lobe: targetLobe, location: zone.location });
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
-  postopSetDiagramPoint(nod, getPostopDiagramSvgPoint(event.clientX, event.clientY), targetLobe);
-  if (targetLobe !== postopDiagramMarkerDrag.lobe) {
-    po.residualThyroidNodules[postopDiagramMarkerDrag.lobe].splice(postopDiagramMarkerDrag.idx, 1);
+  postopSetDiagramPoint(nod, event ? getPostopDiagramSvgPoint(event.clientX, event.clientY) : null, targetLobe);
+  if (targetLobe !== drag.lobe) {
+    po.residualThyroidNodules[drag.lobe].splice(drag.idx, 1);
     if (!po.residualThyroidNodules[targetLobe]) po.residualThyroidNodules[targetLobe] = [];
     po.residualThyroidNodules[targetLobe].push(nod);
-    postopDiagramMarkerDrag.lobe = targetLobe;
-    postopDiagramMarkerDrag.idx = po.residualThyroidNodules[targetLobe].length - 1;
   }
   saveState();
   renderPostop();
-  refreshPostopPopupIfOpen(postopDiagramMarkerDrag.lobe);
-}
-function postopResidualMarkerPointerUp() {
-  document.removeEventListener('pointermove', postopResidualMarkerPointerMove);
-  const drag = postopDiagramMarkerDrag;
-  postopDiagramMarkerDrag = null;
-  if (!drag) return;
-  if (!drag.moved) openPostopPopup('residual', drag.lobe, drag.idx);
+  refreshPostopPopupIfOpen(targetLobe);
 }
 function postopResidualMarkerPointerCancel() {
   document.removeEventListener('pointermove', postopResidualMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
   postopDiagramMarkerDrag = null;
+  renderPostop();
 }
 function postopResidualSpanHandlePointerDown(event, lobe, idx, handle) {
   event.preventDefault();
@@ -4304,6 +4382,8 @@ function postopResidualSpanHandlePointerDown(event, lobe, idx, handle) {
   const nod = po.residualThyroidNodules[lobe] && po.residualThyroidNodules[lobe][idx];
   if (!nod || lobe === 'isthmus') return;
   postopDiagramSpanHandleDrag = { kind: 'residual', lobe, idx, handle, startX: event.clientX, startY: event.clientY, moved: false, lastZone: null };
+  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
+  if (marker) marker.classList.add('diagram-marker-dragging');
   document.addEventListener('pointermove', postopResidualSpanHandlePointerMove, { passive: false });
   document.addEventListener('pointerup', postopResidualSpanHandlePointerUp, { once: true });
   document.addEventListener('pointercancel', postopResidualSpanHandlePointerCancel, { once: true });
@@ -4315,30 +4395,35 @@ function postopResidualSpanHandlePointerMove(event) {
   const dy = event.clientY - postopDiagramSpanHandleDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramSpanHandleDrag.moved = true;
   const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone || zone.type !== 'residual' || zone.lobe !== postopDiagramSpanHandleDrag.lobe) return;
-  postopDiagramSpanHandleDrag.lastZone = zone;
+  if (zone && zone.type === 'residual' && zone.lobe === postopDiagramSpanHandleDrag.lobe) {
+    postopDiagramSpanHandleDrag.lastZone = zone;
+  }
+}
+function postopResidualSpanHandlePointerUp(event) {
+  document.removeEventListener('pointermove', postopResidualSpanHandlePointerMove);
+  clearPostopDraggingClass();
+  const drag = postopDiagramSpanHandleDrag;
+  postopDiagramSpanHandleDrag = null;
+  if (!drag || !drag.moved) { renderPostop(); return; }
+  const zone = (event && getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY)) || drag.lastZone;
+  if (!zone || zone.type !== 'residual' || zone.lobe !== drag.lobe) { renderPostop(); return; }
   const po = ensurePostopState();
-  const nod = po.residualThyroidNodules[postopDiagramSpanHandleDrag.lobe] && po.residualThyroidNodules[postopDiagramSpanHandleDrag.lobe][postopDiagramSpanHandleDrag.idx];
-  if (!nod) return;
-  const locations = postopLocationsForSpanHandle(nod, zone, postopDiagramSpanHandleDrag);
+  const nod = po.residualThyroidNodules[drag.lobe] && po.residualThyroidNodules[drag.lobe][drag.idx];
+  if (!nod) { renderPostop(); return; }
+  const locations = postopLocationsForSpanHandle(nod, zone, drag);
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
-  postopSetDiagramPoint(nod, getPostopDiagramSvgPoint(event.clientX, event.clientY), postopDiagramSpanHandleDrag.lobe);
+  postopSetDiagramPoint(nod, event ? getPostopDiagramSvgPoint(event.clientX, event.clientY) : null, drag.lobe);
   saveState();
   renderPostop();
-  refreshPostopPopupIfOpen(postopDiagramSpanHandleDrag.lobe);
-}
-function postopResidualSpanHandlePointerUp() {
-  document.removeEventListener('pointermove', postopResidualSpanHandlePointerMove);
-  const drag = postopDiagramSpanHandleDrag;
-  postopDiagramSpanHandleDrag = null;
-  if (!drag) return;
-  if (!drag.moved) renderPostop();
+  refreshPostopPopupIfOpen(drag.lobe);
 }
 function postopResidualSpanHandlePointerCancel() {
   document.removeEventListener('pointermove', postopResidualSpanHandlePointerMove);
+  clearPostopDraggingClass();
   postopDiagramSpanHandleDrag = null;
+  renderPostop();
 }
 function postopOpBedMarkerPointerDown(event, site, idx) {
   event.preventDefault();
@@ -4347,6 +4432,9 @@ function postopOpBedMarkerPointerDown(event, site, idx) {
   const les = po.opBedLesions[site] && po.opBedLesions[site][idx];
   if (!les) return;
   postopDiagramMarkerDrag = { kind: 'opbed', site, idx, startX: event.clientX, startY: event.clientY, moved: false, lastZone: null };
+  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
+  if (marker) marker.classList.add('diagram-marker-dragging');
+  updatePostopDragGhost(event.clientX, event.clientY);
   document.addEventListener('pointermove', postopOpBedMarkerPointerMove, { passive: false });
   document.addEventListener('pointerup', postopOpBedMarkerPointerUp, { once: true });
   document.addEventListener('pointercancel', postopOpBedMarkerPointerCancel, { once: true });
@@ -4357,39 +4445,44 @@ function postopOpBedMarkerPointerMove(event) {
   const dx = event.clientX - postopDiagramMarkerDrag.startX;
   const dy = event.clientY - postopDiagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramMarkerDrag.moved = true;
+  updatePostopDragGhost(event.clientX, event.clientY);
   const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone || zone.type !== 'opbed') return;
-  postopDiagramMarkerDrag.lastZone = zone;
+  if (zone && zone.type === 'opbed') postopDiagramMarkerDrag.lastZone = zone;
+}
+function postopOpBedMarkerPointerUp(event) {
+  document.removeEventListener('pointermove', postopOpBedMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
+  const drag = postopDiagramMarkerDrag;
+  postopDiagramMarkerDrag = null;
+  if (!drag) return;
+  if (!drag.moved) { openPostopPopup('opbed', drag.site, drag.idx); return; }
+  const zone = (event && getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY)) || drag.lastZone;
+  if (!zone || zone.type !== 'opbed') { renderPostop(); return; }
   const po = ensurePostopState();
-  const les = po.opBedLesions[postopDiagramMarkerDrag.site] && po.opBedLesions[postopDiagramMarkerDrag.site][postopDiagramMarkerDrag.idx];
-  if (!les) return;
-  const targetSite = postopSiteForOpBedMove(zone, postopDiagramMarkerDrag);
-  const dropPoint = getPostopDiagramSvgPoint(event.clientX, event.clientY) || null;
+  const targetSite = postopSiteForOpBedMove(zone, drag);
+  const les = po.opBedLesions[drag.site] && po.opBedLesions[drag.site][drag.idx];
+  if (!les) { renderPostop(); return; }
+  const dropPoint = event ? getPostopDiagramSvgPoint(event.clientX, event.clientY) : null;
   postopSetDiagramPoint(les, dropPoint, targetSite);
   if (zone.site) {
     les.location = zone.site === 'central' ? 'Central Neck / Thyroidectomy Bed' : zone.site === 'isthmus' ? 'Isthmus Op. Bed' : zone.site === 'right' ? 'Right Op. Bed' : 'Left Op. Bed';
   }
-  if (targetSite !== postopDiagramMarkerDrag.site) {
-    po.opBedLesions[postopDiagramMarkerDrag.site].splice(postopDiagramMarkerDrag.idx, 1);
+  if (targetSite !== drag.site) {
+    po.opBedLesions[drag.site].splice(drag.idx, 1);
     if (!po.opBedLesions[targetSite]) po.opBedLesions[targetSite] = [];
     po.opBedLesions[targetSite].push(les);
-    postopDiagramMarkerDrag.site = targetSite;
-    postopDiagramMarkerDrag.idx = po.opBedLesions[targetSite].length - 1;
   }
   saveState();
   renderPostop();
-  refreshPostopPopupIfOpen(postopDiagramMarkerDrag.site);
-}
-function postopOpBedMarkerPointerUp() {
-  document.removeEventListener('pointermove', postopOpBedMarkerPointerMove);
-  const drag = postopDiagramMarkerDrag;
-  postopDiagramMarkerDrag = null;
-  if (!drag) return;
-  if (!drag.moved) openPostopPopup('opbed', drag.site, drag.idx);
+  refreshPostopPopupIfOpen(targetSite);
 }
 function postopOpBedMarkerPointerCancel() {
   document.removeEventListener('pointermove', postopOpBedMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
   postopDiagramMarkerDrag = null;
+  renderPostop();
 }
 function postopDiagramZoneClick(z, evt, svg) {
   // Convert click coordinates to SVG space so the new marker appears at the clicked position
