@@ -502,7 +502,7 @@ textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
 textarea:disabled { background: var(--fill4); color: var(--label4); }
 
 /* Center and size the compact clinical/dimension fields consistently */
-#clinIndText { width: 100%; max-width: 360px; }
+#clinIndText { width: 100%; }
 input[id^="sizeRight"],
 input[id^="sizeIsthmus"],
 input[id^="sizeLeft"] {
@@ -1974,9 +1974,9 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
       <tbody>
         <tr>
           <td class="label-cell">Clinical Indication</td>
-          <td>
+          <td style="width:100%">
             <div class="radio-group" style="display:inline-flex;margin-bottom:6px;"><label><input type="checkbox" id="clinIndDefault" onchange="state.clinIndDefault=this.checked;saveState()" checked> Thyroid nodule</label></div>
-            <textarea id="clinIndText" rows="1" placeholder="Additional info (optional)" style="display:block;width:100%;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';state.clinIndText=this.value;saveState()"></textarea>
+            <textarea id="clinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';state.clinIndText=this.value;saveState()"></textarea>
           </td>
         </tr>
         <tr>
@@ -2181,14 +2181,14 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
         <tbody>
           <tr>
             <td class="label-cell">Clinical Indication</td>
-            <td>
+            <td style="width:100%">
               <div class="radio-group" style="display:inline-flex;margin-bottom:6px;"><label><input type="checkbox" id="postopClinIndDefault" onchange="ensurePostopState().clinIndDefault=this.checked;saveState()" checked> Postoperative surveillance</label></div>
-              <textarea id="postopClinIndText" rows="1" placeholder="Additional info (optional)" style="display:block;width:100%;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';ensurePostopState().clinIndText=this.value;saveState()"></textarea>
+              <textarea id="postopClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';ensurePostopState().clinIndText=this.value;saveState()"></textarea>
             </td>
           </tr>
           <tr>
             <td class="label-cell">Clinical History</td>
-            <td><textarea id="postopClinHistory" rows="2" style="width:100%;resize:none;overflow-y:hidden;" placeholder="e.g. PTC s/p total thyroidectomy (2020), RAI therapy..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';ensurePostopState().clinHistory=this.value;saveState()"></textarea></td>
+            <td style="width:100%"><textarea id="postopClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. PTC s/p total thyroidectomy (2020), RAI therapy..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';ensurePostopState().clinHistory=this.value;saveState()"></textarea></td>
           </tr>
           <tr>
             <td class="label-cell">US Comparison</td>
@@ -2450,7 +2450,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.52';
+const APP_VERSION = 'ver0.53';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
