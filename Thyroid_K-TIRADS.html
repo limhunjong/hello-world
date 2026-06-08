@@ -506,6 +506,7 @@ textarea:disabled { background: var(--fill4); color: var(--label4); }
 
 /* Center and size the compact clinical/dimension fields consistently */
 #clinIndText { width: 100%; }
+#clinIndText, #clinHistory, #postopClinIndText, #postopClinHistory { min-height: 64px; }
 input[id^="sizeRight"],
 input[id^="sizeIsthmus"],
 input[id^="sizeLeft"] {
@@ -2460,7 +2461,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.57';
+const APP_VERSION = 'ver0.58';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
