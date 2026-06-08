@@ -584,7 +584,7 @@ input[id^="sizeLeft"] {
 
 /* ===== LYMPH NODE TABLE ===== */
 .ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); margin-bottom: 12px; }
-table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-base); }
+table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-base); min-width: 720px; }
 table.ln-table th, table.ln-table td {
   border-bottom: 0.5px solid rgba(84,84,88,0.3);
   padding: 10px 12px; text-align: center; vertical-align: middle;
@@ -791,11 +791,19 @@ col.nodule-label-col { width: 136px; }
 .ln-check-label {
   display: flex; align-items: center; justify-content: center; gap: 5px;
   white-space: nowrap; cursor: pointer;
-  padding: 8px 13px; border-radius: 8px;
+  padding: 7px 11px; border-radius: 8px;
   transition: background 0.15s;
+  background: var(--fill3);
   color: var(--label2); font-size: var(--font-md); font-weight: 500; letter-spacing: -0.1px;
-  min-height: 42px; text-align: center;
+  min-height: 38px; text-align: center;
 }
+.ln-check-label:active { background: var(--fill4); }
+.ln-check-label:has(input:checked) { background: var(--blue-bg); color: var(--blue); font-weight: 700; }
+.ln-check-label:has(input:disabled) { opacity: 0.35; pointer-events: none; }
+/* Biopsy / Complications inline checks in LN table */
+table.ln-table .inline-check-label { background: var(--fill3); }
+/* Level chip flex wrapper */
+.ln-chip-group { display: flex; flex-wrap: wrap; gap: 3px; }
 .ln-section-hdr {
   background: var(--fill4); color: var(--label3);
   font-weight: 700; text-align: left;
@@ -2476,7 +2484,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.62';
+const APP_VERSION = 'ver0.63';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -4998,6 +5006,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td'); td.className='td-top';
+    const group1 = document.createElement('div'); group1.className='ln-chip-group';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -5006,8 +5015,9 @@ function renderLymphTable() {
       chk.checked = !!(ln[key]);
       chk.addEventListener('change',()=>{ const cur=getLN(ci); cur[key]=chk.checked; setLN(ci,cur); saveState(); });
       lbl.appendChild(chk); lbl.append(' '+lvl);
-      td.appendChild(lbl);
+      group1.appendChild(lbl);
     });
+    td.appendChild(group1);
     tr1.appendChild(td);
   }
   tbody.appendChild(tr1);
@@ -5077,6 +5087,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
+    const group5 = document.createElement('div'); group5.className='ln-chip-group';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -5085,8 +5096,9 @@ function renderLymphTable() {
       chk.checked = !!(ln['fna_'+lvl]);
       chk.addEventListener('change',()=>{ const cur=getLN(ci); cur['fna_'+lvl]=chk.checked; setLN(ci,cur); saveState(); });
       lbl.appendChild(chk); lbl.append(' '+lvl);
-      td.appendChild(lbl);
+      group5.appendChild(lbl);
     });
+    td.appendChild(group5);
     tr5.appendChild(td);
   }
   tbody.appendChild(tr5);
@@ -5097,6 +5109,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
+    const group6 = document.createElement('div'); group6.className='ln-chip-group';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -5105,8 +5118,9 @@ function renderLymphTable() {
       chk.checked = !!(ln['cnb_'+lvl]);
       chk.addEventListener('change',()=>{ const cur=getLN(ci); cur['cnb_'+lvl]=chk.checked; setLN(ci,cur); saveState(); });
       lbl.appendChild(chk); lbl.append(' '+lvl);
-      td.appendChild(lbl);
+      group6.appendChild(lbl);
     });
+    td.appendChild(group6);
     tr6.appendChild(td);
   }
   tbody.appendChild(tr6);
