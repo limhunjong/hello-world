@@ -598,7 +598,7 @@ table.ln-table th, table.ln-table td {
   overflow: hidden;
 }
 table.ln-table th { background: var(--bg2); color: var(--label1); font-weight: 700; border-bottom: 0.5px solid var(--sep); }
-table.ln-table th.sub-header { background: var(--bg1); color: var(--label3); font-weight: 600; font-size: 11px; }
+table.ln-table th.sub-header { background: var(--bg1); color: var(--label3); font-weight: 600; font-size: 12px; }
 table.ln-table td.row-label {
   background: var(--bg1); font-weight: 600; text-align: left;
   white-space: normal; word-break: keep-all; color: var(--label2);
@@ -819,9 +819,9 @@ table.ln-table .inline-check-label { background: var(--fill3); }
 }
 .ln-measure-cell { display: flex; flex-direction: column; gap: 3px; width: 100%; }
 .ln-measure-row { display: flex; align-items: center; gap: 2px; width: 100%; min-width: 0; }
-.ln-meas-lbl { font-size: 11px; font-weight: 600; color: var(--label3); flex-shrink: 0; }
+.ln-meas-lbl { font-size: 12px; font-weight: 600; color: var(--label3); flex-shrink: 0; }
 .ln-size-input { flex: 1; min-width: 0; width: 0; font-size: 13px; }
-.ln-measure-row select { flex-shrink: 1; min-width: 0; font-size: 12px; max-width: 52px; }
+.ln-measure-row select { flex-shrink: 1; min-width: 0; font-size: 13px; max-width: 54px; }
 table.ln-table textarea { width: 100%; box-sizing: border-box; min-width: 0; font-size: 13px; }
 table.ln-table td.td-top { vertical-align: top; }
 .ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; width: 100%; }
@@ -2535,7 +2535,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.69';
+const APP_VERSION = 'ver0.70';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
