@@ -357,7 +357,7 @@ table.data-table th {
 }
 table.data-table td.label-cell {
   background: var(--bg1); font-weight: 600;
-  white-space: nowrap; padding: 10px 14px;
+  width: 168px; min-width: 168px; padding: 10px 14px;
   font-size: var(--font-sm); color: var(--label2);
   border-right: 0.5px solid rgba(84,84,88,0.3);
   line-height: 1.35;
@@ -831,7 +831,7 @@ table.ln-table td.td-top { vertical-align: top; }
   #main { padding: 12px 12px; }
   .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .pink-btn, .blue-btn { padding: 11px 16px; font-size: var(--font-md); min-height: 48px; }
-  table.data-table td.label-cell { font-size: var(--font-sm); padding: 10px 10px; }
+  table.data-table td.label-cell { width: 140px; min-width: 140px; font-size: 13px; padding: 10px 10px; }
   table.data-table td { padding: 10px 10px; }
   table.data-table th { padding: 10px 10px; font-size: var(--font-sm); }
   .nodule-section { flex-direction: column; }
@@ -1259,7 +1259,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .pink-btn, .blue-btn { padding: 11px 16px; font-size: 14px; min-height: 48px; }
 
-  table.data-table td.label-cell { font-size: 12px; padding: 10px 10px; }
+  table.data-table td.label-cell { width: 130px; min-width: 130px; font-size: 12px; padding: 10px 10px; }
   table.data-table td { padding: 10px 10px; }
   table.data-table th { padding: 10px 10px; font-size: 13px; }
 
@@ -1371,7 +1371,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   /* Compact table rows */
   table.data-table th { padding: 8px 10px; font-size: 13px; }
   table.data-table td { padding: 8px 10px; }
-  table.data-table td.label-cell { padding: 8px 8px; }
+  table.data-table td.label-cell { width: 120px; min-width: 120px; font-size: 12px; padding: 8px 8px; }
 
   /* Compact controls — keep 40px min for thumb accuracy */
   .radio-group label { min-height: 40px; padding: 8px 12px; font-size: 13px; }
@@ -2477,7 +2477,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.60';
+const APP_VERSION = 'ver0.61';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
