@@ -299,9 +299,6 @@ body.light table.ln-table th.sub-header {
 #main { padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-/* Force second column to fill remaining width */
-#clinicalTable { table-layout: fixed; }
-
 /* Normal Thyroid active: gray out clinical/parenchyma sections */
 #clinicalTable:has(input:disabled),
 #parenchymaTable:has(input:disabled) {
@@ -359,7 +356,8 @@ table.data-table th {
   border-bottom: 0.5px solid var(--sep);
 }
 table.data-table td.label-cell {
-  background: var(--bg1); font-weight: 600; width: 124px;
+  background: var(--bg1); font-weight: 600;
+  white-space: nowrap; padding: 10px 14px;
   font-size: var(--font-sm); color: var(--label2);
   border-right: 0.5px solid rgba(84,84,88,0.3);
   line-height: 1.35;
@@ -833,7 +831,7 @@ table.ln-table td.td-top { vertical-align: top; }
   #main { padding: 12px 12px; }
   .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .pink-btn, .blue-btn { padding: 11px 16px; font-size: var(--font-md); min-height: 48px; }
-  table.data-table td.label-cell { width: 92px !important; font-size: var(--font-sm); padding: 10px 8px; }
+  table.data-table td.label-cell { font-size: var(--font-sm); padding: 10px 10px; }
   table.data-table td { padding: 10px 10px; }
   table.data-table th { padding: 10px 10px; font-size: var(--font-sm); }
   .nodule-section { flex-direction: column; }
@@ -871,7 +869,7 @@ table.ln-table td.td-top { vertical-align: top; }
 @media (max-width: 390px) {
   .mode-btn { font-size: 12px; padding: 0 10px; }
   .sec-nav-btn { font-size: 10px; padding: 0 7px; height: 28px; }
-  table.data-table td.label-cell { width: 76px !important; }
+  
   .nodule-label-cell { width: 84px !important; }
   col.nodule-label-col { width: 84px; }
 }
@@ -1234,7 +1232,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 @media (min-width: 768px) and (max-width: 1023px) {
   #main { padding: 16px; }
   #bottom-section { margin: 0 16px 16px; }
-  table.data-table td.label-cell { width: 120px; }
+  
 }
 
 /* ===== MOBILE ALL (< 768px) ===== */
@@ -1261,7 +1259,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .pink-btn, .blue-btn { padding: 11px 16px; font-size: 14px; min-height: 48px; }
 
-  table.data-table td.label-cell { width: 88px !important; font-size: 12px; padding: 10px 8px; }
+  table.data-table td.label-cell { font-size: 12px; padding: 10px 10px; }
   table.data-table td { padding: 10px 10px; }
   table.data-table th { padding: 10px 10px; font-size: 13px; }
 
@@ -1308,7 +1306,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 @media (max-width: 429px) {
   .mode-btn { font-size: 12px; padding: 0 11px; }
   .sec-nav-btn { font-size: 11px; padding: 0 8px; height: 28px; }
-  table.data-table td.label-cell { width: 82px !important; }
+  
   .nodule-label-cell { width: 90px !important; }
   col.nodule-label-col { width: 90px; }
 }
@@ -1316,7 +1314,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 /* ===== MOBILE SMALL (< 375px) ===== */
 @media (max-width: 374px) {
   .tab-btn { font-size: 10px; padding: 0 4px; }
-  table.data-table td.label-cell { width: 76px !important; }
+  
   .nodule-label-cell { width: 84px !important; }
   col.nodule-label-col { width: 84px; }
   #main { padding: 10px max(10px, env(safe-area-inset-left, 10px)); }
@@ -1999,7 +1997,6 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     <!-- Section A: Clinical Information -->
     <div class="table-card">
     <table class="data-table" id="clinicalTable">
-      <colgroup><col style="width:124px"><col></colgroup>
       <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
       <tbody>
         <tr>
@@ -2480,7 +2477,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.59';
+const APP_VERSION = 'ver0.60';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
