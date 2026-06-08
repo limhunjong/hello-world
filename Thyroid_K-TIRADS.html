@@ -299,8 +299,7 @@ body.light table.ln-table th.sub-header {
 #main { padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-/* Normal Thyroid active: gray out clinical/parenchyma sections */
-#clinicalTable:has(input:disabled),
+/* Normal Thyroid active: gray out parenchyma section only */
 #parenchymaTable:has(input:disabled) {
   opacity: 0.38;
   pointer-events: none;
@@ -2477,7 +2476,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.61';
+const APP_VERSION = 'ver0.62';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -2787,7 +2786,7 @@ function onNormalThyroidChange() {
 
 function applyNormalThyroidDisable() {
   const dis = state.normalThyroid;
-  ['clinicalTable', 'parenchymaTable'].forEach(id => {
+  ['parenchymaTable'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.querySelectorAll('input,select,textarea,button').forEach(i => {
