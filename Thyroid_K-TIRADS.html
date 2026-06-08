@@ -2484,7 +2484,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.63';
+const APP_VERSION = 'ver0.64';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -5064,7 +5064,7 @@ function renderLymphTable() {
   // Biopsy header
   const trBxH = document.createElement('tr');
   const tdBxH = document.createElement('td'); tdBxH.colSpan=9; tdBxH.className='ln-section-hdr';
-  tdBxH.textContent='--- Biopsy ---'; trBxH.appendChild(tdBxH);
+  tdBxH.textContent='Biopsy'; trBxH.appendChild(tdBxH);
   tbody.appendChild(trBxH);
 
   // Row 4: Biopsy
