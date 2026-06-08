@@ -721,10 +721,11 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   border-bottom: 0.5px solid var(--sep);
 }
 .nodule-table-el {
-  border-collapse: collapse; width: 100%;
+  border-collapse: collapse; width: 100%; table-layout: fixed;
   background: var(--bg1);
   border-radius: 0 0 16px 16px; overflow: hidden;
 }
+col.nodule-label-col { width: 136px; }
 .nodule-th-el {
   background: var(--bg1); color: var(--label1);
   padding: 0; border: none;
@@ -818,6 +819,7 @@ table.ln-table td.td-top { vertical-align: top; }
   .nodule-section { flex-direction: column; }
   .nodule-col { width: 100%; }
   .nodule-label-cell { width: 108px !important; font-size: var(--font-sm) !important; padding: 10px 10px !important; }
+  col.nodule-label-col { width: 108px; }
   .nodule-data-cell { padding: 10px 10px; }
   .nodule-header-inner { padding: 12px 12px; }
   .nodule-section-hdr { padding: 10px 10px 8px; }
@@ -851,6 +853,7 @@ table.ln-table td.td-top { vertical-align: top; }
   .sec-nav-btn { font-size: 10px; padding: 0 7px; }
   table.data-table td.label-cell { width: 76px !important; }
   .nodule-label-cell { width: 84px !important; }
+  col.nodule-label-col { width: 84px; }
 }
 
 /* ===== TWO-COLUMN LAYOUT ===== */
@@ -1245,6 +1248,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .nodule-section { flex-direction: column; }
   .nodule-col { width: 100%; }
   .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 10px !important; }
+  col.nodule-label-col { width: 100px; }
   .nodule-data-cell { padding: 10px 10px; }
   .nodule-header-inner { padding: 12px 12px; }
   .nodule-section-hdr { padding: 10px 10px 8px; }
@@ -1286,6 +1290,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .sec-nav-btn { font-size: 11px; padding: 0 8px; }
   table.data-table td.label-cell { width: 82px !important; }
   .nodule-label-cell { width: 90px !important; }
+  col.nodule-label-col { width: 90px; }
 }
 
 /* ===== MOBILE SMALL (< 375px) ===== */
@@ -1293,6 +1298,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .tab-btn { font-size: 10px; padding: 0 4px; }
   table.data-table td.label-cell { width: 76px !important; }
   .nodule-label-cell { width: 84px !important; }
+  col.nodule-label-col { width: 84px; }
   #main { padding: 10px max(10px, env(safe-area-inset-left, 10px)); }
   #bottom-section { margin: 0 10px 10px; }
   .radio-group label { padding: 9px 8px; font-size: 13px; }
@@ -2454,7 +2460,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.56';
+const APP_VERSION = 'ver0.57';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -3019,6 +3025,14 @@ function removeNodule(lobe, idx, opts = {}) {
   return removed;
 }
 
+function makeNoduleColgroup() {
+  const cg = document.createElement('colgroup');
+  const c1 = document.createElement('col'); c1.className = 'nodule-label-col';
+  cg.appendChild(c1);
+  cg.appendChild(document.createElement('col'));
+  return cg;
+}
+
 function buildNoduleTable(lobe, idx, nod) {
   const wrap = document.createElement('div');
   wrap.className = 'nodule-item';
@@ -3054,6 +3068,7 @@ function buildNoduleTable(lobe, idx, nod) {
 
   const tbl = document.createElement('table');
   tbl.className = 'nodule-table-el';
+  tbl.appendChild(makeNoduleColgroup());
 
   // Header row
   const thead = document.createElement('thead');
@@ -4842,7 +4857,7 @@ function renderPostopResidualNoduleCol(lobe) {
 }
 function buildPostopResidualNoduleTable(lobe, idx, nod) {
   const wrap=document.createElement('div'); wrap.className='nodule-item'; const label=LOBE_LABELS[lobe]+(idx+1); const anatomyLabel=getPostopLabelFor('residual', lobe); const info=getKTIRADSInfo(nod,false);
-  const table=document.createElement('table'); table.className='nodule-table-el';
+  const table=document.createElement('table'); table.className='nodule-table-el'; table.appendChild(makeNoduleColgroup());
   const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el';
   const hin=document.createElement('div'); hin.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap';
   const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Nodule '+label+' <span style="color:var(--label2);font-weight:600;">('+anatomyLabel+')</span> &nbsp;<span class="tirads-display '+(info.tirads.includes('5')?'tirads-5':info.tirads.includes('4')?'tirads-4':info.tirads.includes('3')?'tirads-3':info.tirads.includes('2')?'tirads-2':'')+'">'+(info.tirads||'[K-TIRADS]')+'</span>'; tw.appendChild(main);
@@ -4901,7 +4916,7 @@ function autoPostopOpBedImpression(les){
   }
 }
 function renderPostopOpBedCol(site){ const cont=document.getElementById('postop-opbed-'+site); if(!cont)return; cont.innerHTML=''; const list=ensurePostopState().opBedLesions[site]||[]; if(!list.length){ const e=document.createElement('div'); e.className='postop-section-empty'; e.textContent='No op bed lesion.'; cont.appendChild(e); } list.forEach((les,idx)=>cont.appendChild(buildPostopOpBedTable(site,idx,les))); }
-function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
+function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; table.appendChild(makeNoduleColgroup()); const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
   addRow('Location', mkOpBedLocation(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Diameter', mkPostopDiameter(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Shape /\nOrientation', mkPostopRadio('op_shape_ori_'+site+'_'+idx,['Parallel','Nonparallel / Taller-than-wide','Irregular shape'],les,'orientation',()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Margin', mkPostopRadio('op_margin_'+site+'_'+idx,['Smooth','Ill-defined','Irregular','Spiculated','Infiltrative'],les,'margin',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenicity', mkPostopRadio('op_echo_'+site+'_'+idx,['Marked hypoechoic','Mild hypoechoic','Isoechoic','Hyperechoic','Heterogeneous','Cystic / cystic change'],les,'echogenicity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenic foci', mkPostopRadio('op_foci_'+site+'_'+idx,['None','Punctate echogenic foci','Macrocalcification','Rim calcification','Coarse calcification','Surgical clip / artifact suspected'],les,'echogenicFoci',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Vascularity', mkPostopRadio('op_vasc_'+site+'_'+idx,['None','Peripheral','Mild intralesional','Marked intralesional','Abnormal vascularity'],les,'vascularity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Suspicious\nFeatures', mkPostopChecks([['suspPEF','Punctate echogenic foci'],['suspIrregular','Irregular or infiltrative margin'],['suspTaller','Nonparallel orientation'],['suspMarkedHypoechoic','Marked hypoechogenicity'],['suspAbnormalVascularity','Abnormal vascularity'],['suspGrowth','Interval growth'],['suspInvasion','Adjacent structure invasion']],les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Adjacent\nStructure\nInvasion', mkOpBedInvasion(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Size Change', mkOpBedSizeChange(site,idx,les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Biopsy/Procedure', mkOpBedBiopsy(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Impression\nCategory', mkOpBedImpression(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Comment', mkTextarea(les,'comment',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Recommendation', mkTextarea(les,'recommendation',()=>updatePostopOpBedLesion(site,idx,les)),false); const rr=document.createElement('tr'); const rc=document.createElement('td'); rc.colSpan=2; rc.className='nodule-reset-cell'; const rb=document.createElement('button'); rb.className='pink-btn'; rb.textContent='Reset this op bed lesion'; rb.onclick=()=>{ ensurePostopState().opBedLesions[site][idx]=defaultOpBedLesion(); saveState(); renderPostop(); }; rc.appendChild(rb); rr.appendChild(rc); tbody.appendChild(rr); table.appendChild(tbody); wrap.appendChild(table); return wrap; }
 function mkOpBedLocation(les,onch){ const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;gap:6px;'; const sel=document.createElement('select'); sel.style.cssText='width:100%;'; const opts=['','Right Op. Bed','Left Op. Bed','Isthmus Op. Bed','Central Neck / Thyroidectomy Bed','Strap muscle adjacent area','Tracheoesophageal groove','Paraesophageal area','Other']; opts.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o||'-- Select location --'; if(les.location===o) opt.selected=true; sel.appendChild(opt); }); sel.onchange=()=>{ les.location=sel.value; onch(); }; wrap.appendChild(sel); if(les.location==='Other'){ const i=mkTextInput(les,'locationOtherText',onch,'Other location','180px'); wrap.appendChild(i); } return wrap; }
 function mkOpBedTwoRadios(site,idx,les,k1,o1,k2,o2,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:6px;'; d.appendChild(mkPostopRadio('op_'+k1+'_'+site+'_'+idx,o1,les,k1,onch)); d.appendChild(mkPostopRadio('op_'+k2+'_'+site+'_'+idx,o2,les,k2,onch)); return d; }
