@@ -2535,7 +2535,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.70';
+const APP_VERSION = 'ver0.71';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -5025,24 +5025,45 @@ function resetPostopOpBeds(){ ensurePostopState().opBedLesions={ right:[], left:
 function resetPostopResidualNodules(){ ensurePostopState().residualThyroidNodules={ right:[], left:[], isthmus:[] }; saveState(); renderPostop(); }
 
 // ==================== LN CHIP DRAG-SELECT ====================
+// Click  → native label click handles toggle (no preventDefault)
+// Drag   → mouseover applies dragVal to each chip entered
+// Edge   → drag ending on start chip blocks the imminent click to prevent double-toggle
 (function() {
-  let dragging = false, dragVal = false;
+  let startLbl = null, dragVal = false, didDrag = false;
+
   document.addEventListener('mousedown', e => {
     const lbl = e.target.closest('.ln-check-label');
     if (!lbl) return;
     const chk = lbl.querySelector('input[type=checkbox]');
     if (!chk || chk.disabled) return;
-    e.preventDefault();
-    dragging = true;
+    startLbl = lbl;
     dragVal = !chk.checked;
-    chk.checked = dragVal;
-    chk.dispatchEvent(new Event('change'));
+    didDrag = false;
   });
-  document.addEventListener('mouseup', () => { dragging = false; });
+
+  document.addEventListener('mouseup', e => {
+    if (didDrag && startLbl && e.target.closest('.ln-check-label') === startLbl) {
+      // Drag ended on the same chip it started — block the imminent click
+      const once = ev => { ev.preventDefault(); document.removeEventListener('click', once, true); };
+      document.addEventListener('click', once, true);
+    }
+    startLbl = null;
+    didDrag = false;
+  });
+
   document.addEventListener('mouseover', e => {
-    if (!dragging) return;
+    if (!startLbl) return;
     const lbl = e.target.closest('.ln-check-label');
-    if (!lbl) return;
+    if (!lbl || lbl === startLbl) return;
+    if (!didDrag) {
+      // First time entering a different chip: apply dragVal to start chip too
+      didDrag = true;
+      const sc = startLbl.querySelector('input[type=checkbox]');
+      if (sc && !sc.disabled && sc.checked !== dragVal) {
+        sc.checked = dragVal;
+        sc.dispatchEvent(new Event('change'));
+      }
+    }
     const chk = lbl.querySelector('input[type=checkbox]');
     if (!chk || chk.disabled || chk.checked === dragVal) return;
     chk.checked = dragVal;
