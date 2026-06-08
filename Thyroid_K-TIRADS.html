@@ -588,10 +588,10 @@ input[id^="sizeLeft"] {
 
 /* ===== LYMPH NODE TABLE ===== */
 .ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); margin-bottom: 12px; }
-table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-base); min-width: 720px; }
+table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-base); min-width: 560px; }
 table.ln-table th, table.ln-table td {
   border-bottom: 0.5px solid rgba(84,84,88,0.3);
-  padding: 10px 12px; text-align: center; vertical-align: middle;
+  padding: 7px 6px; text-align: center; vertical-align: middle;
 }
 table.ln-table th { background: var(--bg2); color: var(--label1); font-weight: 700; border-bottom: 0.5px solid var(--sep); }
 table.ln-table th.sub-header { background: var(--bg1); color: var(--label3); font-weight: 600; font-size: var(--font-xs); }
@@ -793,13 +793,13 @@ col.nodule-label-col { width: 136px; }
   border-bottom: none; background: var(--bg1);
 }
 .ln-check-label {
-  display: flex; align-items: center; justify-content: center; gap: 5px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
   white-space: nowrap; cursor: pointer;
-  padding: 7px 11px; border-radius: 8px;
+  padding: 3px 8px; border-radius: 6px;
   transition: background 0.15s;
   background: var(--fill3);
-  color: var(--label2); font-size: var(--font-md); font-weight: 500; letter-spacing: -0.1px;
-  min-height: 38px; text-align: center;
+  color: var(--label2); font-size: 12px; font-weight: 500; letter-spacing: 0;
+  min-height: 26px; text-align: center;
   user-select: none; -webkit-user-select: none;
 }
 .ln-check-label:active { background: var(--fill4); }
@@ -808,7 +808,7 @@ col.nodule-label-col { width: 136px; }
 /* Biopsy / Complications inline checks in LN table */
 table.ln-table .inline-check-label { background: var(--fill3); }
 /* Level chip flex wrapper */
-.ln-chip-group { display: flex; flex-wrap: wrap; gap: 3px; }
+.ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; }
 .ln-section-hdr {
   background: var(--fill4); color: var(--label3);
   font-weight: 700; text-align: left;
@@ -2025,7 +2025,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
       <circle cx="19.5" cy="4.5" r="3" fill="currentColor" stroke="none"/>
       <line x1="16" y1="7" x2="17.4" y2="6.1" stroke-width="1.5"/>
     </svg>
-    Ext. Lesion
+    Extrathyroidal Lesion
   </button>
   <div class="top-spacer"></div>
   <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
@@ -2350,7 +2350,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
       <table class="ln-table" id="lnTable">
         <thead>
           <tr>
-            <th rowspan="2" style="min-width:140px;">Location</th>
+            <th rowspan="2" style="min-width:110px;">Location</th>
             <th colspan="4">Lateral Neck</th>
             <th colspan="4">Central Neck</th>
           </tr>
@@ -2528,7 +2528,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.66';
+const APP_VERSION = 'ver0.67';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
