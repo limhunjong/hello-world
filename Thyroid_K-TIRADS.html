@@ -588,17 +588,22 @@ input[id^="sizeLeft"] {
 
 /* ===== LYMPH NODE TABLE ===== */
 .ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); margin-bottom: 12px; }
-table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-base); min-width: 560px; }
+table.ln-table {
+  border-collapse: collapse; background: var(--bg1); font-size: var(--font-base);
+  width: 100%; table-layout: fixed; min-width: 0;
+}
 table.ln-table th, table.ln-table td {
   border-bottom: 0.5px solid rgba(84,84,88,0.3);
-  padding: 7px 6px; text-align: center; vertical-align: middle;
+  padding: 7px 5px; text-align: center; vertical-align: middle;
+  overflow: hidden;
 }
 table.ln-table th { background: var(--bg2); color: var(--label1); font-weight: 700; border-bottom: 0.5px solid var(--sep); }
 table.ln-table th.sub-header { background: var(--bg1); color: var(--label3); font-weight: 600; font-size: var(--font-xs); }
 table.ln-table td.row-label {
   background: var(--bg1); font-weight: 600; text-align: left;
-  white-space: nowrap; color: var(--label2);
+  white-space: normal; word-break: keep-all; color: var(--label2);
   border-right: 0.5px solid rgba(84,84,88,0.2);
+  width: 88px; font-size: 12px;
 }
 table.ln-table td.required-cell { background: rgba(255,159,10,0.055); }
 
@@ -807,18 +812,20 @@ col.nodule-label-col { width: 136px; }
 .ln-check-label:has(input:disabled) { opacity: 0.35; pointer-events: none; }
 /* Biopsy / Complications inline checks in LN table */
 table.ln-table .inline-check-label { background: var(--fill3); }
-/* Level chip flex wrapper */
-.ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; }
 .ln-section-hdr {
   background: var(--fill4); color: var(--label3);
   font-weight: 700; text-align: left;
   padding: 8px 12px; font-size: var(--font-xs);
 }
-.ln-measure-cell { display: flex; flex-direction: column; gap: 3px; }
-.ln-measure-row { display: flex; align-items: center; gap: 3px; }
-.ln-size-input { width: 50px; }
-table.ln-table textarea { width: 100%; }
+.ln-measure-cell { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.ln-measure-row { display: flex; align-items: center; gap: 2px; width: 100%; min-width: 0; }
+.ln-meas-lbl { font-size: 10px; font-weight: 600; color: var(--label3); flex-shrink: 0; }
+.ln-size-input { flex: 1; min-width: 0; width: 0; }
+.ln-measure-row select { flex-shrink: 1; min-width: 0; font-size: 11px; max-width: 52px; }
+table.ln-table textarea { width: 100%; box-sizing: border-box; min-width: 0; }
 table.ln-table td.td-top { vertical-align: top; }
+.ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; width: 100%; }
+.ln-check-label { min-width: calc(50% - 1px); flex: 1; }
 #tab-content-extra textarea { width: 100%; }
 
 /* ===== NODULE LABEL COLUMN ===== */
@@ -2350,7 +2357,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
       <table class="ln-table" id="lnTable">
         <thead>
           <tr>
-            <th rowspan="2" style="min-width:110px;">Location</th>
+            <th rowspan="2" style="width:88px;">Location</th>
             <th colspan="4">Lateral Neck</th>
             <th colspan="4">Central Neck</th>
           </tr>
@@ -2528,7 +2535,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.67';
+const APP_VERSION = 'ver0.68';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -5110,9 +5117,11 @@ function renderLymphTable() {
     };
     const d = document.createElement('div'); d.className='ln-measure-cell';
     const r1 = document.createElement('div'); r1.className='ln-measure-row';
-    r1.append('LD:'); r1.appendChild(mkInp('LD','ldValue')); r1.appendChild(mkSel('ldUnit'));
+    const l1=document.createElement('span'); l1.className='ln-meas-lbl'; l1.textContent='LD';
+    r1.appendChild(l1); r1.appendChild(mkInp('LD','ldValue')); r1.appendChild(mkSel('ldUnit'));
     const r2 = document.createElement('div'); r2.className='ln-measure-row';
-    r2.append('SD:'); r2.appendChild(mkInp('SD','sdValue')); r2.appendChild(mkSel('sdUnit'));
+    const l2=document.createElement('span'); l2.className='ln-meas-lbl'; l2.textContent='SD';
+    r2.appendChild(l2); r2.appendChild(mkInp('SD','sdValue')); r2.appendChild(mkSel('sdUnit'));
     d.appendChild(r1); d.appendChild(r2);
     td.appendChild(d);
     tr2.appendChild(td);
