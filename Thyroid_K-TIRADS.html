@@ -327,6 +327,15 @@ body.light table.ln-table th.sub-header {
   box-shadow: var(--shadow-btn);
 }
 .pink-btn:active { opacity: 0.72; }
+.section-reset-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: rgba(255,69,58,0.14); color: var(--red); border: 0.5px solid rgba(255,69,58,0.35);
+  padding: 4px 12px; border-radius: var(--r-sm);
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  font-family: inherit; transition: background 0.15s;
+}
+.section-reset-btn:hover { background: rgba(255,69,58,0.22); }
+.section-reset-btn:active { background: rgba(255,69,58,0.30); }
 .blue-btn {
   background: var(--blue); color: #fff; border: none;
   padding: 10px 18px; border-radius: var(--r-md);
@@ -2063,7 +2072,6 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <!-- TAB 1: THYROID -->
   <div class="tab-content active" id="tab-content-thyroid">
     <div class="action-bar">
-      <button class="pink-btn" onclick="resetThyroid()">갑상선 초기화</button>
       <div class="radio-group" style="display:inline-flex;"><label><input type="checkbox" id="normalThyroid" onchange="onNormalThyroidChange()"> Normal Thyroid</label></div>
     </div>
 
@@ -2106,7 +2114,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     <!-- Section B: Thyroid Parenchyma -->
     <div class="table-card">
     <table class="data-table" id="parenchymaTable">
-      <thead><tr><th colspan="2">Thyroid Parenchyma</th></tr></thead>
+      <thead><tr><th colspan="2" style="position:relative;">Thyroid Parenchyma<button class="section-reset-btn" onclick="resetThyroid()">갑상선 초기화</button></th></tr></thead>
       <tbody>
         <tr>
           <td class="label-cell">Thyroid Size</td>
@@ -2550,7 +2558,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.73';
+const APP_VERSION = 'ver0.74';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
