@@ -130,17 +130,6 @@
       line-height: 1.5;
     }
 
-    .edit-banner {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(10, 132, 255, 0.08);
-      color: var(--accent);
-      font-size: 0.92rem;
-      line-height: 1.45;
-      font-weight: 600;
-    }
-
     .input-wrap {
       margin-top: 18px;
       position: relative;
@@ -228,12 +217,6 @@
 
     button:active { transform: scale(0.98); }
 
-    button:disabled {
-      opacity: 0.56;
-      cursor: default;
-      transform: none;
-    }
-
     .btn-primary {
       background: var(--accent);
       color: white;
@@ -289,21 +272,14 @@
       border-radius: 20px;
       padding: 18px 18px 16px;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
-      position: relative;
-    }
-
-    .row-card.is-editing {
-      border-color: rgba(10, 132, 255, 0.34);
-      box-shadow: 0 14px 30px rgba(10, 132, 255, 0.10), 0 10px 24px rgba(0, 0, 0, 0.04);
     }
 
     .row-top {
       display: flex;
       gap: 12px;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       margin-bottom: 12px;
-      flex-wrap: wrap;
     }
 
     .row-label {
@@ -327,29 +303,6 @@
       font-weight: 700;
       letter-spacing: -0.01em;
       white-space: nowrap;
-    }
-
-    .row-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .btn-row-edit {
-      min-height: 34px;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: rgba(10, 132, 255, 0.10);
-      color: var(--accent);
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .btn-row-edit:hover {
-      transform: translateY(-1px);
     }
 
     .badge.neutral {
@@ -506,7 +459,6 @@
           <div class="progress" id="progressPill"><span class="progress-dot"></span><span id="progressText">Initial · 1 of 3</span></div>
           <div class="prompt" id="promptText">Initial - first diameter (cm)</div>
           <div class="step-note">Type a positive number and press Enter. The next step appears automatically.</div>
-          <div class="edit-banner" id="editBanner" hidden></div>
 
           <div class="input-wrap">
             <input
@@ -526,7 +478,6 @@
 
           <div class="summary-actions">
             <button class="btn-secondary" id="resetBtn" type="button">Reset</button>
-            <button class="btn-secondary" id="cancelEditBtn" type="button" hidden>Cancel Edit</button>
             <button class="btn-primary" id="copyBtn" type="button">Copy Summary</button>
           </div>
         </div>
@@ -559,7 +510,6 @@
       currentValues: [],      // values being typed for the active row
       initial: null,
       followups: [],
-      editTarget: null,
     };
 
     const el = {
@@ -568,10 +518,8 @@
       progress: document.getElementById('progressText'),
       preview: document.getElementById('enteredPreview'),
       error: document.getElementById('errorMessage'),
-      editBanner: document.getElementById('editBanner'),
       rows: document.getElementById('rows'),
       reset: document.getElementById('resetBtn'),
-      cancelEdit: document.getElementById('cancelEditBtn'),
       copy: document.getElementById('copyBtn'),
       toast: document.getElementById('toast'),
     };
@@ -593,11 +541,6 @@
     }
 
     function getCurrentLabel() {
-      if (state.editTarget) {
-        return state.editTarget.kind === 'initial'
-          ? 'Edit Initial'
-          : `Edit F/U ${state.editTarget.index + 1}`;
-      }
       if (state.phase === 'initial') return 'Initial';
       return `F/U ${state.followups.length + 1}`;
     }
@@ -659,58 +602,22 @@
       };
     }
 
-    function clearDraft() {
-      state.currentValues = [];
-      state.stepIndex = 0;
-      el.input.value = '';
-    }
-
-    function cancelEdit() {
-      state.editTarget = null;
-      clearDraft();
-      clearError();
-      renderAll();
-      setInputFocus();
-      showToast('Edit cancelled');
-    }
-
-    function beginEdit(target) {
-      state.editTarget = target;
-      clearDraft();
-      clearError();
-      renderAll();
-      setInputFocus();
-      showToast(target.kind === 'initial' ? 'Editing Initial' : `Editing F/U ${target.index + 1}`);
-    }
-
     function finalizeCurrentRow() {
-      const rowLabel = state.editTarget
-        ? (state.editTarget.kind === 'initial' ? 'Initial' : `F/U ${state.editTarget.index + 1}`)
-        : (state.phase === 'initial' ? 'Initial' : `F/U ${state.followups.length + 1}`);
-      const row = buildRowData(rowLabel, state.currentValues, state.initial ? state.initial.volume : null);
+      const label = state.phase === 'initial' ? 'Initial' : `F/U ${state.followups.length + 1}`;
+      const row = buildRowData(label, state.currentValues, state.initial ? state.initial.volume : null);
 
-      if (state.editTarget) {
-        if (state.editTarget.kind === 'initial') {
-          state.initial = row;
-          state.followups = state.followups.map(existing => ({
-            ...existing,
-            vrr: calculateVRR(state.initial.volume, existing.volume),
-          }));
-        } else {
-          const index = state.editTarget.index;
-          state.followups[index] = row;
-        }
-        state.editTarget = null;
-      } else if (state.phase === 'initial') {
+      if (state.phase === 'initial') {
         state.initial = row;
         state.phase = 'followup';
       } else {
         state.followups.push(row);
       }
 
-      clearDraft();
+      state.currentValues = [];
+      state.stepIndex = 0;
       renderAll();
       clearError();
+      el.input.value = '';
       setInputFocus();
     }
 
@@ -740,18 +647,9 @@
     }
 
     function renderChromeOnly() {
-      const placeholder = getCurrentPlaceholder();
-      el.prompt.textContent = placeholder;
+      el.prompt.textContent = getCurrentPlaceholder();
       el.progress.textContent = getProgressText();
-      el.input.placeholder = placeholder;
-      const isEditing = !!state.editTarget;
-      el.editBanner.hidden = !isEditing;
-      el.cancelEdit.hidden = !isEditing;
-      el.editBanner.textContent = isEditing
-        ? (state.editTarget.kind === 'initial'
-          ? 'Editing Initial. Enter three new diameters to replace the baseline row and automatically refresh all follow-up VRRs.'
-          : `Editing F/U ${state.editTarget.index + 1}. Enter three new diameters to replace this follow-up row.`)
-        : '';
+      el.input.placeholder = getCurrentPlaceholder();
       el.preview.textContent = state.currentValues.length
         ? `Entered so far: ${state.currentValues.map(v => formatNumber(v, 1)).join(' × ')}${state.currentValues.length < 3 ? ' × …' : ''}`
         : 'No values entered yet.';
@@ -767,15 +665,9 @@
       return `<span class="badge accent">Stable</span>`;
     }
 
-    function renderRow(row, kind, index = null) {
+    function renderRow(row) {
       const card = document.createElement('article');
       card.className = 'row-card';
-
-      const isEditing = state.editTarget
-        && ((kind === 'initial' && state.editTarget.kind === 'initial')
-          || (kind === 'followup' && state.editTarget.kind === 'followup' && state.editTarget.index === index));
-
-      if (isEditing) card.classList.add('is-editing');
 
       const badgeClass = row.label === 'Initial'
         ? 'neutral'
@@ -785,13 +677,14 @@
             ? 'bad'
             : 'accent';
 
+      const vrrText = row.label === 'Initial'
+        ? 'Baseline'
+        : `${row.vrr >= 0 ? '' : ''}${formatNumber(row.vrr, 1)}%`;
+
       card.innerHTML = `
         <div class="row-top">
           <div class="row-label">${row.label}</div>
-          <div class="row-actions">
-            <div class="badge ${badgeClass}">${row.label === 'Initial' ? 'Baseline' : (row.vrr > 0 ? 'Reduction' : row.vrr < 0 ? 'Increase' : 'Stable')}</div>
-            <button class="btn-row-edit" type="button" ${isEditing ? 'disabled' : ''}>${isEditing ? 'Editing' : 'Edit'}</button>
-          </div>
+          <div class="badge ${badgeClass}">${row.label === 'Initial' ? 'Baseline' : (row.vrr > 0 ? 'Reduction' : row.vrr < 0 ? 'Increase' : 'Stable')}</div>
         </div>
         <div class="card-grid">
           <div class="metric wide">
@@ -814,11 +707,6 @@
         <div class="hint-line">${row.label === 'Initial' ? 'This is the baseline volume used for all follow-up VRR calculations.' : (row.vrr >= 0 ? 'Positive VRR means volume reduction.' : 'Negative VRR means the follow-up volume is larger than baseline.')}</div>
       `;
 
-      const editBtn = card.querySelector('.btn-row-edit');
-      editBtn.addEventListener('click', () => {
-        beginEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', index });
-      });
-
       return card;
     }
 
@@ -834,8 +722,8 @@
         return;
       }
 
-      el.rows.appendChild(renderRow(state.initial, 'initial'));
-      state.followups.forEach((row, index) => el.rows.appendChild(renderRow(row, 'followup', index)));
+      el.rows.appendChild(renderRow(state.initial));
+      state.followups.forEach(row => el.rows.appendChild(renderRow(row)));
     }
 
     function resetAll() {
@@ -844,7 +732,6 @@
       state.currentValues = [];
       state.initial = null;
       state.followups = [];
-      state.editTarget = null;
       el.input.value = '';
       clearError();
       renderAll();
@@ -901,7 +788,6 @@
     });
 
     el.reset.addEventListener('click', resetAll);
-    el.cancelEdit.addEventListener('click', cancelEdit);
     el.copy.addEventListener('click', copySummary);
 
     // Restore focus when clicking elsewhere so the app feels keyboard-first.
