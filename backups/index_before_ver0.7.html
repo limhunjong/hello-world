@@ -106,39 +106,37 @@
 
     .row-select-wrap {
       margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .row-select-label {
+      color: var(--subtext);
+      font-size: 0.92rem;
+      font-weight: 600;
+      white-space: nowrap;
     }
 
     .row-select {
-      width: 100%;
+      flex: 1;
       min-width: 0;
       appearance: none;
       border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 14px;
       min-height: 44px;
-      padding: 0 42px 0 14px;
-      background: rgba(255, 255, 255, 0.96) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="%236e6e73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 14px center;
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.96);
       color: var(--text);
       font: inherit;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 600;
       outline: none;
-      cursor: pointer;
-      text-align: center;
-      text-align-last: center;
-      line-height: 1.2;
-    }
-
-    .row-select option {
-      text-align: center;
     }
 
     .row-select:focus-visible {
       box-shadow: var(--focus);
       border-color: rgba(10, 132, 255, 0.45);
-    }
-
-    .row-select::-ms-expand {
-      display: none;
     }
 
     .progress-dot {
@@ -150,12 +148,10 @@
     }
 
     .prompt {
-      margin-top: 10px;
-      color: var(--subtext);
-      font-size: 0.84rem;
-      font-weight: 600;
-      letter-spacing: 0;
-      line-height: 1.35;
+      margin-top: 6px;
+      font-size: 1.1rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
     }
 
     .step-note {
@@ -171,8 +167,8 @@
       border-radius: 14px;
       background: rgba(10, 132, 255, 0.08);
       color: var(--accent);
-      font-size: 0.88rem;
-      line-height: 1.4;
+      font-size: 0.92rem;
+      line-height: 1.45;
       font-weight: 600;
     }
 
@@ -183,14 +179,14 @@
 
     input[type="text"] {
       width: 100%;
-      height: 62px;
+      height: 66px;
       border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 20px;
       background: rgba(255, 255, 255, 0.96);
       color: var(--text);
-      font-size: clamp(0.9rem, 2.1vw, 1.15rem);
+      font-size: clamp(1.12rem, 3.15vw, 1.65rem);
       font-weight: 650;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
       text-align: center;
       outline: none;
       padding: 0 18px;
@@ -202,7 +198,6 @@
       color: #a1a1a6;
       font-weight: 500;
       opacity: 1;
-      font-size: 0.9em;
     }
 
     input[type="text"]:focus {
@@ -215,8 +210,8 @@
       margin-top: 14px;
       min-height: 26px;
       color: var(--subtext);
-      font-size: 0.9rem;
-      line-height: 1.35;
+      font-size: 0.95rem;
+      line-height: 1.4;
       word-break: break-word;
     }
 
@@ -310,8 +305,8 @@
     .results-subtitle {
       margin: 6px 0 0;
       color: var(--subtext);
-      font-size: 0.88rem;
-      line-height: 1.4;
+      font-size: 0.95rem;
+      line-height: 1.45;
     }
 
     .rows {
@@ -661,7 +656,8 @@
         <div class="panel-inner">
           <div class="section-title" id="input-title">Input</div>
           <div class="row-select-wrap">
-            <select class="row-select" id="rowTargetSelect" aria-label="Select input target"></select>
+            <div class="row-select-label">Row</div>
+            <select class="row-select" id="rowTargetSelect" aria-label="Select input row"></select>
           </div>
           <div class="prompt" id="promptText">Initial - first diameter (cm)</div>
           <div class="edit-banner" id="editBanner" hidden></div>
@@ -828,21 +824,6 @@
         options.push(`<option value="followup:${row.uid}">${escapeHtml(row.label)}</option>`);
       });
       return options.join('');
-    }
-
-    function syncRowTargetOptions() {
-      if (!el.rowTarget) return;
-      const nextValue = state.editTarget
-        ? (state.editTarget.kind === 'initial' ? 'initial' : `followup:${state.editTarget.uid}`)
-        : 'next';
-      const nextOptions = buildInputTargetOptions();
-      if (el.rowTarget.dataset.optionsHtml !== nextOptions) {
-        el.rowTarget.innerHTML = nextOptions;
-        el.rowTarget.dataset.optionsHtml = nextOptions;
-      }
-      if ([...el.rowTarget.options].some(opt => opt.value === nextValue)) {
-        el.rowTarget.value = nextValue;
-      }
     }
 
     function getCurrentPlaceholder() {
@@ -1143,12 +1124,10 @@
             : `Editing ${getEditLabel(state.editTarget)}`))
         : '';
       if (el.rowTarget) {
-        const nextValue = state.editTarget
+        el.rowTarget.innerHTML = buildInputTargetOptions();
+        el.rowTarget.value = state.editTarget
           ? (state.editTarget.kind === 'initial' ? 'initial' : `followup:${state.editTarget.uid}`)
           : 'next';
-        if ([...el.rowTarget.options].some(opt => opt.value === nextValue)) {
-          el.rowTarget.value = nextValue;
-        }
       }
     }
 
@@ -1289,7 +1268,6 @@
         }));
       }
 
-      syncRowTargetOptions();
       renderChromeOnly();
       el.rows.innerHTML = '';
 
