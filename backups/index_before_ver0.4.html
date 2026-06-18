@@ -424,51 +424,6 @@
       word-break: break-word;
     }
 
-    .size-inline {
-      display: inline-flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .size-chip {
-      appearance: none;
-      border: 1px solid rgba(10, 132, 255, 0.18);
-      background: rgba(10, 132, 255, 0.06);
-      color: var(--text);
-      border-radius: 999px;
-      min-height: 34px;
-      padding: 0 12px;
-      font: inherit;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      cursor: pointer;
-      transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
-    }
-
-    .size-chip:hover {
-      transform: translateY(-1px);
-      background: rgba(10, 132, 255, 0.10);
-      border-color: rgba(10, 132, 255, 0.28);
-    }
-
-    .size-chip:focus-visible {
-      outline: none;
-      box-shadow: var(--focus);
-    }
-
-    .size-sep {
-      color: var(--subtext);
-      font-weight: 600;
-    }
-
-    .size-unit {
-      color: var(--subtext);
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-left: 2px;
-    }
-
     .metric .value.volume {
       font-size: clamp(1.4rem, 2.5vw, 1.9rem);
     }
@@ -656,35 +611,24 @@
       return `${values.map(v => formatNumber(v, 1)).join(' × ')} cm`;
     }
 
-    function getPhaseLabel() {
+    function getCurrentLabel() {
+      if (state.editTarget) {
+        return state.editTarget.kind === 'initial'
+          ? 'Edit Initial'
+          : `Edit F/U ${state.editTarget.index + 1}`;
+      }
       if (state.phase === 'initial') return 'Initial';
       return `F/U ${state.followups.length + 1}`;
     }
 
-    function getEditLabel(target) {
-      if (!target) return '';
-      return target.kind === 'initial'
-        ? 'Edit Initial'
-        : `Edit F/U ${target.index + 1}`;
-    }
-
-    function getTargetPartName(index) {
-      return ['first', 'second', 'third'][index] || 'selected';
-    }
-
     function getCurrentPlaceholder() {
-      if (state.editTarget?.mode === 'cell') {
-        return `${getEditLabel(state.editTarget)} - ${getTargetPartName(state.editTarget.cellIndex)} diameter (cm)`;
-      }
-      const label = state.editTarget ? getEditLabel(state.editTarget) : getPhaseLabel();
-      return `${label} - ${['first', 'second', 'third'][state.stepIndex]} diameter (cm)`;
+      const partNames = ['first', 'second', 'third'];
+      const label = getCurrentLabel();
+      return `${label} - ${partNames[state.stepIndex]} diameter (cm)`;
     }
 
     function getProgressText() {
-      if (state.editTarget?.mode === 'cell') {
-        return `${getEditLabel(state.editTarget)} · ${getTargetPartName(state.editTarget.cellIndex)} diameter`;
-      }
-      const label = state.editTarget ? getEditLabel(state.editTarget) : getPhaseLabel();
+      const label = getCurrentLabel();
       return `${label} · ${state.stepIndex + 1} of 3`;
     }
 
@@ -707,10 +651,10 @@
       showToast._t = setTimeout(() => el.toast.classList.remove('show'), 1500);
     }
 
-    function setInputFocus(selectAll = true) {
+    function setInputFocus() {
       requestAnimationFrame(() => {
         el.input.focus();
-        if (selectAll) el.input.select?.();
+        el.input.select?.();
       });
     }
 
@@ -749,29 +693,16 @@
       showToast('Edit cancelled');
     }
 
-    function beginRowEdit(target) {
-      state.editTarget = { ...target, mode: 'row' };
+    function beginEdit(target) {
+      state.editTarget = target;
       clearDraft();
       clearError();
       renderAll();
       setInputFocus();
-      showToast(target.kind === 'initial' ? 'Editing Initial row' : `Editing F/U ${target.index + 1} row`);
+      showToast(target.kind === 'initial' ? 'Editing Initial' : `Editing F/U ${target.index + 1}`);
     }
 
-    function beginCellEdit(target, cellIndex) {
-      state.editTarget = { ...target, mode: 'cell', cellIndex };
-      clearDraft();
-      clearError();
-      const currentValue = target.kind === 'initial'
-        ? state.initial.values[cellIndex]
-        : state.followups[target.index].values[cellIndex];
-      el.input.value = formatNumber(currentValue, 1);
-      renderAll();
-      setInputFocus(true);
-      showToast(`Editing ${getEditLabel(target)} · ${getTargetPartName(cellIndex)} diameter`);
-    }
-
-    function finalizeRowEdit() {
+    function finalizeCurrentRow() {
       const rowLabel = state.editTarget
         ? (state.editTarget.kind === 'initial' ? 'Initial' : `F/U ${state.editTarget.index + 1}`)
         : (state.phase === 'initial' ? 'Initial' : `F/U ${state.followups.length + 1}`);
@@ -802,34 +733,6 @@
       setInputFocus();
     }
 
-    function applyCellEdit(value) {
-      const target = state.editTarget;
-      const cellIndex = target.cellIndex;
-      const newValues = target.kind === 'initial'
-        ? [...state.initial.values]
-        : [...state.followups[target.index].values];
-      newValues[cellIndex] = value;
-
-      if (target.kind === 'initial') {
-        const updatedInitial = buildRowData('Initial', newValues);
-        state.initial = updatedInitial;
-        state.followups = state.followups.map(existing => ({
-          ...existing,
-          vrr: calculateVRR(updatedInitial.volume, existing.volume),
-        }));
-      } else {
-        const updated = buildRowData(`F/U ${target.index + 1}`, newValues, state.initial.volume);
-        state.followups[target.index] = updated;
-      }
-
-      state.editTarget = null;
-      clearDraft();
-      renderAll();
-      clearError();
-      setInputFocus();
-      showToast(`${getEditLabel(target)} updated`);
-    }
-
     function handleEnter() {
       const value = parsePositiveNumber(el.input.value);
       if (value === null) {
@@ -841,18 +744,12 @@
         return;
       }
 
-      clearError();
-
-      if (state.editTarget?.mode === 'cell') {
-        applyCellEdit(value);
-        return;
-      }
-
       state.currentValues.push(value);
       el.input.value = '';
+      clearError();
 
       if (state.currentValues.length === 3) {
-        finalizeRowEdit();
+        finalizeCurrentRow();
         return;
       }
 
@@ -870,19 +767,13 @@
       el.editBanner.hidden = !isEditing;
       el.cancelEdit.hidden = !isEditing;
       el.editBanner.textContent = isEditing
-        ? (state.editTarget.mode === 'cell'
-          ? `${getEditLabel(state.editTarget)} · ${getTargetPartName(state.editTarget.cellIndex)} diameter. Replace just this number and press Enter.`
-          : (state.editTarget.kind === 'initial'
-            ? 'Editing Initial row. Enter three new diameters to replace the baseline row and automatically refresh all follow-up VRRs.'
-            : `Editing F/U ${state.editTarget.index + 1} row. Enter three new diameters to replace this follow-up row.`))
+        ? (state.editTarget.kind === 'initial'
+          ? 'Editing Initial. Enter three new diameters to replace the baseline row and automatically refresh all follow-up VRRs.'
+          : `Editing F/U ${state.editTarget.index + 1}. Enter three new diameters to replace this follow-up row.`)
         : '';
-      if (state.editTarget?.mode === 'cell') {
-        el.preview.textContent = `Selected for editing: ${formatNumber(parseFloat(el.input.value), 1)} cm`;
-      } else {
-        el.preview.textContent = state.currentValues.length
-          ? `Entered so far: ${state.currentValues.map(v => formatNumber(v, 1)).join(' × ')}${state.currentValues.length < 3 ? ' × …' : ''}`
-          : 'No values entered yet.';
-      }
+      el.preview.textContent = state.currentValues.length
+        ? `Entered so far: ${state.currentValues.map(v => formatNumber(v, 1)).join(' × ')}${state.currentValues.length < 3 ? ' × …' : ''}`
+        : 'No values entered yet.';
     }
 
     function rowBadge(row) {
@@ -924,12 +815,7 @@
         <div class="card-grid">
           <div class="metric wide">
             <div class="kicker">Size</div>
-            <div class="size-inline">
-              ${row.values.map((value, idx) => `
-                <button class="size-chip" type="button" data-cell="${idx}" aria-label="Edit ${row.label} ${getTargetPartName(idx)} diameter">${formatNumber(value, 1)}</button>${idx < 2 ? '<span class="size-sep">×</span>' : ''}
-              `).join('')}
-              <span class="size-unit">cm</span>
-            </div>
+            <div class="value">${formatSize(row.values)}</div>
           </div>
           <div class="metric">
             <div class="kicker">Volume</div>
@@ -944,31 +830,20 @@
             <div class="value vrr">${row.label === 'Initial' ? '—' : `${formatNumber(row.vrr, 1)}%`}</div>
           </div>
         </div>
-        <div class="row-edit-hint">Click any number to change just that diameter. Tap the card to edit all three.</div>
+        <div class="row-edit-hint">Tap this card or the edit pill above to edit the row.</div>
         <div class="hint-line">${row.label === 'Initial' ? 'This is the baseline volume used for all follow-up VRR calculations.' : (row.vrr >= 0 ? 'Positive VRR means volume reduction.' : 'Negative VRR means the follow-up volume is larger than baseline.')}</div>
       `;
 
-      const openRowEdit = () => beginRowEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', index });
-      card.addEventListener('click', (event) => {
-        if (event.target.closest('.size-chip')) return;
-        openRowEdit();
-      });
+      const openEdit = () => beginEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', index });
+      card.addEventListener('click', openEdit);
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', `Edit ${row.label}`);
       card.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          openRowEdit();
+          openEdit();
         }
-      });
-
-      card.querySelectorAll('.size-chip').forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.stopPropagation();
-          const cellIndex = Number(button.dataset.cell);
-          beginCellEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', index }, cellIndex);
-        });
       });
 
       return card;
