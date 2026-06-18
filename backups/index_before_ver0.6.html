@@ -95,48 +95,17 @@
       text-transform: uppercase;
     }
 
-    .progress,
-    .step-note,
-    .entered-preview,
-    .row-edit-pill,
-    .row-edit-hint,
-    .hint-line {
-      display: none;
-    }
-
-    .row-select-wrap {
-      margin-top: 14px;
-      display: flex;
+    .progress {
+      display: inline-flex;
       align-items: center;
-      gap: 10px;
-    }
-
-    .row-select-label {
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.035);
       color: var(--subtext);
       font-size: 0.92rem;
       font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .row-select {
-      flex: 1;
-      min-width: 0;
-      appearance: none;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 14px;
-      min-height: 44px;
-      padding: 0 14px;
-      background: rgba(255, 255, 255, 0.96);
-      color: var(--text);
-      font: inherit;
-      font-size: 0.95rem;
-      font-weight: 600;
-      outline: none;
-    }
-
-    .row-select:focus-visible {
-      box-shadow: var(--focus);
-      border-color: rgba(10, 132, 255, 0.45);
     }
 
     .progress-dot {
@@ -648,18 +617,16 @@
   <div class="app">
     <header>
       <h1>VRR Calculator</h1>
-      <div class="subtitle">Enter three diameters in cm.</div>
+      <div class="subtitle">Enter three diameters in cm. Volumes and VRR are calculated automatically.</div>
     </header>
 
     <main class="grid">
       <section class="panel entry-panel" aria-labelledby="input-title">
         <div class="panel-inner">
           <div class="section-title" id="input-title">Input</div>
-          <div class="row-select-wrap">
-            <div class="row-select-label">Row</div>
-            <select class="row-select" id="rowTargetSelect" aria-label="Select input row"></select>
-          </div>
+          <div class="progress" id="progressPill"><span class="progress-dot"></span><span id="progressText">Initial · 1 of 3</span></div>
           <div class="prompt" id="promptText">Initial - first diameter (cm)</div>
+          <div class="step-note">Type a positive number and press Enter. The next step appears automatically.</div>
           <div class="edit-banner" id="editBanner" hidden></div>
 
           <div class="input-wrap">
@@ -675,6 +642,7 @@
             />
           </div>
 
+          <div class="entered-preview" id="enteredPreview">No values entered yet.</div>
           <div class="error" id="errorMessage" aria-live="polite"></div>
 
           <div class="summary-actions">
@@ -691,7 +659,7 @@
             <div>
               <div class="section-title">Results</div>
               <h2 class="results-title" id="results-title">Calculated rows</h2>
-              <p class="results-subtitle">Rows are ordered by follow-up timing.</p>
+              <p class="results-subtitle">Initial stays fixed at the top. Each follow-up row is appended below in time order, and you can set the follow-up timing from each row header.</p>
             </div>
           </div>
 
@@ -707,34 +675,23 @@
     // VRR Calculator: single-file app with keyboard-first data entry.
 
     const FOLLOWUP_PERIOD_OPTIONS = ['1 month', '3 month', '6 month', '1 year', '2 year', '3 year', '4 year', '5 year'];
-    const FOLLOWUP_PERIOD_MONTHS = {
-      '1 month': 1,
-      '3 month': 3,
-      '6 month': 6,
-      '1 year': 12,
-      '2 year': 24,
-      '3 year': 36,
-      '4 year': 48,
-      '5 year': 60,
-    };
 
     const state = {
-      phase: 'initial',
-      stepIndex: 0,
-      currentValues: [],
+      phase: 'initial',       // 'initial' | 'followup'
+      stepIndex: 0,           // 0..2 inside the current 3-number row
+      currentValues: [],      // values being typed for the active row
       initial: null,
       followups: [],
       editTarget: null,
-      rowCounter: 0,
     };
 
     const el = {
       input: document.getElementById('diameterInput'),
       prompt: document.getElementById('promptText'),
       progress: document.getElementById('progressText'),
+      preview: document.getElementById('enteredPreview'),
       error: document.getElementById('errorMessage'),
       editBanner: document.getElementById('editBanner'),
-      rowTarget: document.getElementById('rowTargetSelect'),
       rows: document.getElementById('rows'),
       reset: document.getElementById('resetBtn'),
       cancelEdit: document.getElementById('cancelEditBtn'),
@@ -769,22 +726,14 @@
 
     function getPhaseLabel() {
       if (state.phase === 'initial') return 'Initial';
-      return 'Next follow-up';
-    }
-
-    function getFollowupIndexByUid(uid) {
-      return state.followups.findIndex(row => row.uid === uid);
-    }
-
-    function getFollowupLabelByUid(uid) {
-      const index = getFollowupIndexByUid(uid);
-      return index >= 0 ? `F/U ${index + 1}` : 'F/U';
+      return `F/U ${state.followups.length + 1}`;
     }
 
     function getEditLabel(target) {
       if (!target) return '';
-      if (target.kind === 'initial') return 'Initial';
-      return getFollowupLabelByUid(target.uid);
+      return target.kind === 'initial'
+        ? 'Edit Initial'
+        : `Edit F/U ${target.index + 1}`;
     }
 
     function getTargetPartName(index) {
@@ -796,50 +745,20 @@
       return FOLLOWUP_PERIOD_OPTIONS.includes(row.period) ? row.period : '__custom__';
     }
 
-    function parsePeriodMonths(period) {
-      const text = String(period || '').trim().toLowerCase();
-      if (!text) return Number.POSITIVE_INFINITY;
-      if (FOLLOWUP_PERIOD_MONTHS[period]) return FOLLOWUP_PERIOD_MONTHS[period];
-      const match = text.match(/^(\d+(?:\.\d+)?)\s*(month|months|mo|year|years|yr|yrs)$/i);
-      if (!match) return Number.POSITIVE_INFINITY;
-      const value = Number(match[1]);
-      if (!Number.isFinite(value) || value <= 0) return Number.POSITIVE_INFINITY;
-      const unit = match[2].toLowerCase();
-      return unit.startsWith('year') || unit.startsWith('yr') ? value * 12 : value;
-    }
-
-    function sortFollowups() {
-      state.followups.sort((a, b) => {
-        const diff = (a.sortValue ?? Number.POSITIVE_INFINITY) - (b.sortValue ?? Number.POSITIVE_INFINITY);
-        if (diff !== 0) return diff;
-        return (a.createdAt ?? 0) - (b.createdAt ?? 0);
-      });
-      state.followups.forEach((row, index) => { row.label = `F/U ${index + 1}`; });
-    }
-
-    function buildInputTargetOptions() {
-      const options = ['<option value="next">Next follow-up</option>'];
-      if (state.initial) options.push('<option value="initial">Initial</option>');
-      state.followups.forEach((row) => {
-        options.push(`<option value="followup:${row.uid}">${escapeHtml(row.label)}</option>`);
-      });
-      return options.join('');
-    }
-
     function getCurrentPlaceholder() {
       if (state.editTarget?.mode === 'cell') {
         return `${getEditLabel(state.editTarget)} - ${getTargetPartName(state.editTarget.cellIndex)} diameter (cm)`;
       }
-      const label = state.editTarget ? getEditLabel(state.editTarget) : (state.initial ? 'Next follow-up' : 'Initial');
+      const label = state.editTarget ? getEditLabel(state.editTarget) : getPhaseLabel();
       return `${label} - ${['first', 'second', 'third'][state.stepIndex]} diameter (cm)`;
     }
 
     function getProgressText() {
       if (state.editTarget?.mode === 'cell') {
-        return `${getEditLabel(state.editTarget)} · ${getTargetPartName(state.editTarget.cellIndex)}`;
+        return `${getEditLabel(state.editTarget)} · ${getTargetPartName(state.editTarget.cellIndex)} diameter`;
       }
-      const label = state.editTarget ? getEditLabel(state.editTarget) : (state.initial ? 'Next follow-up' : 'Initial');
-      return `${label} · ${state.stepIndex + 1}/3`;
+      const label = state.editTarget ? getEditLabel(state.editTarget) : getPhaseLabel();
+      return `${label} · ${state.stepIndex + 1} of 3`;
     }
 
     function showError(message) {
@@ -881,16 +800,12 @@
     function buildRowData(label, values, initialVolume = null, meta = {}) {
       const volume = calculateVolume(values[0], values[1], values[2]);
       const period = typeof meta.period === 'string' ? meta.period.trim() : '';
-      const sortValue = typeof meta.sortValue === 'number' ? meta.sortValue : parsePeriodMonths(period);
       return {
-        uid: meta.uid || `row-${++state.rowCounter}`,
         label,
         values: [...values],
         volume,
         vrr: initialVolume === null ? null : calculateVRR(initialVolume, volume),
         period,
-        sortValue,
-        createdAt: typeof meta.createdAt === 'number' ? meta.createdAt : Date.now(),
         periodMode: meta.periodMode || (period ? (FOLLOWUP_PERIOD_OPTIONS.includes(period) ? 'preset' : 'custom') : 'none'),
       };
     }
@@ -916,114 +831,91 @@
       clearError();
       renderAll();
       setInputFocus();
+      showToast(target.kind === 'initial' ? 'Editing Initial row' : `Editing F/U ${target.index + 1} row`);
     }
 
     function beginCellEdit(target, cellIndex) {
       state.editTarget = { ...target, mode: 'cell', cellIndex };
       clearDraft();
       clearError();
-      const row = target.kind === 'initial'
-        ? state.initial
-        : state.followups[getFollowupIndexByUid(target.uid)];
-      const currentValue = row?.values[cellIndex];
+      const currentValue = target.kind === 'initial'
+        ? state.initial.values[cellIndex]
+        : state.followups[target.index].values[cellIndex];
       el.input.value = formatNumber(currentValue, 1);
       renderAll();
       setInputFocus(true);
+      showToast(`Editing ${getEditLabel(target)} · ${getTargetPartName(cellIndex)} diameter`);
     }
 
-    function updateRowPeriod(uid, nextPeriod, nextMode = 'preset') {
-      const index = getFollowupIndexByUid(uid);
-      if (index < 0) return;
+    function updateRowPeriod(kind, index, nextPeriod, nextMode = 'preset') {
+      if (kind === 'initial') return;
       const row = state.followups[index];
+      if (!row) return;
       row.period = String(nextPeriod || '').trim();
-      row.sortValue = parsePeriodMonths(row.period);
       row.periodMode = row.period ? nextMode : 'none';
-      sortFollowups();
       renderAll();
     }
 
-    function beginPeriodCustomEdit(uid) {
-      const index = getFollowupIndexByUid(uid);
-      if (index < 0) return;
+    function beginPeriodCustomEdit(kind, index) {
+      if (kind === 'initial') return;
       const row = state.followups[index];
+      if (!row) return;
       row.periodMode = 'custom';
       row.period = row.period && !FOLLOWUP_PERIOD_OPTIONS.includes(row.period) ? row.period : '';
       renderAll();
       requestAnimationFrame(() => {
-        const input = el.rows.querySelector(`[data-period-custom="${uid}"]`);
+        const input = el.rows.querySelector(`[data-period-custom="${index}"]`);
         input?.focus();
         input?.select?.();
       });
     }
 
-    function commitPeriodCustomEdit(uid, value) {
-      const index = getFollowupIndexByUid(uid);
-      if (index < 0) return;
+    function commitPeriodCustomEdit(kind, index, value) {
+      if (kind === 'initial') return;
       const row = state.followups[index];
+      if (!row) return;
       const text = String(value ?? '').trim();
       if (!text) {
         row.period = '';
-        row.sortValue = Number.POSITIVE_INFINITY;
         row.periodMode = 'none';
       } else {
         row.period = text;
-        row.sortValue = parsePeriodMonths(text);
         row.periodMode = 'custom';
       }
-      sortFollowups();
       renderAll();
     }
 
     function finalizeRowEdit() {
-      const isEditingInitial = state.editTarget?.kind === 'initial';
-      const editingUid = state.editTarget?.kind === 'followup' ? state.editTarget.uid : null;
-      const currentRow = isEditingInitial ? state.initial : (editingUid ? state.followups[getFollowupIndexByUid(editingUid)] : null);
       const rowLabel = state.editTarget
-        ? (state.editTarget.kind === 'initial' ? 'Initial' : getFollowupLabelByUid(editingUid))
-        : (state.initial ? `F/U ${state.followups.length + 1}` : 'Initial');
+        ? (state.editTarget.kind === 'initial' ? 'Initial' : `F/U ${state.editTarget.index + 1}`)
+        : (state.phase === 'initial' ? 'Initial' : `F/U ${state.followups.length + 1}`);
       const row = buildRowData(
         rowLabel,
         state.currentValues,
         state.initial ? state.initial.volume : null,
-        state.editTarget?.kind === 'followup' && currentRow ? {
-          uid: currentRow.uid,
-          createdAt: currentRow.createdAt,
-          period: currentRow.period,
-          periodMode: currentRow.periodMode,
-          sortValue: currentRow.sortValue,
-        } : (state.editTarget?.kind === 'initial' && state.initial ? { uid: state.initial.uid, createdAt: state.initial.createdAt } : {})
+        state.editTarget?.kind === 'followup' ? {
+          period: state.followups[state.editTarget.index].period,
+          periodMode: state.followups[state.editTarget.index].periodMode,
+        } : {}
       );
 
       if (state.editTarget) {
         if (state.editTarget.kind === 'initial') {
-          row.uid = state.initial?.uid || row.uid;
-          row.createdAt = state.initial?.createdAt || row.createdAt;
           state.initial = row;
           state.followups = state.followups.map(existing => ({
             ...existing,
             vrr: calculateVRR(state.initial.volume, existing.volume),
           }));
         } else {
-          const index = getFollowupIndexByUid(editingUid);
-          if (index >= 0) {
-            state.followups[index] = row;
-          } else {
-            state.followups.push(row);
-          }
+          const index = state.editTarget.index;
+          state.followups[index] = row;
         }
         state.editTarget = null;
-      } else if (!state.initial) {
+      } else if (state.phase === 'initial') {
         state.initial = row;
+        state.phase = 'followup';
       } else {
         state.followups.push(row);
-      }
-
-      if (state.followups.length) {
-        sortFollowups();
-        state.followups = state.followups.map(existing => ({
-          ...existing,
-          vrr: calculateVRR(state.initial.volume, existing.volume),
-        }));
       }
 
       clearDraft();
@@ -1035,40 +927,24 @@
     function applyCellEdit(value) {
       const target = state.editTarget;
       const cellIndex = target.cellIndex;
-      const row = target.kind === 'initial'
-        ? state.initial
-        : state.followups[getFollowupIndexByUid(target.uid)];
-      const newValues = [...row.values];
+      const newValues = target.kind === 'initial'
+        ? [...state.initial.values]
+        : [...state.followups[target.index].values];
       newValues[cellIndex] = value;
 
       if (target.kind === 'initial') {
-        const updatedInitial = buildRowData('Initial', newValues, null, {
-          uid: state.initial.uid,
-          createdAt: state.initial.createdAt,
-        });
+        const updatedInitial = buildRowData('Initial', newValues);
         state.initial = updatedInitial;
         state.followups = state.followups.map(existing => ({
           ...existing,
           vrr: calculateVRR(updatedInitial.volume, existing.volume),
         }));
       } else {
-        const updated = buildRowData(row.label, newValues, state.initial.volume, {
-          uid: row.uid,
-          createdAt: row.createdAt,
-          period: row.period,
-          periodMode: row.periodMode,
-          sortValue: row.sortValue,
+        const updated = buildRowData(`F/U ${target.index + 1}`, newValues, state.initial.volume, {
+          period: state.followups[target.index].period,
+          periodMode: state.followups[target.index].periodMode,
         });
-        const index = getFollowupIndexByUid(target.uid);
-        if (index >= 0) state.followups[index] = updated;
-      }
-
-      if (state.followups.length) {
-        sortFollowups();
-        state.followups = state.followups.map(existing => ({
-          ...existing,
-          vrr: calculateVRR(state.initial.volume, existing.volume),
-        }));
+        state.followups[target.index] = updated;
       }
 
       state.editTarget = null;
@@ -1076,6 +952,7 @@
       renderAll();
       clearError();
       setInputFocus();
+      showToast(`${getEditLabel(target)} updated`);
     }
 
     function handleEnter() {
@@ -1112,22 +989,24 @@
     function renderChromeOnly() {
       const placeholder = getCurrentPlaceholder();
       el.prompt.textContent = placeholder;
+      el.progress.textContent = getProgressText();
       el.input.placeholder = placeholder;
       const isEditing = !!state.editTarget;
       el.editBanner.hidden = !isEditing;
       el.cancelEdit.hidden = !isEditing;
       el.editBanner.textContent = isEditing
         ? (state.editTarget.mode === 'cell'
-          ? `${getEditLabel(state.editTarget)} · ${getTargetPartName(state.editTarget.cellIndex)} diameter`
+          ? `${getEditLabel(state.editTarget)} · ${getTargetPartName(state.editTarget.cellIndex)} diameter. Replace just this number and press Enter.`
           : (state.editTarget.kind === 'initial'
-            ? 'Editing Initial'
-            : `Editing ${getEditLabel(state.editTarget)}`))
+            ? 'Editing Initial row. Enter three new diameters to replace the baseline row and automatically refresh all follow-up VRRs.'
+            : `Editing F/U ${state.editTarget.index + 1} row. Enter three new diameters to replace this follow-up row.`))
         : '';
-      if (el.rowTarget) {
-        el.rowTarget.innerHTML = buildInputTargetOptions();
-        el.rowTarget.value = state.editTarget
-          ? (state.editTarget.kind === 'initial' ? 'initial' : `followup:${state.editTarget.uid}`)
-          : 'next';
+      if (state.editTarget?.mode === 'cell') {
+        el.preview.textContent = `Selected for editing: ${formatNumber(parseFloat(el.input.value), 1)} cm`;
+      } else {
+        el.preview.textContent = state.currentValues.length
+          ? `Entered so far: ${state.currentValues.map(v => formatNumber(v, 1)).join(' × ')}${state.currentValues.length < 3 ? ' × …' : ''}`
+          : 'No values entered yet.';
       }
     }
 
@@ -1147,7 +1026,7 @@
 
       const isEditing = state.editTarget
         && ((kind === 'initial' && state.editTarget.kind === 'initial')
-          || (kind === 'followup' && state.editTarget.kind === 'followup' && state.editTarget.uid === row.uid));
+          || (kind === 'followup' && state.editTarget.kind === 'followup' && state.editTarget.index === index));
 
       if (isEditing) card.classList.add('is-editing');
 
@@ -1164,12 +1043,12 @@
         ? '<span class="row-edit-pill">Fixed</span>'
         : `
           <div class="row-period-control" aria-label="Follow-up timing controls">
-            <select class="row-period-select" data-period-select="${row.uid}" aria-label="Set follow-up timing for ${row.label}">
+            <select class="row-period-select" data-period-select="${index}" aria-label="Set follow-up timing for ${row.label}">
               <option value="">Set timing</option>
               ${FOLLOWUP_PERIOD_OPTIONS.map(option => `<option value="${escapeHtml(option)}" ${periodSelectValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
               <option value="__custom__" ${periodSelectValue === '__custom__' ? 'selected' : ''}>Custom…</option>
             </select>
-            ${row.periodMode === 'custom' ? `<input class="row-period-custom" data-period-custom="${row.uid}" type="text" value="${escapeHtml(row.period)}" placeholder="Custom period" aria-label="Custom follow-up timing for ${row.label}" />` : ''}
+            ${row.periodMode === 'custom' ? `<input class="row-period-custom" data-period-custom="${index}" type="text" value="${escapeHtml(row.period)}" placeholder="Custom period" aria-label="Custom follow-up timing for ${row.label}" />` : ''}
           </div>
         `;
 
@@ -1181,6 +1060,7 @@
           </div>
           <div class="row-actions">
             <div class="badge ${badgeClass}">${row.label === 'Initial' ? 'Baseline' : (row.vrr > 0 ? 'Reduction' : row.vrr < 0 ? 'Increase' : 'Stable')}</div>
+            <div class="row-edit-pill">${isEditing ? 'Editing' : 'Tap to edit'}</div>
           </div>
         </div>
         <div class="card-grid">
@@ -1198,13 +1078,19 @@
             <div class="value volume">${formatNumber(row.volume, 2)} cc</div>
           </div>
           <div class="metric">
+            <div class="kicker">Status</div>
+            <div class="value">${row.label === 'Initial' ? 'Baseline' : 'Compared with initial'}</div>
+          </div>
+          <div class="metric">
             <div class="kicker">VRR</div>
-            <div class="value vrr ${row.label === 'Initial' ? 'neutral' : (row.vrr > 0 ? 'good' : row.vrr < 0 ? 'bad' : 'accent')}">${row.label === 'Initial' ? 'Baseline' : `${formatNumber(row.vrr, 1)}%`}</div>
+            <div class="value vrr">${row.label === 'Initial' ? '—' : `${formatNumber(row.vrr, 1)}%`}</div>
           </div>
         </div>
+        <div class="row-edit-hint">Click any number to change just that diameter. Tap the card to edit all three.${row.label === 'Initial' ? '' : ' Set timing from the dropdown above.'}</div>
+        <div class="hint-line">${row.label === 'Initial' ? 'This is the baseline volume used for all follow-up VRR calculations.' : (row.vrr >= 0 ? 'Positive VRR means volume reduction.' : 'Negative VRR means the follow-up volume is larger than baseline.')}</div>
       `;
 
-      const openRowEdit = () => beginRowEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', uid: row.uid });
+      const openRowEdit = () => beginRowEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', index });
       card.addEventListener('click', (event) => {
         if (event.target.closest('.size-chip, .row-period-select, .row-period-custom')) return;
         openRowEdit();
@@ -1223,7 +1109,7 @@
         button.addEventListener('click', (event) => {
           event.stopPropagation();
           const cellIndex = Number(button.dataset.cell);
-          beginCellEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', uid: row.uid }, cellIndex);
+          beginCellEdit(kind === 'initial' ? { kind: 'initial' } : { kind: 'followup', index }, cellIndex);
         });
       });
 
@@ -1234,10 +1120,11 @@
           event.stopPropagation();
           const value = event.target.value;
           if (value === '__custom__') {
-            beginPeriodCustomEdit(row.uid);
+            beginPeriodCustomEdit('followup', index);
             return;
           }
-          updateRowPeriod(row.uid, value, value ? 'preset' : 'none');
+          updateRowPeriod('followup', index, value, value ? 'preset' : 'none');
+          showToast(value ? `${row.label} timing set to ${value}` : `${row.label} timing cleared`);
         });
       }
 
@@ -1248,11 +1135,12 @@
           event.stopPropagation();
           if (event.key === 'Enter') {
             event.preventDefault();
-            commitPeriodCustomEdit(row.uid, periodCustom.value);
+            commitPeriodCustomEdit('followup', index, periodCustom.value);
+            showToast(periodCustom.value.trim() ? `${row.label} timing updated` : `${row.label} timing cleared`);
           }
         });
         periodCustom.addEventListener('blur', () => {
-          commitPeriodCustomEdit(row.uid, periodCustom.value);
+          commitPeriodCustomEdit('followup', index, periodCustom.value);
         });
       }
 
@@ -1260,14 +1148,6 @@
     }
 
     function renderAll() {
-      if (state.followups.length) {
-        sortFollowups();
-        state.followups = state.followups.map(existing => ({
-          ...existing,
-          vrr: calculateVRR(state.initial.volume, existing.volume),
-        }));
-      }
-
       renderChromeOnly();
       el.rows.innerHTML = '';
 
@@ -1344,26 +1224,6 @@
     el.input.addEventListener('input', () => {
       clearError();
       renderChromeOnly();
-    });
-
-    el.rowTarget?.addEventListener('change', () => {
-      const value = el.rowTarget.value;
-      if (value === 'next') {
-        state.editTarget = null;
-        clearDraft();
-        clearError();
-        renderAll();
-        setInputFocus();
-        return;
-      }
-      if (value === 'initial') {
-        beginRowEdit({ kind: 'initial' });
-        return;
-      }
-      if (value.startsWith('followup:')) {
-        const uid = value.slice('followup:'.length);
-        beginRowEdit({ kind: 'followup', uid });
-      }
     });
 
     el.reset.addEventListener('click', resetAll);
